@@ -1,0 +1,57 @@
+.hd1-banner {
+    background-image: url('../img/hd1.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 4rem 2rem;
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    justify-content: flex-start;
+}
+
+.hd1-overlay {
+    background-color: #0c6a4ed0;
+    padding: 2rem;
+    max-width: 600px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    border-radius: 10px;
+}
+
+.hd1-overlay h2 {
+    font-size: 2.6rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    color: #ffffff;
+    text-align: center;
+}
+
+.hd1-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.hd1-btn {
+    background-color: #4b0000;
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    font-weight: bold;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.hd1-btn:hover {
+    background-color: #bc3e3e;
+}
+
+.hd1-desc {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #ffffff;
+    text-align: justify;
+}

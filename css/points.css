@@ -1,0 +1,115 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: url('../img/info.png') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.container {
+  display: flex;
+  max-width: 1200px;
+  margin: 2rem auto;
+  background:  #e1ffe1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* ——— MENU BÊN TRÁI ——— */
+.menu {
+  width: 250px;
+  background-color:  #beffbe;
+  border-right: 1px solid #eee;
+  padding: 1.5rem 1rem;
+}
+.menu-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;    
+  justify-content: center;
+  text-align: center;     
+  padding: 0.5rem 0;
+}
+.menu img.avatar-preview {
+  width: 100px;
+  height: 100px;
+  object-fit:center;
+  border-radius: 50%;
+  margin-bottom: 0.5rem;
+}
+
+.menu p {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #555;
+}
+
+.menu a {
+  display: block;
+  padding: 0.6rem 0.8rem;
+  margin: 0.4rem 0;
+  text-decoration: none;
+  color: #555;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.menu a:hover {
+  background-color: #144d16;
+  font-weight:550;
+  color: #fff;
+}
+
+
+/* ——— MAIN CONTENT ——— */
+.main {
+  flex: 1;
+  padding: 2rem;
+}
+
+/* ——— POINTS ——— */
+.points-balance {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+.points {
+  font-weight: bold;
+  color: var(--highlight-points);
+}
+
+/* ——— VOUCHER LIST ——— */
+.voucher-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px,1fr));
+  gap: 1rem;
+}
+.voucher-item {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.voucher-item h4 {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.btn-redeem {
+  background: var(--btn-primary);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-redeem:disabled {
+  background: var(--btn-disabled);
+  cursor: not-allowed;
+}

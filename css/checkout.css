@@ -1,0 +1,194 @@
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;      
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px 0;              
+  overflow-y: auto;             
+}
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  max-height: 90vh !important;   
+  overflow-y: scroll !important;           
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.modal-content:hover {
+  transform: translateY(-4px);
+}
+
+.modal-content .close {
+  top: 0.5rem;
+  right: 0.75rem;
+  font-size: 2.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  background-color: transparent !important;
+  border: none !important;
+  color: #ff1818;
+}
+.modal-content .close:hover {
+  background-color: transparent !important;
+  border: none !important;
+  color: #000;
+}
+
+#address-list {
+  max-height: none;
+  overflow: visible;
+  margin-bottom: 1rem;
+}
+.address-item {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.address-item:hover {
+  background: #f9f9f9;
+  border-color: #ccc;
+}
+.address-item.default {
+  border-color: #4CAF50;
+}
+.address-item .view-mode label {
+  cursor: pointer;
+}
+
+.btn, button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  margin: 0.25rem;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.btn:hover, button:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn-add {
+  background: #b2ffa6;
+  color: #092c00;
+}
+.btn-add:hover {
+  background: #f8faab;
+}
+.btn-save-final {
+  background: #b2ffa6;
+  color: #092c00;
+}
+.btn-save-final:hover {
+  background: #f8faab;
+}
+
+.btn-edit,
+.btn-save,
+.btn-cancel {
+  background-color: transparent !important;
+  border: none !important;
+  background: #ff0000;
+  font-weight:800;
+  color: #000000;
+  font-size: 0.85rem;
+}
+.btn-edit:hover {
+  background: #ff0000;
+}
+.btn-save {
+  background: #dbffe1;
+  color: #000000;
+}
+.btn-save:hover {
+  background: #f7fdc0;
+}
+.btn-cancel {
+  background: #ffdedc;
+  color: #fff;
+}
+.btn-cancel:hover {
+  background: #fe8383;
+}
+
+.edit-form,
+#addAddressForm {
+  background: #ffaeae;
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px solid #eee;
+}
+.edit-form div,
+#addAddressForm div {
+  margin-bottom: 0.75rem;
+}
+.edit-form label,
+#addAddressForm label {
+  font-size: 0.9rem;
+  color: #555;
+}
+.edit-form input,
+#addAddressForm input {
+  width: 100%;
+  padding: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.2s;
+}
+.edit-form input:focus,
+#addAddressForm input:focus {
+  border-color: #2196F3;
+  outline: none;
+}
+.modal-content::-webkit-scrollbar,
+#address-list::-webkit-scrollbar {
+  width: 8px;
+}
+.modal-content::-webkit-scrollbar-thumb,
+#address-list::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
+.modal-content::-webkit-scrollbar-track,
+#address-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.address-item {
+  position: relative;
+  padding-top: 1.5rem; 
+}
+.address-item.default .badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #ffeb3b;          
+  color: #333;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border: 1px solid #fbc02d;  
+  border-radius: 3px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  animation: shake 1.5s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-2px); }
+  75%      { transform: translateX(2px); }
+} 

@@ -1,0 +1,397 @@
+
+#bg-video {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: -1;            /* đẩy ra sau mọi nội dung */
+  pointer-events: none;   /* để click xuyên qua */
+}
+.cart-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #003311;
+  margin: 2rem;
+  padding-left: 7rem;
+}
+
+.cart-container {
+  max-width: 1300px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: space-between;  
+  align-items: flex-start;
+}
+
+.cart-left {
+  flex: 0 0 62% !important;
+  max-width: 62% !important;
+  width: 65% !important;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Cart empty */
+.cart-empty-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem 3rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+  text-align: left;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+.cart-empty-box p {
+  margin-bottom: 1rem;
+  font-size:1rem;
+  color: black;
+  font-weight:630;
+}
+.cart-empty-home-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  font-size:1.2rem;
+  gap: 0.5rem;
+  color: rgb(1, 66, 4);
+  font-weight: 750;
+  transition: background 0.3s;
+}
+.cart-empty-home-link:hover {
+  color:#52ff58;
+  text-decoration: none;
+}
+.cart-empty-home-link::before {
+  content: "👈";
+  font-size:1.8rem;
+}
+
+/* Header row */
+.cart-header-row {
+    display: grid;
+    grid-template-columns: 1.3fr 0.6fr 0.6fr 0.7fr;
+    align-items: center;
+    text-align: center;
+    background: #fff;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    color: #2f3e46;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #e0e0e0;
+    column-gap: 0.5rem;
+}
+
+.cart-header-row div {
+    padding: 0.2rem 0;
+    font-size: 0.95rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    white-space: nowrap;
+}
+
+.cart-header-row div::after {
+    content: attr(data-sub);
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.cart-header-row .checkbox-header label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.cart-info h4 {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-wrap: break-word;    
+  word-break: break-word;   
+}
+/* Cart item */
+.cart-item {
+  display: grid;
+  grid-template-columns:
+    40px    /* checkbox cột 1 */
+    100px   /* ảnh cột 2 */
+    1fr     /* tên (thông tin) cột 3 */
+    100px   /* đơn giá cột 4 */
+    140px   /* số lượng cột 5 */
+    120px   /* thành tiền cột 6 */
+    40px    /* nút xóa cột 7 */
+  ;
+  align-items: center;
+  column-gap: 16px;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.cart-checkbox {
+  width: 20px;
+  height: 20px;
+}
+
+.cart-img {
+  width: 70px;
+  height: 70px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.cart-info {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.cart-info h4 {
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cart-info .option {
+  background: #f0f0f0;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: #444;
+  width: fit-content;
+}
+
+.cart-price {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  color: #333;
+}
+
+.cart-quantity {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+.cart-quantity button {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid #9cc956;
+  border-radius: 8px;
+  background: #fff;
+  color: #4d7229;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.cart-quantity button:hover {
+  background: #e0e0e0;
+}
+.cart-quantity input {
+  width: 45px;
+  text-align: center;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0.2rem;
+}
+.cart-quantity input:focus {
+  border-color: #5d9b36;
+  box-shadow: 0 0 2px rgba(93,155,54,0.5);
+}
+
+.cart-total-price {
+  flex: 0.5;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #1f8d00;
+  text-align: right;
+  min-width: 100px;
+}
+
+.cart-remove {
+  font-size: 1.5rem;
+  color: #333;
+  cursor: pointer;
+}
+.cart-remove:hover {
+  color: red;
+}
+
+/* Right sidebar */
+.cart-right {
+  flex: 0 0 35% !important;
+  max-width: 35% !important;
+  width: 35% !important;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-self: flex-start;
+  position: sticky;
+  top: 2rem;
+}
+
+.cart-box, .cart-boxs {
+  min-width:350px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+}
+
+.cart-right h4 {
+  margin: 0 0 0.8rem;
+  font-size: 1.2rem;
+}
+
+.cart-right p, .cart-right span {
+  font-size: 1rem;
+  line-height: 0.5;
+}
+
+.cart-right input[type="text"] {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cart-box p {
+  margin: 0.4rem 0;
+}
+
+/* Checkout button */
+.cart-checkout-btn {
+  width: 100%;
+  padding: 1rem 0;
+  font-size: 1.1rem;
+  border-radius: 50px;
+  background: #7fbf3f;
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: background 0.2s ease;
+}
+.cart-checkout-btn:hover {
+  background: #6aa02f;
+}
+
+/* Misc */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.error-msg {
+  color: red;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+#btnSelectAddress.change-address:hover {
+  background-color: rgb(212, 217, 120);
+  color: rgb(0, 38, 16); 
+}
+
+/* Nếu bạn muốn bo góc và padding cho nút này: */
+#btnSelectAddress.change-address {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  margin-top:1rem;
+  background-color: #aede7a;
+  color: rgb(0, 38, 16);
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 0.5rem;  
+  transition: background-color .2s, color .2s;
+}
+@media (max-width: 768px) {
+    .cart-header-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        row-gap: 0.5rem;
+        column-gap: 0.5rem;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+    .cart-header-row div {
+        font-size: 0.85rem;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .cart-header-row div::after {
+        font-size: 0.75rem;
+    }
+    .cart-header-row .checkbox-header label {
+        justify-content: flex-start;
+        font-size: 0.85rem;
+    }
+}
+  .cart-header-row .checkbox-header,
+  .cart-header-row div {
+    flex: 1 1 100%;
+    color:#0a2e00;
+    text-align: left;
+    font-weight:650;
+    font-size:1.1rem;
+  }
+
+.modal {
+  display: none;
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  align-items: center; 
+  justify-content: center;
+  z-index: 9999;
+}
+.modal.show {
+  display: flex;
+}
+body.modal-open {
+  overflow: hidden;
+}
+.modal-content {
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
+  width: 90%; min-width: 700px;
+  height: 80%;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.modal-content .close {
+  position: absolute;
+  top: 0.5rem; right: 1rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.modal-iframe {
+  width: 100%; height: 100%; border: none;
+}
+

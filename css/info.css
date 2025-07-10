@@ -1,0 +1,196 @@
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  background: url('../img/info.png') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.container {
+  display: flex;
+  max-width: 1200px;
+  margin: 2rem auto;
+  background:  #e1ffe1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* ——— MENU BÊN TRÁI ——— */
+.menu {
+  width: 250px;
+  background-color:  #beffbe;
+  border-right: 1px solid #eee;
+  padding: 1.5rem 1rem;
+}
+.menu-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;    
+  justify-content: center;
+  text-align: center;     
+  padding: 0.5rem 0;
+}
+.menu img.avatar-preview {
+  width: 100px;
+  height: 100px;
+  object-fit:center;
+  border-radius: 50%;
+  margin-bottom: 0.5rem;
+}
+
+.menu p {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #555;
+}
+
+.menu a {
+  display: block;
+  padding: 0.6rem 0.8rem;
+  margin: 0.4rem 0;
+  text-decoration: none;
+  color: #555;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.menu a:hover {
+  background-color: #144d16;
+  font-weight:550;
+  color: #fff;
+}
+
+/* ——— NỘI DUNG CHÍNH ——— */
+.main {
+  flex: 1;
+  padding: 2rem;
+}
+
+.main h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  color: #222;
+}
+
+.main p {
+  margin-bottom: 1rem;
+  color: #666;
+}
+
+.main hr {
+  border: none;
+  border-top: 1px solid #eee;
+  margin-bottom: 1.5rem;
+}
+
+.success {
+  color: green;
+  margin-bottom: 1rem;
+}
+
+.errors {
+  margin-bottom: 1rem;
+  list-style: disc inside;
+  color: #c00;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.form-group span {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+/* Input, select */
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group select {
+  width: 35%;
+  padding: 0.6rem 0.8rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #e60023;
+  outline: none;
+}
+
+/* Radio inline */
+.form-group input[type="radio"] {
+  margin-right: 0.4rem;
+}
+
+/* Date selects side by side */
+.form-group select {
+  width: calc(15% - 0.5rem);
+  margin-right: 0.75rem;
+}
+
+.form-group select:last-child {
+  margin-right: 0;
+}
+
+/* Avatar preview */
+.avatar-preview {
+  display: block;
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+}
+
+/* File input */
+.form-group input[type="file"] {
+  font-size: 0.9rem;
+}
+
+/* Button */
+.btn-save {
+  background-color: #e60023;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-save:hover {
+  background-color: #c5001f;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    margin: 1rem;
+  }
+  .menu {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #eee;
+  }
+  .main {
+    padding: 1rem;
+  }
+}

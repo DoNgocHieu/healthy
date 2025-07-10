@@ -1,0 +1,293 @@
+body{
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  color: #333;
+  background: #fafafa;
+}
+.recipe-container {
+  width: 850px;
+  margin: 0 auto;
+  padding: 0 16px; 
+}
+/* Recipe header container */
+.recipe-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  margin: 40px auto 20px;
+  padding: 0 16px;
+  max-width: 800px;
+}
+
+/* Thông tin bên trái */
+.recipe-header .info {
+  flex: 1;
+}
+
+/* Tags phía trên cùng */
+.recipe-header .info .tags {
+  display: inline-flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.recipe-header .info .tags span {
+  background: #eef2f5;
+  color: #444;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: .85rem;
+}
+
+/* Tiêu đề */
+.recipe-header .info h1 {
+  margin: 0 0 12px;
+  font-size: 2.4rem;
+  line-height: 1.2;
+  color: #154501
+}
+/* Thời gian & khẩu phần */
+.recipe-header .info .stats {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 0;
+}
+.recipe-header .info .stats div {
+  text-align: center;
+}
+.recipe-header .info .stats div .label {
+  display: block;
+  font-size: .8rem;
+  color: #666;
+  text-transform: uppercase;
+}
+.recipe-header .info .stats div .value {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #222;
+}
+
+/* Ảnh bên phải */
+.recipe-header .image {
+  flex: 0 0 48%;
+  max-width: 48%;
+}
+.recipe-header .image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* Responsive: mobile xuống 1 cột */
+@media (max-width: 768px) {
+  .recipe-header {
+    flex-direction: column;
+    max-width: 100%;
+    padding: 0 8px;
+  }
+  .recipe-header .image {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 20px;
+  }
+}
+/* ALLERGENS */
+.allergens h4 {
+  margin-top: 2rem;
+  font-size: 1 rem;
+  font-weight:550;
+  color: #c0392b;
+}
+.allergens p {
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight:450;
+  color: #051a00;
+}
+
+/* INTRO */
+.intro {
+  font-style: italic;
+  margin: 20px 0;
+  padding: 0 10px;
+  border-left: 4px solid #3498db;
+  background: #ecf6fc;
+  border-radius: 4px;
+}
+
+/* SECTIONS */
+.section {
+  margin-top: 30px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.03);
+}
+.section h2 {
+  margin-bottom: 15px;
+  font-size: 1.3em;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 6px;
+  color: #2c3e50;
+}
+
+/* INGREDIENTS & NUTRITION LISTS */
+/* --- Nutrition section styling --- */
+.nutrition {
+  margin-top: 30px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Header */
+.nutrition h2 {
+  background: #f7f7f7;
+  padding: 12px 16px;
+  margin: 0;
+  font-size: 1.2em;
+  color: #222;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* List as two-column grid */
+.nutrition ul {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 12px;
+  column-gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 16px;
+}
+
+/* Reset bullets & margins */
+.nutrition ul li {
+  margin: 0;
+  padding: 0;
+  display: contents;
+}
+
+/* Label (left) */
+.nutrition ul li .label {
+  font-weight: 600;
+  color: #222;
+  align-self: center;
+}
+
+/* Value (right), can align text-right */
+.nutrition ul li .value {
+  text-align: right;
+  font-weight: 400;
+  color: #444;
+  align-self: center;
+}
+
+/* Sub‐items (ví dụ “– Saturated”, “– Sugars”) */
+.nutrition ul li.sub .label {
+  padding-left: 16px;
+  font-style: italic;
+  font-weight: 400;
+  color: #555;
+}
+
+/* Và nếu bạn có 1 link “Detailed nutrition” ở cuối */
+.nutrition .more-link {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-top: 12px;
+}
+
+/* NOTES */
+.notes pre {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+/* RECOMMENDED CARDS */
+.recommended {
+  margin-top: 20px;
+}
+.recommended .item {
+  display: inline-block;
+  width: 160px;
+  margin-right: 12px;
+  text-align: center;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  transition: transform .2s, box-shadow .2s;
+}
+.recommended .item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.recommended img {
+  width: 100%;
+  display: block;
+}
+.recommended p {
+  margin: 10px;
+  font-size: 0.9em;
+  color: #444;
+}
+
+/* TAGS (nếu cần) */
+.tags span {
+  background: #e1ecf4;
+  color: #00412e;
+  padding: 4px 8px;
+  margin-right: 6px;
+  border-radius: 12px;
+  font-size: .85em;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+  }
+  .header .image {
+    width: 100%;
+  }
+}
+.progress-circle {
+  --p: 0;                      /* biến chứa % */
+  width: 120px;                /* đường kính vòng */
+  height: 120px;
+  border-radius: 50%;
+  background:
+    conic-gradient(
+      #7fc242 calc(var(--p) * 1%),  /* màu tiến độ */
+      #e0e0e0 0                     /* màu nền */
+    );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-family: sans-serif;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.progress-circle::after {
+  /* Inner white circle để tạo gạch viền dày */
+  content: "";
+  position: absolute;
+  width: 84px;   /* = 120px - 2*18px (độ dày viền) */
+  height: 84px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.progress-value {
+  position: relative;
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #333;
+}
