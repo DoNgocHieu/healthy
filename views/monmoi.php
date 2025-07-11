@@ -6,9 +6,15 @@ if (!isset($_SESSION['cart']) && isset($_COOKIE['cart_sync'])) {
     $_SESSION['cart'] = json_decode($_COOKIE['cart_sync'], true);
 }
 
+// Lấy mã danh mục từ URL, ví dụ: monmoi.php?tt=MM
+$tt = $_GET['tt'] ?? 'MM'; // Mặc định là 'MM' nếu không truyền
+
 $sql = "SELECT id, name, price, description, image_url, quantity 
-        FROM items WHERE TT='MM'";
-$res = $mysqli->query($sql) or die("SQL ERROR (items): ".$mysqli->error);
+        FROM items WHERE TT = ?";
+$stmt = $mysqli->prepare($sql);
+$stmt->bind_param('s', $tt);
+$stmt->execute();
+$res = $stmt->get_result();
 
 $items = [];
 while ($row = $res->fetch_assoc()) {
@@ -38,7 +44,7 @@ $mysqli->close();
         $inCartQty = $_SESSION['cart'][$id]['qty'] ?? 0;
       ?>
         <div class="monmoi-card" onclick="showItemModalById(<?= $id ?>)">
-          <img src="../img/<?=htmlspecialchars($it['image_url'],ENT_QUOTES)?>"
+          <img src="/healthy/uploads/posts/<?=htmlspecialchars($it['image_url'],ENT_QUOTES)?>"
                alt="<?=htmlspecialchars($it['name'],ENT_QUOTES)?>">
           <div class="name"><?=htmlspecialchars($it['name'],ENT_QUOTES)?></div>
           <div class="price"><?=number_format($it['price'],0,',','.')?> đ</div>
