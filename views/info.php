@@ -1,4 +1,8 @@
 <?php
+// filepath: c:\wamp64\www\healthy\views\info.php
+// ini_set('display_errors', 0);
+// ini_set('display_startup_errors', 0);
+// error_reporting(E_ALL);
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -121,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a href="layout.php?page=info" class="active">Thông tin tài khoản</a>
     <a href="layout.php?page=points">Điểm & Voucher</a>
     <a href="layout.php?page=address">Địa chỉ giao hàng</a>
-    <a href="layout.php?page=orders">Đơn hàng hiện tại</a>
+    <a href="layout.php?page=orders">Đơn hàng của tôi</a>
   </nav>
 
   <section class="main">

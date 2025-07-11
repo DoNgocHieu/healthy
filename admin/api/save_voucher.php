@@ -26,9 +26,10 @@ try {
         'code' => $_POST['code'] ?? '',
         'description' => $_POST['description'] ?? '',
         'points_required' => (int)($_POST['points_required'] ?? 0),
-        'discount_value' => (float)($_POST['discount_amount'] ?? 0), // Map discount_amount to discount_value
-        'expires_at' => $_POST['expiry_date'] ?? null, // Map expiry_date to expires_at
-        'active' => isset($_POST['is_active']) ? 1 : 0 // Map is_active to active
+        'discount_type' => $_POST['discount_type'] ?? 'amount',
+        'discount_value' => (float)($_POST['discount_value'] ?? 0),
+        'expires_at' => !empty($_POST['expires_at']) ? $_POST['expires_at'] : null,
+        'active' => isset($_POST['active']) ? 1 : 0 // Map is_active to active
     ];
 
     $db->beginTransaction();
@@ -36,13 +37,14 @@ try {
     if (empty($data['id'])) {
         // Insert new voucher
         $stmt = $db->prepare('
-            INSERT INTO vouchers (code, description, points_required, discount_value, expires_at, active)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO vouchers (code, description, points_required, discount_type, discount_value, expires_at, active)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         ');
         $stmt->execute([
             $data['code'],
             $data['description'],
             $data['points_required'],
+            $data['discount_type'],
             $data['discount_value'],
             $data['expires_at'],
             $data['active']
@@ -51,7 +53,7 @@ try {
         // Update existing voucher
         $stmt = $db->prepare('
             UPDATE vouchers
-            SET code = ?, description = ?, points_required = ?, discount_value = ?,
+            SET code = ?, description = ?, points_required = ?, discount_type = ?, discount_value = ?,
                 expires_at = ?, active = ?
             WHERE id = ?
         ');
@@ -59,6 +61,7 @@ try {
             $data['code'],
             $data['description'],
             $data['points_required'],
+            $data['discount_type'],
             $data['discount_value'],
             $data['expires_at'],
             $data['active'],

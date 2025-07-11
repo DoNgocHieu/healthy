@@ -15,14 +15,11 @@ $stmt = $pdo->prepare("
     SELECT
         o.id,
         o.created_at,
-        o.total,
-        o.status,
+        o.order_status,
         o.payment_method,
-        a.fullname,
-        a.phone,
-        a.address
+        o.shipping_address,
+        o.total_amount
     FROM orders o
-    JOIN user_addresses a ON o.address_id = a.id
     WHERE o.user_id = ?
     ORDER BY o.created_at DESC
 ");
@@ -37,7 +34,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <?php if (empty($orders)): ?>
         <div class="no-orders">
-            <img src="../img/empty-order.png" alt="Không có đơn hàng">
+            <!-- <img src="../img/empty-order.png" alt="Không có đơn hàng"> -->
             <p>Bạn chưa có đơn hàng nào</p>
             <a href="layout.php?page=home" class="btn-shop-now">Mua sắm ngay</a>
         </div>
@@ -50,7 +47,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <h3>Đơn hàng #<?= $order['id'] ?></h3>
                             <p>Đặt ngày: <?= date('d/m/Y H:i', strtotime($order['created_at'])) ?></p>
                         </div>
-                        <div class="order-status <?= strtolower($order['status']) ?>">
+                        <div class="order-status <?= strtolower($order['order_status']) ?>">
                             <?php
                             $statusText = [
                                 'pending' => 'Chờ xác nhận',
@@ -59,7 +56,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 'completed' => 'Đã giao hàng',
                                 'cancelled' => 'Đã hủy'
                             ];
-                            echo $statusText[$order['status']] ?? $order['status'];
+                            echo $statusText[$order['order_status']] ?? $order['order_status'];
                             ?>
                         </div>
                     </div>
@@ -98,15 +95,21 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <div class="order-footer">
                             <div class="delivery-info">
                                 <h4>Thông tin giao hàng</h4>
-                                <p><strong>Người nhận:</strong> <?= htmlspecialchars($order['fullname']) ?></p>
-                                <p><strong>Số điện thoại:</strong> <?= htmlspecialchars($order['phone']) ?></p>
-                                <p><strong>Địa chỉ:</strong> <?= nl2br(htmlspecialchars($order['address'])) ?></p>
+                                <?php
+                                $shippingParts = explode(',', $order['shipping_address'] ?? '');
+                                $fullname = trim($shippingParts[0] ?? '');
+                                $phone = trim($shippingParts[1] ?? '');
+                                $address = implode(',', array_slice($shippingParts, 2));
+                                ?>
+                                <p><strong>Người nhận:</strong> <?= htmlspecialchars($fullname) ?></p>
+                                <p><strong>Số điện thoại:</strong> <?= htmlspecialchars($phone) ?></p>
+                                <p><strong>Địa chỉ giao hàng:</strong> <?= nl2br(htmlspecialchars($order['shipping_address'] ?? '')) ?></p>
                                 <p><strong>Phương thức thanh toán:</strong>
                                     <?= $order['payment_method'] === 'cod' ? 'Thanh toán khi nhận hàng' : 'Chuyển khoản ngân hàng' ?>
                                 </p>
                             </div>
                             <div class="order-total">
-                                <p>Tổng tiền: <span><?= number_format($order['total'], 0, ',', '.') ?> đ</span></p>
+                                <p>Tổng tiền: <span><?= number_format($order['total_amount'] ?? 0, 0, ',', '.') ?> đ</span></p>
                             </div>
                         </div>
                     </div>
@@ -115,3 +118,51 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     <?php endif; ?>
 </div>
+
+<?php
+// Xử lý lưu đơn hàng mới
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_order') {
+    $selectedAddress = $_POST['address'] ?? null;
+    $paymentMethod = $_POST['payment_method'] ?? 'cod'; // Mặc định là thanh toán khi nhận hàng
+
+    if ($selectedAddress) {
+        // Lưu đơn hàng vào cơ sở dữ liệu
+        $orderStmt = $pdo->prepare("
+            INSERT INTO orders (user_id, shipping_address, payment_method, total_amount, created_at, order_status)
+            VALUES (?, ?, ?, ?, NOW(), 'pending')
+        ");
+        $orderStmt->execute([
+            $userId,
+            $selectedAddress['address'], // chỉ lưu địa chỉ!
+            $_POST['payment_method'],
+            array_sum(array_column($_SESSION['cart'] ?? [], 'subtotal')) // Tổng tiền
+        ]);
+
+        $orderId = $pdo->lastInsertId();
+
+        // Lưu chi tiết đơn hàng
+        $detailStmt = $pdo->prepare("
+            INSERT INTO order_items (order_id, item_id, quantity, price)
+            VALUES (?, ?, ?, ?)
+        ");
+
+        foreach ($_SESSION['cart'] as $item) {
+            $detailStmt->execute([
+                $orderId,
+                $item['id'],
+                $item['quantity'],
+                $item['price']
+            ]);
+        }
+
+        // Xóa giỏ hàng sau khi đặt hàng thành công
+        unset($_SESSION['cart']);
+
+        // Chuyển hướng đến trang cảm ơn
+        header('Location: layout.php?page=thank_you');
+        exit;
+    } else {
+        $error = "Vui lòng chọn địa chỉ giao hàng.";
+    }
+}
+?>

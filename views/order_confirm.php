@@ -78,19 +78,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $orderStmt = $pdo->prepare("
                     INSERT INTO orders (
                         user_id,
-                        address_id,
+                        shipping_address,
                         payment_method,
                         subtotal,
                         shipping_fee,
                         discount,
-                        total,
-                        status,
+                        total_amount,
+                        order_status,
                         created_at
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
                 ");
+                $fullShipping = $selectedAddress['fullname'] . ', ' . $selectedAddress['phone'] . ', ' . $selectedAddress['address'];
                 $orderStmt->execute([
                     $userId,
-                    $selectedAddress['id'],
+                    $fullShipping, // Lưu cả tên, SĐT, địa chỉ
                     $_POST['payment_method'],
                     $subtotal,
                     $shipping,
@@ -135,8 +136,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $clearCartStmt->execute([$userId]);
 
                 $pdo->commit();
-                header("Location: layout.php?page=order_success&id=$orderId");
-                exit;
+
+                if ($_POST['payment_method'] === 'vnpay') {
+                    header("Location: layout.php?page=vnpay_pay&id=$orderId");
+                    exit;
+                } else {
+                    // Chuyển hướng bình thường
+                    header("Location: layout.php?page=order_success&id=$orderId");
+                    exit;
+                }
 
             } catch (Exception $e) {
                 $pdo->rollBack();
@@ -199,14 +207,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="payment-methods">
                 <label class="payment-method">
                     <input type="radio" name="payment_method" value="cod">
-                    <img src="../img/cod.png" alt="COD">
                     <span>Thanh toán khi nhận hàng</span>
                 </label>
 
                 <label class="payment-method">
                     <input type="radio" name="payment_method" value="bank_transfer">
-                    <img src="../img/bank.png" alt="Bank transfer">
                     <span>Chuyển khoản ngân hàng</span>
+                </label>
+
+                <label class="payment-method">
+                    <input type="radio" name="payment_method" value="vnpay">
+                    <span>Thanh toán online qua VNPAY</span>
                 </label>
             </div>
         </div>

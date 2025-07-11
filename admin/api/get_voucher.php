@@ -31,10 +31,14 @@ try {
     $voucher = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($voucher) {
-        // Map database fields to frontend expected names
-        $voucher['discount_amount'] = $voucher['discount_value'];
-        $voucher['expiry_date'] = $voucher['expires_at'];
-        $voucher['is_active'] = $voucher['active'];
+        // Chuẩn hóa trường ngày hết hạn
+        if (empty($voucher['expires_at']) || $voucher['expires_at'] === '0000-00-00') {
+            $voucher['expires_at'] = '';
+        }
+        // Đảm bảo kiểu dữ liệu đúng cho JS
+        $voucher['active'] = (int)$voucher['active'];
+        $voucher['points_required'] = (int)$voucher['points_required'];
+        $voucher['discount_value'] = (float)$voucher['discount_value'];
 
         echo json_encode([
             'success' => true,
