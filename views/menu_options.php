@@ -24,3 +24,41 @@ $mysqli->close();
     </a>
   <?php endforeach; ?>
 </nav>
+
+<script>
+function showItemModalById(itemId) {
+  var overlay = document.getElementById('itemModalOverlay');
+  var contentDiv = document.getElementById('itemModalContent');
+  contentDiv.innerHTML = '<div style="text-align:center;padding:2rem 1rem;">Đang tải...</div>';
+  overlay.style.display = 'flex';
+  fetch('item.php?id=' + itemId + '&ajax=1')
+    .then(res => res.text())
+    .then(html => {
+      contentDiv.innerHTML = html;
+
+      // Khởi tạo favorites cho modal content
+      if (window.favoritesManager) {
+        window.favoritesManager.initializeFavorites();
+      }
+
+      // Force run script tags in loaded content
+      var scripts = contentDiv.querySelectorAll('script');
+      scripts.forEach(script => {
+        var newScript = document.createElement('script');
+        newScript.textContent = script.textContent;
+        document.head.appendChild(newScript);
+        document.head.removeChild(newScript);
+      });
+    })
+    .catch(() => contentDiv.innerHTML = 'Lỗi tải dữ liệu!');
+  document.onkeydown = function(e) { if (e.key === 'Escape') closeItemModal(); }
+  overlay.onclick = function(e) { if(e.target === overlay) closeItemModal(); }
+}
+function closeItemModal() {
+  var overlay = document.getElementById('itemModalOverlay');
+  overlay.style.display = 'none';
+  document.onkeydown = null;
+  overlay.onclick = null;
+}
+</script>
+

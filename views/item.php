@@ -19,6 +19,7 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
 ?>
 
 <script defer src="../js/qty.js"></script>
+<script defer src="../js/favorites.js"></script>
 
 <?php if ($isAjax): ?>
   <button class="item-detail-modal-close"
@@ -40,7 +41,12 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
   <div class="item-detail-row">
 
 <div class="item-detail-info">
-  <h2><?=htmlspecialchars($item['name'], ENT_QUOTES)?></h2>
+  <div class="title-with-heart">
+    <h2><?=htmlspecialchars($item['name'], ENT_QUOTES)?></h2>
+    <button class="favorite-btn favorite-btn-large" data-item-id="<?= $id ?>" title="Thêm vào yêu thích">
+      <i class="fa-regular fa-heart"></i>
+    </button>
+  </div>
   <div class="price"><?=number_format($item['price'],0,',','.')?> đ</div>
 
   <?php if ($maxQty > 0): ?>
@@ -146,84 +152,235 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
     padding-left: 2px;
   }
   #add-review-form {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto auto;
+    gap: 16px;
     margin-top: 18px;
-    flex-wrap: wrap;
-    background: #f6fff6;
-    border-radius: 8px;
-    padding: 12px 10px 10px 10px;
-    box-shadow: 0 1px 4px #0001;
+    background: linear-gradient(135deg, #f8fff8 0%, #f0fcf0 100%);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(107, 191, 89, 0.2);
   }
   #add-review-form input[name=username] {
-    min-width: 140px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1.2px solid #b5b5b5;
-    font-size: 1em;
+    grid-column: 1;
+    grid-row: 1;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 2px solid #e8f5e8;
+    font-size: 1.05em;
     background: #fff;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+  #add-review-form input[name=username]:focus {
+    outline: none;
+    border-color: #6BBF59;
+    box-shadow: 0 0 0 3px rgba(107, 191, 89, 0.1);
   }
   #add-review-form .star-group {
+    grid-column: 2;
+    grid-row: 1;
     display: flex;
     align-items: center;
-    gap: 2px;
-    font-size: 1.5em;
+    gap: 4px;
+    font-size: 1.8em;
     cursor: pointer;
-    margin-top: 2px;
     user-select: none;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(245, 179, 1, 0.08);
+    border: 2px solid rgba(245, 179, 1, 0.25);
+    transition: all .3s ease;
+    justify-self: end;
+  }
+  #add-review-form .star-group:hover {
+    background: rgba(245, 179, 1, 0.1);
+    border-color: rgba(245, 179, 1, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(245, 179, 1, 0.15);
   }
   #add-review-form .star-group .star {
-    color: #ccc;
-    transition: color .15s;
+    color: #ddd;
+    transition: all .2s ease;
     cursor: pointer;
-    padding: 0 1px;
+    padding: 2px 3px;
+    border-radius: 4px;
+    position: relative;
   }
-  #add-review-form .star-group .star.selected,
-  #add-review-form .star-group .star:hover,
-  #add-review-form .star-group .star.selected ~ .star {
+  #add-review-form .star-group .star:hover {
     color: #f5b301;
+    transform: scale(1.15);
+    text-shadow: 0 0 8px rgba(245, 179, 1, 0.3);
+  }
+  #add-review-form .star-group .star.selected {
+    color: #f5b301;
+    text-shadow: 0 0 8px rgba(245, 179, 1, 0.4);
+    animation: starPulse .3s ease;
+  }
+  @keyframes starPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
   }
   #add-review-form textarea {
-    min-width: 220px;
-    min-height: 32px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1.2px solid #b5b5b5;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-height: 80px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 2px solid #e8f5e8;
     resize: vertical;
-    font-size: 1em;
+    font-size: 1.05em;
     background: #fff;
+    font-family: inherit;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+  }
+  #add-review-form textarea:focus {
+    outline: none;
+    border-color: #6BBF59;
+    box-shadow: 0 0 0 3px rgba(107, 191, 89, 0.1);
+  }
+  #add-review-form textarea::placeholder {
+    color: #999;
+    font-style: italic;
+  }
+  #add-review-form .image-upload-section {
+    grid-column: 1;
+    grid-row: 3;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  #add-review-form .image-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border: 2px solid #42a5f5;
+    border-radius: 8px;
+    color: #1565c0;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+  #add-review-form .image-upload-btn:hover {
+    background: linear-gradient(135deg, #bbdefb, #90caf9);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(66, 165, 245, 0.3);
+  }
+  #add-review-form .image-upload-btn i {
+    font-size: 1.1em;
+  }
+  #add-review-form input[type="file"] {
+    display: none;
+  }
+  #add-review-form .image-preview {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  #add-review-form .image-preview-item {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #e0e0e0;
+  }
+  #add-review-form .image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  #add-review-form .image-preview-item .remove-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    background: #e74c3c;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
   #add-review-form button[type=submit] {
-    background: #6BBF59;
+    grid-column: 2;
+    grid-row: 3;
+    background: linear-gradient(135deg, #6BBF59, #4e9c3e);
     color: #fff;
     border: none;
-    border-radius: 6px;
-    padding: 10px 24px;
+    border-radius: 8px;
+    padding: 12px 28px;
     font-weight: 700;
-    font-size: 1.08em;
+    font-size: 1.1em;
     cursor: pointer;
-    transition: background .18s;
-    box-shadow: 0 1px 4px #0001;
-    margin-left: 8px;
+    transition: all .3s ease;
+    box-shadow: 0 4px 12px rgba(107, 191, 89, 0.3);
+    justify-self: end;
+    align-self: start;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
   #add-review-form button[type=submit]:hover {
-    background: #4e9c3e;
+    background: linear-gradient(135deg, #4e9c3e, #3d7b2f);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(107, 191, 89, 0.4);
+  }
+  #add-review-form button[type=submit]:active {
+    transform: translateY(0);
   }
   @media (max-width: 600px) {
     #add-review-form {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 8px;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto auto auto;
+      gap: 12px;
+    }
+    #add-review-form input[name=username] {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    #add-review-form .star-group {
+      grid-column: 1;
+      grid-row: 2;
+      justify-self: center;
+      font-size: 1.6em;
     }
     #add-review-form textarea {
-      min-width: 100px;
+      grid-column: 1;
+      grid-row: 3;
+      min-height: 70px;
+    }
+    #add-review-form .image-upload-section {
+      grid-column: 1;
+      grid-row: 4;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    #add-review-form button[type=submit] {
+      grid-column: 1;
+      grid-row: 5;
+      justify-self: stretch;
+      padding: 14px 20px;
     }
   }
   </style>
   <div class="review-section">
     <div id="review-list"></div>
-    <form id="add-review-form" autocomplete="off">
+    <form id="add-review-form" autocomplete="off" enctype="multipart/form-data">
       <input name="username" placeholder="Tên của bạn" required>
       <div class="star-group" id="star-group">
         <span class="star" data-star="1">&#9733;</span>
@@ -233,35 +390,115 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
         <span class="star" data-star="5">&#9733;</span>
         <input type="hidden" name="star" id="star-input" required>
       </div>
-      <textarea name="detail" placeholder="Nội dung đánh giá" required></textarea>
-      <button type="submit">Gửi đánh giá</button>
+      <textarea name="detail" placeholder="Chia sẻ trải nghiệm của bạn về món ăn này..." required></textarea>
+      <div class="image-upload-section">
+        <label for="review-images" class="image-upload-btn">
+          <i class="fas fa-camera"></i>
+          Thêm ảnh
+        </label>
+        <input type="file" id="review-images" name="images[]" multiple accept="image/*" onchange="debugFileInput(this)">
+        <div class="image-preview" id="image-preview"></div>
+      </div>
+      <button type="submit">
+        <i class="fas fa-paper-plane"></i> Gửi đánh giá
+      </button>
     </form>
   </div>
   <script>
-    // Star rating UI
+    // Star rating UI - Improved logic
     (function() {
       const stars = document.querySelectorAll('#star-group .star');
       const starInput = document.getElementById('star-input');
       let selected = 0;
-      stars.forEach(star => {
+
+      function highlightStars(count) {
+        stars.forEach((star, index) => {
+          if (index < count) {
+            star.classList.add('selected');
+          } else {
+            star.classList.remove('selected');
+          }
+        });
+      }
+
+      stars.forEach((star, index) => {
         star.addEventListener('mouseenter', function() {
-          const val = +this.dataset.star;
-          stars.forEach(s => s.classList.toggle('selected', +s.dataset.star <= val));
+          highlightStars(index + 1);
         });
+
         star.addEventListener('mouseleave', function() {
-          stars.forEach(s => s.classList.toggle('selected', +s.dataset.star <= selected));
+          highlightStars(selected);
         });
+
         star.addEventListener('click', function() {
-          selected = +this.dataset.star;
+          selected = index + 1;
           starInput.value = selected;
-          stars.forEach(s => s.classList.toggle('selected', +s.dataset.star <= selected));
+          highlightStars(selected);
         });
       });
     })();
-    document.addEventListener('DOMContentLoaded', function() {
-      if (typeof loadReviews === 'function') loadReviews(<?= $id ?>);
-      if (typeof addReviewHandler === 'function') addReviewHandler(<?= $id ?>);
-    });
+
+    // Image upload functionality
+    (function() {
+      const fileInput = document.getElementById('review-images');
+      const imagePreview = document.getElementById('image-preview');
+
+      // Initialize global selectedFiles array
+      if (!window.selectedFiles) {
+        window.selectedFiles = [];
+      }
+      let selectedFiles = window.selectedFiles;
+
+      fileInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+
+        files.forEach(file => {
+          if (file.type.startsWith('image/') && selectedFiles.length < 3) {
+            selectedFiles.push(file);
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const previewItem = document.createElement('div');
+              previewItem.className = 'image-preview-item';
+              previewItem.innerHTML = `
+                <img src="${e.target.result}" alt="Preview">
+                <button type="button" class="remove-btn" onclick="removeImage(${selectedFiles.length - 1})">×</button>
+              `;
+              imagePreview.appendChild(previewItem);
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+        // Reset input to allow selecting same file again
+        fileInput.value = '';
+      });
+
+      // Make removeImage function global
+      window.removeImage = function(index) {
+        window.selectedFiles.splice(index, 1);
+        imagePreview.innerHTML = '';
+
+        // Rebuild preview
+        window.selectedFiles.forEach((file, i) => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const previewItem = document.createElement('div');
+            previewItem.className = 'image-preview-item';
+            previewItem.innerHTML = `
+              <img src="${e.target.result}" alt="Preview">
+              <button type="button" class="remove-btn" onclick="removeImage(${i})">×</button>
+            `;
+            imagePreview.appendChild(previewItem);
+          };
+          reader.readAsDataURL(file);
+        });
+      };
+    })();
+
+    // Initialize reviews immediately (not waiting for DOMContentLoaded)
+    if (typeof loadReviews === 'function') loadReviews(<?= $id ?>);
+    if (typeof addReviewHandler === 'function') addReviewHandler(<?= $id ?>);
   </script>
 </div>
 
@@ -300,11 +537,63 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
   flex-direction: column;
   align-items: flex-start;
 }
+
+.title-with-heart {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: .65rem;
+}
+
+.title-with-heart h2 {
+  flex: 1;
+  margin: 0;
+}
+
+.favorite-btn-large {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #e9ecef;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.favorite-btn-large:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: #e74c3c;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.favorite-btn-large i {
+  font-size: 20px;
+  color: #6c757d;
+  transition: color 0.3s ease;
+}
+
+.favorite-btn-large.favorited {
+  border-color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+}
+
+.favorite-btn-large.favorited i {
+  color: #e74c3c;
+}
+
+.favorite-btn-large:hover i {
+  color: #e74c3c;
+}
 .item-detail-info h2 {
   font-size: 1.5rem;
   font-weight: 700;
   color: rgb(0,39,16);
-  margin-bottom: .65rem;
 }
 .item-detail-info .price {
   font-size: 1.17rem;
@@ -375,8 +664,9 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
   .item-detail-info .price {
     text-align: center;
   }
-  .qty-error-tab
-}
+  .qty-error-tab {
+    display: none;
+  }
 
 .item-detail-container.qty-control input[type=number]::-webkit-inner-spin-button,
 .item-detail-container.qty-control input[type=number]::-webkit-outer-spin-button {
@@ -385,6 +675,7 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
 }
 .item-detail-container.qty-control input[type=number] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .item-detail-container.qty-control,
@@ -413,9 +704,9 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
 
 .qty-control input[type="number"],
 [id^="cart-controls-"] input[type="number"] {
-  width: 3.2rem;               
+  width: 3.2rem;
   height: 2.4rem;
-  font-size: 1.2rem;           
+  font-size: 1.2rem;
   font-weight: 700;
   text-align: center;
   background: transparent;
@@ -430,7 +721,7 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
   justify-content: center;
   padding: 0.6rem 1.2rem;
   background:rgba(181, 255, 156, 0.75) !important;
-  border: 1.5px solid rgb(30, 128, 0) !important; 
+  border: 1.5px solid rgb(30, 128, 0) !important;
   border-radius: 8px;
   color:rgb(0, 64, 19) !important;
   font-size: 1rem;
