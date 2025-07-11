@@ -7,17 +7,28 @@ if (!$id_food) {
     exit;
 }
 $mysqli = getDbConnection();
-$stmt = $mysqli->prepare("SELECT username, star, date, detail, photos FROM comments WHERE id_food = ? ORDER BY id DESC");
+$stmt = $mysqli->prepare("SELECT username, star, date, detail, images, photos FROM comments WHERE id_food = ? ORDER BY id DESC");
 $stmt->bind_param('i', $id_food);
 $stmt->execute();
-$stmt->bind_result($username, $star, $date, $detail, $photos);
+$stmt->bind_result($username, $star, $date, $detail, $images, $photos);
+
 $reviews = [];
 while ($stmt->fetch()) {
+    // Parse images JSON
+    $imageArray = [];
+    if ($images) {
+        $decoded = json_decode($images, true);
+        if (is_array($decoded)) {
+            $imageArray = $decoded;
+        }
+    }
+
     $reviews[] = [
         'username' => $username,
         'star'     => (int)$star,
         'date'     => $date,
         'detail'   => $detail,
+        'images'   => $imageArray,
         'photos'   => $photos
     ];
 }

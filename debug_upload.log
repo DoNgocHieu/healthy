@@ -1,0 +1,50 @@
+
+
+2025-07-11 21:55:47 - New request
+POST: Array
+(
+    [id_food] => 2
+    [username] => ádfsd
+    [star] => 2
+    [detail] => sfsdf
+)
+
+FILES: Array
+(
+    [images] => Array
+        (
+            [name] => Array
+                (
+                    [0] => ddf7d530-d783-4ee6-a8c1-6f46b88b0d1e.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => ddf7d530-d783-4ee6-a8c1-6f46b88b0d1e.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\wamp64\tmp\phpEAF8.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 1007020
+                )
+
+        )
+
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryYFl2iBAZArq8gLBU
