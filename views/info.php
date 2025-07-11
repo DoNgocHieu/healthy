@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a href="layout.php?page=info" class="active">Thông tin tài khoản</a>
     <a href="layout.php?page=points">Điểm & Voucher</a>
     <a href="layout.php?page=address">Địa chỉ giao hàng</a>
-    <a href="layout.php?page=orders">Đơn hàng hiện tại</a>
+    <a href="layout.php?page=orders">Đơn hàng của tôi</a>
   </nav>
 
   <section class="main">

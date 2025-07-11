@@ -107,13 +107,23 @@ if (empty($vouchers)) {
                 <td><?php echo number_format($voucher['points_required']); ?></td>
                 <td>
                     <?php
-                    echo $voucher['discount_type'] === 'percent'
-                        ? number_format($voucher['discount_value'], 1) . '%'
-                        : number_format($voucher['discount_value']) . '₫';
+                    if ($voucher['discount_type'] === 'percent') {
+                        echo number_format($voucher['discount_value'], 1) . '%';
+                    } else {
+                        echo number_format($voucher['discount_value']) . '₫';
+                    }
                     ?>
                 </td>
                 <td><?php echo number_format($voucher['usage_count']); ?></td>
-                <td><?php echo number_format($voucher['total_discount']); ?>₫</td>
+                <td>
+                    <?php
+                    if ($voucher['discount_type'] === 'percent') {
+                        echo number_format($voucher['total_discount'], 1) . '%';
+                    } else {
+                        echo number_format($voucher['total_discount']) . '₫';
+                    }
+                    ?>
+                </td>
                 <td>
                     <span class="badge <?php echo $voucher['active'] ? 'bg-success' : 'bg-danger'; ?>">
                         <?php echo $voucher['active'] ? 'Đang mở' : 'Đã đóng'; ?>
@@ -121,9 +131,11 @@ if (empty($vouchers)) {
                 </td>
                 <td>
                     <?php
-                    echo $voucher['expires_at']
-                        ? date('d/m/Y', strtotime($voucher['expires_at']))
-                        : 'Không giới hạn';
+                    if (empty($voucher['expires_at']) || $voucher['expires_at'] === '0000-00-00') {
+                        echo 'Không giới hạn';
+                    } else {
+                        echo date('d/m/Y', strtotime($voucher['expires_at']));
+                    }
                     ?>
                 </td>
                 <td>
@@ -189,22 +201,35 @@ if (empty($vouchers)) {
                                 <input type="number" class="form-control" name="points_required" min="0" value="0">
                             </div>
                         </div>
+                        
+                    </div>
+
+                    <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Giảm giá (VNĐ)</label>
-                                <input type="number" class="form-control" name="discount_amount" min="0" value="0">
+                                <label class="form-label">Loại giảm giá</label>
+                                <select class="form-select" name="discount_type" required>
+                                    <option value="percent">Phần trăm (%)</option>
+                                    <option value="amount">Số tiền (VNĐ)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Giá trị giảm</label>
+                                <input type="number" class="form-control" name="discount_value" min="0" value="0" required>
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Ngày hết hạn</label>
-                        <input type="date" class="form-control" name="expiry_date">
+                        <input type="date" class="form-control" name="expires_at">
                     </div>
 
                     <div class="mb-3">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="is_active" value="1" checked>
+                            <input class="form-check-input" type="checkbox" name="active" value="1" checked>
                             <label class="form-check-label">Kích hoạt voucher</label>
                         </div>
                     </div>
@@ -247,9 +272,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     voucherForm.querySelector('[name="code"]').value = voucher.code;
                     voucherForm.querySelector('[name="description"]').value = voucher.description;
                     voucherForm.querySelector('[name="points_required"]').value = voucher.points_required || 0;
-                    voucherForm.querySelector('[name="discount_amount"]').value = voucher.discount_amount || 0;
-                    voucherForm.querySelector('[name="expiry_date"]').value = voucher.expiry_date || '';
-                    voucherForm.querySelector('[name="is_active"]').checked = voucher.is_active == 1;
+                    voucherForm.querySelector('[name="discount_type"]').value = voucher.discount_type || 'amount';
+                    voucherForm.querySelector('[name="discount_value"]').value = voucher.discount_value || 0;
+                    voucherForm.querySelector('[name="expires_at"]').value = voucher.expires_at || '';
+                    voucherForm.querySelector('[name="active"]').checked = voucher.active == 1;
 
                     voucherModal.show();
                 } else {

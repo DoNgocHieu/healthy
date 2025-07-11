@@ -45,6 +45,17 @@ $stmt = $pdo->prepare(
 );
 $stmt->execute();
 $vouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Lấy tổng điểm từ bảng points_history
+$stmt = $pdo->prepare('SELECT SUM(change_amount) AS total_points FROM points_history WHERE user_id = ?');
+$stmt->execute([$userId]);
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+$totalPoints = (int)($row['total_points'] ?? 0);
+
+// Lấy danh sách voucher user đã đổi
+$stmt = $pdo->prepare('SELECT voucher_id FROM voucher_usage WHERE user_id = ?');
+$stmt->execute([$userId]);
+$boughtVouchers = array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'voucher_id');
 ?>
 
 <link rel="stylesheet" href="<?= getAssetUrl('css/points.css') ?>">
@@ -69,7 +80,7 @@ $vouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <h2>Điểm tích lũy</h2>
       <div class="points-card">
         <div class="points-balance">
-          <span class="points-amount"><?= number_format($user['points']) ?></span>
+          <span class="points-amount"><?= number_format($totalPoints) ?></span>
           <span class="points-label">điểm</span>
         </div>
         <p class="points-info">
@@ -92,10 +103,20 @@ $vouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
             <div class="voucher-points">
               <span><?= number_format($v['points_required']) ?> điểm</span>
-              <button class="btn-redeem" <?= $user['points'] < $v['points_required'] ? 'disabled' : '' ?>>
-                Đổi ngay
+              <button
+                class="btn-redeem"
+                <?php
+                    if (in_array($v['id'], $boughtVouchers)) {
+                        echo 'disabled style="background:#ccc;cursor:not-allowed"';
+                    } elseif ($totalPoints < $v['points_required']) {
+                        echo 'disabled';
+                    }
+                ?>
+              >
+                <?= in_array($v['id'], $boughtVouchers) ? 'Đã nhận' : 'Đổi ngay' ?>
               </button>
             </div>
+            <input type="hidden" name="voucher_id" value="<?= $v['id'] ?>">
           </div>
         <?php endforeach; ?>
       </div>
@@ -106,9 +127,18 @@ $vouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script>
 document.querySelectorAll('.btn-redeem').forEach(button => {
     button.addEventListener('click', function() {
+        const voucherId = this.closest('.voucher-card').querySelector('input[name="voucher_id"]').value;
         if (confirm('Bạn có chắc muốn đổi voucher này?')) {
-            // Thêm logic đổi voucher ở đây
-            alert('Chức năng đang được phát triển!');
+            fetch('/healthy/actions/redeem_voucher.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'voucher_id=' + voucherId
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) location.reload();
+            });
         }
     });
 });
