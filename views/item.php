@@ -19,6 +19,7 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
 ?>
 
 <script defer src="../js/qty.js"></script>
+<script defer src="../js/favorites.js"></script>
 
 <?php if ($isAjax): ?>
   <button class="item-detail-modal-close"
@@ -40,7 +41,12 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
   <div class="item-detail-row">
 
 <div class="item-detail-info">
-  <h2><?=htmlspecialchars($item['name'], ENT_QUOTES)?></h2>
+  <div class="title-with-heart">
+    <h2><?=htmlspecialchars($item['name'], ENT_QUOTES)?></h2>
+    <button class="favorite-btn favorite-btn-large" data-item-id="<?= $id ?>" title="Thêm vào yêu thích">
+      <i class="fa-regular fa-heart"></i>
+    </button>
+  </div>
   <div class="price"><?=number_format($item['price'],0,',','.')?> đ</div>
 
   <?php if ($maxQty > 0): ?>
@@ -167,22 +173,45 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
   #add-review-form .star-group {
     display: flex;
     align-items: center;
-    gap: 2px;
-    font-size: 1.5em;
+    gap: 3px;
+    font-size: 1.8em;
     cursor: pointer;
     margin-top: 2px;
     user-select: none;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(245, 179, 1, 0.05);
+    border: 1px solid rgba(245, 179, 1, 0.2);
+    transition: all .2s ease;
+  }
+  #add-review-form .star-group:hover {
+    background: rgba(245, 179, 1, 0.1);
+    border-color: rgba(245, 179, 1, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(245, 179, 1, 0.15);
   }
   #add-review-form .star-group .star {
-    color: #ccc;
-    transition: color .15s;
+    color: #ddd;
+    transition: all .2s ease;
     cursor: pointer;
-    padding: 0 1px;
+    padding: 2px 3px;
+    border-radius: 4px;
+    position: relative;
   }
-  #add-review-form .star-group .star.selected,
-  #add-review-form .star-group .star:hover,
-  #add-review-form .star-group .star.selected ~ .star {
+  #add-review-form .star-group .star:hover {
     color: #f5b301;
+    transform: scale(1.15);
+    text-shadow: 0 0 8px rgba(245, 179, 1, 0.3);
+  }
+  #add-review-form .star-group .star.selected {
+    color: #f5b301;
+    text-shadow: 0 0 8px rgba(245, 179, 1, 0.4);
+    animation: starPulse .3s ease;
+  }
+  @keyframes starPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
   }
   #add-review-form textarea {
     min-width: 220px;
@@ -238,30 +267,42 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
     </form>
   </div>
   <script>
-    // Star rating UI
+    // Star rating UI - Improved logic
     (function() {
       const stars = document.querySelectorAll('#star-group .star');
       const starInput = document.getElementById('star-input');
       let selected = 0;
-      stars.forEach(star => {
+
+      function highlightStars(count) {
+        stars.forEach((star, index) => {
+          if (index < count) {
+            star.classList.add('selected');
+          } else {
+            star.classList.remove('selected');
+          }
+        });
+      }
+
+      stars.forEach((star, index) => {
         star.addEventListener('mouseenter', function() {
-          const val = +this.dataset.star;
-          stars.forEach(s => s.classList.toggle('selected', +s.dataset.star <= val));
+          highlightStars(index + 1);
         });
+
         star.addEventListener('mouseleave', function() {
-          stars.forEach(s => s.classList.toggle('selected', +s.dataset.star <= selected));
+          highlightStars(selected);
         });
+
         star.addEventListener('click', function() {
-          selected = +this.dataset.star;
+          selected = index + 1;
           starInput.value = selected;
-          stars.forEach(s => s.classList.toggle('selected', +s.dataset.star <= selected));
+          highlightStars(selected);
         });
       });
     })();
-    document.addEventListener('DOMContentLoaded', function() {
-      if (typeof loadReviews === 'function') loadReviews(<?= $id ?>);
-      if (typeof addReviewHandler === 'function') addReviewHandler(<?= $id ?>);
-    });
+
+    // Initialize reviews immediately (not waiting for DOMContentLoaded)
+    if (typeof loadReviews === 'function') loadReviews(<?= $id ?>);
+    if (typeof addReviewHandler === 'function') addReviewHandler(<?= $id ?>);
   </script>
 </div>
 
@@ -300,11 +341,63 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
   flex-direction: column;
   align-items: flex-start;
 }
+
+.title-with-heart {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: .65rem;
+}
+
+.title-with-heart h2 {
+  flex: 1;
+  margin: 0;
+}
+
+.favorite-btn-large {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #e9ecef;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.favorite-btn-large:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: #e74c3c;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.favorite-btn-large i {
+  font-size: 20px;
+  color: #6c757d;
+  transition: color 0.3s ease;
+}
+
+.favorite-btn-large.favorited {
+  border-color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+}
+
+.favorite-btn-large.favorited i {
+  color: #e74c3c;
+}
+
+.favorite-btn-large:hover i {
+  color: #e74c3c;
+}
 .item-detail-info h2 {
   font-size: 1.5rem;
   font-weight: 700;
   color: rgb(0,39,16);
-  margin-bottom: .65rem;
 }
 .item-detail-info .price {
   font-size: 1.17rem;
@@ -375,8 +468,9 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
   .item-detail-info .price {
     text-align: center;
   }
-  .qty-error-tab
-}
+  .qty-error-tab {
+    display: none;
+  }
 
 .item-detail-container.qty-control input[type=number]::-webkit-inner-spin-button,
 .item-detail-container.qty-control input[type=number]::-webkit-outer-spin-button {
@@ -385,6 +479,7 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
 }
 .item-detail-container.qty-control input[type=number] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .item-detail-container.qty-control,
@@ -413,9 +508,9 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
 
 .qty-control input[type="number"],
 [id^="cart-controls-"] input[type="number"] {
-  width: 3.2rem;               
+  width: 3.2rem;
   height: 2.4rem;
-  font-size: 1.2rem;           
+  font-size: 1.2rem;
   font-weight: 700;
   text-align: center;
   background: transparent;
@@ -430,7 +525,7 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
   justify-content: center;
   padding: 0.6rem 1.2rem;
   background:rgba(181, 255, 156, 0.75) !important;
-  border: 1.5px solid rgb(30, 128, 0) !important; 
+  border: 1.5px solid rgb(30, 128, 0) !important;
   border-radius: 8px;
   color:rgb(0, 64, 19) !important;
   font-size: 1rem;

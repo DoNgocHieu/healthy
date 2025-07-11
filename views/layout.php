@@ -134,6 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
   <link rel="stylesheet" href="../css/menu_options.css" />
 
   <script src="<?= BASE_URL ?>/js/qty.js" defer></script>
+  <script src="../js/favorites.js" defer></script>
   <script defer src="../js/site.js"></script>
     <div id="fb-root"></div>
   <script async defer crossorigin="anonymous"
@@ -160,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
       <input type="text" name="q" placeholder="Search" />
       <button type="submit"><i class="fa fa-search"></i></button>
     </form>
-    <a href="#" class="icon-link" title="Favorites"><i class="fa fa-heart"></i></a>
+    <a href="layout.php?page=favorites" class="icon-link" title="Favorites"><i class="fa fa-heart"></i></a>
     <a href="layout.php?page=cart" class="icon-link" title="Cart"><i class="fa fa-shopping-cart"></i></a>
     <div class="user-menu">
       <i class="fa fa-user user-icon"></i>
@@ -189,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
     'login','signin','monmoi','khaivi','trongoi','dauhu','nam',
     'raucuqua','monchinh','canh','lau','trabanh',
     'item','vct','lh','home','hd1','cart','dl','BBCX','info','logout','forgot_password','points','address','checkout','footer',
-    'order_confirm','order_success','orders','admin'
+    'order_confirm','order_success','orders','admin','favorites'
   ];
 
   if (in_array($page, $allowPages) && file_exists($page . '.php')) {

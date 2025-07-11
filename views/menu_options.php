@@ -48,7 +48,23 @@ function showItemModalById(itemId) {
   overlay.style.display = 'flex';
   fetch('item.php?id=' + itemId + '&ajax=1')
     .then(res => res.text())
-    .then(html => contentDiv.innerHTML = html)
+    .then(html => {
+      contentDiv.innerHTML = html;
+
+      // Khởi tạo favorites cho modal content
+      if (window.favoritesManager) {
+        window.favoritesManager.initializeFavorites();
+      }
+
+      // Force run script tags in loaded content
+      var scripts = contentDiv.querySelectorAll('script');
+      scripts.forEach(script => {
+        var newScript = document.createElement('script');
+        newScript.textContent = script.textContent;
+        document.head.appendChild(newScript);
+        document.head.removeChild(newScript);
+      });
+    })
     .catch(() => contentDiv.innerHTML = 'Lỗi tải dữ liệu!');
   document.onkeydown = function(e) { if (e.key === 'Escape') closeItemModal(); }
   overlay.onclick = function(e) { if(e.target === overlay) closeItemModal(); }

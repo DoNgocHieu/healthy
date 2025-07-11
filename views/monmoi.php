@@ -6,7 +6,7 @@ if (!isset($_SESSION['cart']) && isset($_COOKIE['cart_sync'])) {
     $_SESSION['cart'] = json_decode($_COOKIE['cart_sync'], true);
 }
 
-$sql = "SELECT id, name, price, description, image_url, quantity 
+$sql = "SELECT id, name, price, description, image_url, quantity
         FROM items WHERE TT='MM'";
 $res = $mysqli->query($sql) or die("SQL ERROR (items): ".$mysqli->error);
 
@@ -26,6 +26,7 @@ $mysqli->close();
 </div>
 
 <script defer src="../js/qty.js"></script>
+<script defer src="../js/favorites.js"></script>
 <?php include 'menu_options.php'; ?>
 <div class="monmoi-container">
   <div class="monmoi-grid">
@@ -37,7 +38,12 @@ $mysqli->close();
         $stockQty  = (int)$it['quantity'];
         $inCartQty = $_SESSION['cart'][$id]['qty'] ?? 0;
       ?>
-        <div class="monmoi-card" onclick="showItemModalById(<?= $id ?>)">
+        <div class="monmoi-card" onclick="showItemModalById(<?= $id ?>)" data-item-id="<?= $id ?>">
+          <div class="card-header">
+            <button class="favorite-btn" data-item-id="<?= $id ?>" title="Thêm vào yêu thích" onclick="event.stopPropagation()">
+              <i class="fa-regular fa-heart"></i>
+            </button>
+          </div>
           <img src="../img/<?=htmlspecialchars($it['image_url'],ENT_QUOTES)?>"
                alt="<?=htmlspecialchars($it['name'],ENT_QUOTES)?>">
           <div class="name"><?=htmlspecialchars($it['name'],ENT_QUOTES)?></div>
@@ -81,14 +87,14 @@ $mysqli->close();
 
 <style>
 .monmoi-container {
-  max-width: 1100px; 
-  margin: 0 auto; 
-  padding: 2rem 1rem; 
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
 }
 .monmoi-grid {
-  display: grid !important; 
-  grid-template-columns: repeat(4, 240px); 
-  justify-content: center; 
+  display: grid !important;
+  grid-template-columns: repeat(4, 240px);
+  justify-content: center;
   gap: 2rem;
 }
 .monmoi-card {
@@ -98,8 +104,50 @@ $mysqli->close();
   border-radius: 10px;
   text-align: center;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  position: relative;
   transition: transform .2s, box-shadow .2s;
   cursor: pointer;
+}
+
+.card-header {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}
+
+.favorite-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.favorite-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.favorite-btn i {
+  font-size: 16px;
+  color: #6c757d;
+  transition: color 0.3s ease;
+}
+
+.favorite-btn.favorited i {
+  color: #e74c3c;
+}
+
+.favorite-btn:hover i {
+  color: #e74c3c;
 }
 .monmoi-card:hover {
   transform: translateY(-5px);
@@ -161,9 +209,9 @@ $mysqli->close();
 
 .qty-control input[type="number"],
 [id^="cart-controls-"] input[type="number"] {
-  width: 3.2rem;               
+  width: 3.2rem;
   height: 2.4rem;
-  font-size: 1.2rem;           
+  font-size: 1.2rem;
   font-weight: 700;
   text-align: center;
   background: transparent;
@@ -174,15 +222,15 @@ $mysqli->close();
 }
 .add-to-cart-icon,
 .add-to-cart-btn {
-  width: 2.4rem;      
+  width: 2.4rem;
   height: 2.4rem;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent !important;
   border: none !important;
-  font-size: 1.6rem;  
-  color: #1D2E28 !important; 
+  font-size: 1.6rem;
+  color: #1D2E28 !important;
   cursor: pointer;
   transition: color .2s, background .2s;
 }
@@ -202,7 +250,7 @@ $mysqli->close();
 }
 .add-to-cart-icon:hover {
   color: #00cf8a;
-  
+
 }
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
