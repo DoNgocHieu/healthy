@@ -249,8 +249,19 @@ body {
 }
 </style>
 <script>
-  window.isLoggedIn = <?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>;
-  console.log('isLoggedIn =', window.isLoggedIn);
-  loadReviews(id_food);
-  addReviewHandler(id_food);
+function showItemModalById(id) {
+  fetch('/healthy/views/item.php?id=' + id, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: 'ajax=1'
+  })
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('itemModalContent').innerHTML = html;
+      document.getElementById('itemModalOverlay').style.display = 'block';
+    });
+}
+function closeItemModal() {
+  document.getElementById('itemModalOverlay').style.display = 'none';
+}
 </script>
