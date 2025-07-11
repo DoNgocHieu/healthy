@@ -212,3 +212,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
   window.isLoggedIn = <?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>;
 </script>
 <?php endif; ?>
+<?php
+if ($_GET['page'] === 'category' && !empty($_GET['tt'])) {
+    $tt = $_GET['tt'];
+    $sql = "SELECT id, name, price, description, image_url, quantity 
+            FROM items WHERE TT = ?";
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param('s', $tt);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $items = [];
+    while ($row = $res->fetch_assoc()) {
+        $items[] = $row;
+    }
+    $res->free();
+   
+}
