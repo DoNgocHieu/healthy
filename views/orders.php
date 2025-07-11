@@ -103,13 +103,13 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 ?>
                                 <p><strong>Người nhận:</strong> <?= htmlspecialchars($fullname) ?></p>
                                 <p><strong>Số điện thoại:</strong> <?= htmlspecialchars($phone) ?></p>
-                                <p><strong>Địa chỉ:</strong> <?= nl2br(htmlspecialchars($address)) ?></p>
+                                <p><strong>Địa chỉ giao hàng:</strong> <?= nl2br(htmlspecialchars($order['shipping_address'] ?? '')) ?></p>
                                 <p><strong>Phương thức thanh toán:</strong>
                                     <?= $order['payment_method'] === 'cod' ? 'Thanh toán khi nhận hàng' : 'Chuyển khoản ngân hàng' ?>
                                 </p>
                             </div>
                             <div class="order-total">
-                                <p>Tổng tiền: <span><?= number_format($order['total'], 0, ',', '.') ?> đ</span></p>
+                                <p>Tổng tiền: <span><?= number_format($order['total_amount'] ?? 0, 0, ',', '.') ?> đ</span></p>
                             </div>
                         </div>
                     </div>
