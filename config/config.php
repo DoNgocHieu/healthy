@@ -41,3 +41,8 @@ function getDb() {
 
 $mysqli = getDbConnection();
 $pdo     = getDb();
+
+define('VNP_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html');
+define('VNP_RETURN_URL', 'http://localhost/healthy/views/vnpay_return.php'); // Đổi thành URL nhận kết quả thanh toán của bạn
+define('VNP_TMNCODE', 'NJJ0R8FS'); // Terminal ID provided by VNPay
+define('VNP_HASHSECRET', 'BYKJBHPPZKQMKBIBGGXIYKWYFAYSJXCW'); // Secret key provided by VNPay

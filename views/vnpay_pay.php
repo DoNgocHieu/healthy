@@ -1,10 +1,12 @@
 <?php
+$vnpayUrl = $vnp_Url;
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     echo '<div style="color:red;padding:24px;">Thiếu hoặc sai mã đơn hàng!</div>';
     exit;
 }
 $orderId = intval($_GET['id']);
-$bankCode = $_GET['bankCode'] ?? ''; // Thêm dòng này
+$bankCode = $_GET['bankCode'] ?? '';
+
 
 require_once __DIR__ . '/../config/config.php';
 $pdo = getDb();
@@ -19,28 +21,65 @@ if (!$order) {
     exit;
 }
 
-// Thông tin cần thiết cho VNPAY
-$total = $order['total_amount'];
-$orderCode = 'ORDER' . $orderId;
+// Khởi tạo dữ liệu cho VNPay
+$vnp_TxnRef = 'ORDER' . $orderId; // Mã đơn hàng
+$vnp_OrderInfo = 'Thanh toan don hang ' . $vnp_TxnRef;
+$vnp_OrderType = 'billpayment';
+$vnp_Amount = $order['total_amount'] * 100; // Số tiền * 100 (tiền tệ VNĐ)
+$vnp_Locale = 'vn';
+$vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
+$vnp_CreateDate = date('YmdHis');
 
-?>
+// Tạo mảng dữ liệu gửi đi
+$inputData = array(
+    "vnp_Version" => "2.1.0",
+    "vnp_TmnCode" => VNP_TMNCODE,
+    "vnp_Amount" => $vnp_Amount,
+    "vnp_Command" => "pay",
+    "vnp_CreateDate" => $vnp_CreateDate,
+    "vnp_CurrCode" => "VND",
+    "vnp_IpAddr" => $vnp_IpAddr,
+    "vnp_Locale" => $vnp_Locale,
+    "vnp_OrderInfo" => $vnp_OrderInfo,
+    "vnp_OrderType" => $vnp_OrderType,
+    "vnp_ReturnUrl" => VNP_RETURN_URL,
+    "vnp_TxnRef" => $vnp_TxnRef
+);
+
+if (!empty($bankCode)) {
+    $inputData['vnp_BankCode'] = $bankCode;
+}
+
+// Sắp xếp dữ liệu theo thứ tự a-z
+ksort($inputData);
+$query = "";
+$i = 0;
+$hashdata = "";
+foreach ($inputData as $key => $value) {
+    if ($i == 1) {
+        $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+    } else {
+        $hashdata .= urlencode($key) . "=" . urlencode($value);
+        $i = 1;
+    }
+    $query .= urlencode($key) . "=" . urlencode($value) . '&';
+}
+$vnp_Url = VNP_URL . "?" . $query;
+$vnpSecureHash = hash_hmac('sha512', $hashdata, VNP_HASHSECRET);
+$vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
+
+// Nếu muốn chuyển hướng tự động, không cần render HTML bên dưới
+// Nếu muốn hiển thị trang xác nhận, hãy comment hoặc xóa dòng chuyển hướng sau:
+
+header("Location: $vnp_Url");
+exit;
+
+// The HTML code below is unreachable due to the exit above.
+// If you want to show a confirmation page instead of redirecting immediately,
+// comment out the header() and exit; lines above and uncomment the HTML below.
+
+/*
 <link rel="stylesheet" href="../css/checkout.css">
-<div class="checkout-container">
-    <h2>Thanh toán qua VNPAY</h2>
-    <div class="order-summary">
-        <p>Mã đơn hàng: <b><?= htmlspecialchars($orderCode) ?></b></p>
-        <p>Số tiền cần thanh toán: <b><?= number_format($total, 0, ',', '.') ?> đ</b></p>
-    </div>
-    <div style="margin:32px 0;">
-        <!-- Thay thế bằng nút hoặc form tích hợp VNPAY thật -->
-        <a href="#" class="checkout-button" style="background:#1976d2;color:#fff;padding:12px 32px;border-radius:8px;font-size:18px;">
-            Thanh toán qua VNPAY
-        </a>
-        <p style="margin-top:16px;color:#1976d2;">(Demo: Tích hợp API VNPAY tại đây)</p>
-    </div>
-    <a href="layout.php?page=order_success&id=<?= $orderId ?>" style="color:#1a7f37;">Quay lại trang xác nhận đơn hàng</a>
-</div>
-
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
@@ -52,16 +91,19 @@ $orderCode = 'ORDER' . $orderId;
                     </h4>
                 </div>
                 <div class="card-body p-5">
-                    <form method="POST" action="https://sandbox.vnpayment.vn/paymentv2/vpcpay.html" id="vnpayForm">
-                        <input type="hidden" name="order_id" value="<?= $orderId ?>">
-                        <input type="hidden" name="amount" value="<?= $total ?>">
-                        <input type="hidden" name="bank_code" value="<?= htmlspecialchars($bankCode ?? '') ?>">
-                        <button type="submit" class="btn btn-success btn-lg" id="payButton">
+                    <div class="order-summary mb-4">
+                        <p>Mã đơn hàng: <b><?= htmlspecialchars($vnp_TxnRef) ?></b></p>
+                        <p>Số tiền thanh toán: <b><?= number_format($order['total_amount'], 0, ',', '.') ?> đ</b></p>
+                    </div>
+                    
+                    <form method="GET" action="<?= $vnpayUrl ?>" id="vnpayForm">
+                        <button type="submit" class="btn btn-success btn-lg w-100" id="payButton">
                             <i class="fas fa-credit-card me-2"></i>
                             Thanh Toán Ngay
-                            <span class="fw-bold"><?= number_format($total, 0, ',', '.') ?>đ</span>
+                            <span class="fw-bold"><?= number_format($order['total_amount'], 0, ',', '.') ?>đ</span>
                         </button>
                     </form>
+
                     <?php if (!empty($bankCode)): ?>
                     <div class="alert alert-warning mt-3 text-center" id="countdownBox">
                         <i class="fas fa-clock me-2"></i>
@@ -73,6 +115,7 @@ $orderCode = 'ORDER' . $orderId;
                         const countdownEl = document.getElementById('countdown');
                         const vnpayForm = document.getElementById('vnpayForm');
                         const payButton = document.getElementById('payButton');
+                        
                         const timer = setInterval(function() {
                             countdown--;
                             countdownEl.textContent = countdown;
@@ -81,6 +124,7 @@ $orderCode = 'ORDER' . $orderId;
                                 vnpayForm.submit();
                             }
                         }, 1000);
+                        
                         payButton.addEventListener('click', function(e) {
                             clearInterval(timer);
                             document.getElementById('countdownBox').remove();
@@ -90,6 +134,15 @@ $orderCode = 'ORDER' . $orderId;
                     <?php endif; ?>
                 </div>
             </div>
+            
+            <div class="text-center mt-3">
+                <a href="layout.php?page=order_success&id=<?= $orderId ?>" 
+                   class="text-decoration-none" style="color:#1a7f37;">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Quay lại trang xác nhận đơn hàng
+                </a>
+            </div>
         </div>
     </div>
 </div>
+*/

@@ -118,3 +118,51 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     <?php endif; ?>
 </div>
+
+<?php
+// Xử lý lưu đơn hàng mới
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_order') {
+    $selectedAddress = $_POST['address'] ?? null;
+    $paymentMethod = $_POST['payment_method'] ?? 'cod'; // Mặc định là thanh toán khi nhận hàng
+
+    if ($selectedAddress) {
+        // Lưu đơn hàng vào cơ sở dữ liệu
+        $orderStmt = $pdo->prepare("
+            INSERT INTO orders (user_id, shipping_address, payment_method, total_amount, created_at, order_status)
+            VALUES (?, ?, ?, ?, NOW(), 'pending')
+        ");
+        $orderStmt->execute([
+            $userId,
+            $selectedAddress['address'], // chỉ lưu địa chỉ!
+            $_POST['payment_method'],
+            array_sum(array_column($_SESSION['cart'] ?? [], 'subtotal')) // Tổng tiền
+        ]);
+
+        $orderId = $pdo->lastInsertId();
+
+        // Lưu chi tiết đơn hàng
+        $detailStmt = $pdo->prepare("
+            INSERT INTO order_items (order_id, item_id, quantity, price)
+            VALUES (?, ?, ?, ?)
+        ");
+
+        foreach ($_SESSION['cart'] as $item) {
+            $detailStmt->execute([
+                $orderId,
+                $item['id'],
+                $item['quantity'],
+                $item['price']
+            ]);
+        }
+
+        // Xóa giỏ hàng sau khi đặt hàng thành công
+        unset($_SESSION['cart']);
+
+        // Chuyển hướng đến trang cảm ơn
+        header('Location: layout.php?page=thank_you');
+        exit;
+    } else {
+        $error = "Vui lòng chọn địa chỉ giao hàng.";
+    }
+}
+?>

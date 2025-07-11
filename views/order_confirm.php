@@ -88,9 +88,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         created_at
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
                 ");
+                $fullShipping = $selectedAddress['fullname'] . ', ' . $selectedAddress['phone'] . ', ' . $selectedAddress['address'];
                 $orderStmt->execute([
                     $userId,
-                    $selectedAddress['address'], // hoặc ghép fullname, phone, address nếu muốn đầy đủ
+                    $fullShipping, // Lưu cả tên, SĐT, địa chỉ
                     $_POST['payment_method'],
                     $subtotal,
                     $shipping,
@@ -137,7 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->commit();
 
                 if ($_POST['payment_method'] === 'vnpay') {
-                    // Chuyển hướng sang trang xử lý VNPAY, truyền orderId
                     header("Location: layout.php?page=vnpay_pay&id=$orderId");
                     exit;
                 } else {
