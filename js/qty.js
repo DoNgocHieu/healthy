@@ -297,92 +297,204 @@
 		}
 		reviewList.innerHTML =
 			'<div style="text-align:center;padding:20px;color:#666;"><i class="fa fa-spinner fa-spin"></i> Đang tải đánh giá...</div>';
-		fetch(`../api/get_reviews.php?id_food=${id_food}`)
-			.then((r) => r.json())
+		fetch(`/healthy/api/get_reviews.php?id_food=${id_food}`)
+			.then((r) => {
+				console.log('Response status:', r.status);
+				console.log('Response URL:', r.url);
+				return r.json();
+			})
 			.then((data) => {
+				console.log('Parsed data:', data);
+				console.log('Data.reviews:', data.reviews);
+				console.log(
+					'Reviews length:',
+					data.reviews ? data.reviews.length : 'undefined'
+				);
+
 				if (!data.reviews || !data.reviews.length) {
 					reviewList.innerHTML =
 						'<div style="text-align:center;padding:30px;color:#999;background:#f8f8f8;border-radius:10px;border:2px dashed #ddd;"><i class="fa fa-comment-o" style="font-size:2em;margin-bottom:10px;display:block;"></i>Chưa có đánh giá nào cho món này.<br><small>Hãy là người đầu tiên đánh giá!</small></div>';
 					return;
 				}
-				reviewList.innerHTML = data.reviews
-					.map((rv) => {
-						let photosHtml = '';
-						if (rv.photos) {
-							try {
-								let arr = [];
-								if (rv.photos.trim().startsWith('[')) {
-									arr = JSON.parse(rv.photos);
-								} else if (rv.photos.trim() !== '') {
-									arr = [rv.photos.trim()];
-								}
-								if (Array.isArray(arr) && arr.length) {
-									photosHtml =
-										'<div class="review-photos" style="margin:10px 0 0 4px;display:flex;gap:8px;flex-wrap:wrap;">' +
-										arr
-											.map(
-												(url) =>
-													`<img src="${url}" style="max-width:80px;max-height:80px;border-radius:8px;border:2px solid #e8f0e8;object-fit:cover;">`
-											)
-											.join('') +
-										'</div>';
-								}
-							} catch (e) {}
+
+				console.log('Processing reviews...');
+
+				const reviewsHtml = data.reviews.map((rv, index) => {
+					console.log(`Processing review ${index}:`, rv);
+					let photosHtml = '';
+
+					// Handle new images format
+					if (
+						rv.images &&
+						Array.isArray(rv.images) &&
+						rv.images.length > 0
+					) {
+						console.log('Found images:', rv.images);
+						photosHtml =
+							'<div class="review-photos" style="margin:10px 0 0 4px;display:flex;gap:8px;flex-wrap:wrap;">' +
+							rv.images
+								.map(
+									(filename) =>
+										`<img src="/healthy/uploads/reviews/${filename}" style="width:80px;height:80px;border-radius:8px;border:2px solid #e8f0e8;object-fit:cover;cursor:pointer;" onclick="window.open(this.src, '_blank')">`
+								)
+								.join('') +
+							'</div>';
+					}
+					// Handle old photos format (fallback)
+					else if (rv.photos) {
+						console.log('Found old photos:', rv.photos);
+						try {
+							let arr = [];
+							if (rv.photos.trim().startsWith('[')) {
+								arr = JSON.parse(rv.photos);
+							} else if (rv.photos.trim() !== '') {
+								arr = [rv.photos.trim()];
+							}
+							if (Array.isArray(arr) && arr.length) {
+								photosHtml =
+									'<div class="review-photos" style="margin:10px 0 0 4px;display:flex;gap:8px;flex-wrap:wrap;">' +
+									arr
+										.map(
+											(url) =>
+												`<img src="${url}" style="width:80px;height:80px;border-radius:8px;border:2px solid #e8f0e8;object-fit:cover;cursor:pointer;" onclick="window.open(this.src, '_blank')">`
+										)
+										.join('') +
+									'</div>';
+							}
+						} catch (e) {
+							console.error('Error parsing old photos:', e);
 						}
-						return `
+					}
+
+					return `
             <div class="review-item">
               <div class="review-head">
                 <span class="review-user">${rv.username}</span>
                 <span class="review-star">${'★'.repeat(rv.star)}${'☆'.repeat(
-							5 - rv.star
-						)}</span>
+						5 - rv.star
+					)}</span>
                 <span class="review-date">${rv.date}</span>
               </div>
               <div class="review-detail">${rv.detail}</div>
               ${photosHtml}
             </div>
           `;
-					})
-					.join('');
+				});
+
+				console.log('Generated HTML:', reviewsHtml);
+				reviewList.innerHTML = reviewsHtml.join('');
+				console.log('Reviews loaded successfully');
 			})
-			.catch(() => {
+			.catch((err) => {
+				console.error('Fetch error:', err);
 				reviewList.innerHTML =
 					'<div style="text-align:center;padding:20px;color:#e74c3c;background:#fff5f5;border-radius:10px;border:2px solid #fecaca;"><i class="fa fa-exclamation-triangle"></i> Lỗi tải đánh giá.</div>';
 			});
 	}
 	window.loadReviews = loadReviews;
 	function addReviewHandler(id_food) {
-		const form = document.getElementById('add-review-form');
-		if (!form) return;
-		form.onsubmit = function (e) {
-			e.preventDefault();
-			const username = form.username.value.trim();
-			const star = parseInt(form.star.value, 10);
-			const detail = form.detail.value.trim();
-			if (!username || !star || !detail) {
-				alert('Vui lòng nhập đầy đủ thông tin đánh giá!');
+		// Wait for modal to be fully loaded
+		setTimeout(() => {
+			const form = document.getElementById('add-review-form');
+			if (!form) {
+				console.error('Form not found!');
 				return;
 			}
-			fetch('../api/add_review.php', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded',
-				},
-				body: `id_food=${id_food}&username=${encodeURIComponent(
-					username
-				)}&star=${star}&detail=${encodeURIComponent(detail)}`,
-			})
-				.then((r) => r.json())
-				.then((data) => {
-					if (data.success) {
-						form.reset();
-						loadReviews(id_food);
-					} else {
-						alert(data.msg || 'Lỗi gửi đánh giá!');
+
+			console.log('Setting up form handler for id_food:', id_food);
+
+			form.onsubmit = function (e) {
+				e.preventDefault();
+				console.log('Form submitted');
+				console.log('selectedFiles global:', window.selectedFiles);
+				console.log(
+					'selectedFiles length:',
+					window.selectedFiles
+						? window.selectedFiles.length
+						: 'undefined'
+				);
+
+				const username = form.username.value.trim();
+				const star = parseInt(form.star.value, 10);
+				const detail = form.detail.value.trim();
+				if (!username || !star || !detail) {
+					alert('Vui lòng nhập đầy đủ thông tin đánh giá!');
+					return;
+				}
+
+				// Create FormData to handle file uploads
+				const formData = new FormData();
+				formData.append('id_food', id_food);
+				formData.append('username', username);
+				formData.append('star', star);
+				formData.append('detail', detail);
+
+				// Add images from selectedFiles array (not from input)
+				if (window.selectedFiles && window.selectedFiles.length > 0) {
+					console.log(
+						'Adding files from selectedFiles array:',
+						window.selectedFiles.length
+					);
+					for (let i = 0; i < window.selectedFiles.length; i++) {
+						const file = window.selectedFiles[i];
+						console.log(`File ${i}:`, {
+							name: file.name,
+							type: file.type,
+							size: file.size,
+						});
+						formData.append('images[]', file);
 					}
+				} else {
+					console.log('No files in selectedFiles array');
+				}
+
+				// Debug FormData
+				console.log('FormData entries:');
+				for (let pair of formData.entries()) {
+					console.log(pair[0], ':', pair[1]);
+				}
+
+				// Show loading state
+				const submitBtn = form.querySelector('button[type="submit"]');
+				const originalText = submitBtn.innerHTML;
+				submitBtn.innerHTML =
+					'<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+				submitBtn.disabled = true;
+
+				fetch('/healthy/api/add_review.php', {
+					method: 'POST',
+					body: formData,
 				})
-				.catch(() => alert('Lỗi kết nối server!'));
-		};
+					.then((r) => r.json())
+					.then((data) => {
+						if (data.success) {
+							form.reset();
+							// Clear selectedFiles array
+							if (window.selectedFiles) window.selectedFiles = [];
+							// Clear image preview
+							const imagePreview =
+								document.getElementById('image-preview');
+							if (imagePreview) imagePreview.innerHTML = '';
+							// Reset star rating
+							document
+								.querySelectorAll('#star-group .star')
+								.forEach((star) => {
+									star.classList.remove('selected');
+								});
+							loadReviews(id_food);
+							alert('Đánh giá đã được gửi thành công!');
+						} else {
+							alert(data.message || 'Lỗi gửi đánh giá!');
+						}
+					})
+					.catch(() => alert('Lỗi kết nối server!'))
+					.finally(() => {
+						// Restore button state
+						submitBtn.innerHTML = originalText;
+						submitBtn.disabled = false;
+					});
+			};
+		}, 100); // Wait 100ms for modal to load
 	}
 	window.addReviewHandler = addReviewHandler;
 })(window, document);

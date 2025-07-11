@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Test Upload</title>
+	</head>
+	<body>
+		<h1>Test File Upload</h1>
+		<form id="test-form" enctype="multipart/form-data">
+			<input
+				type="text"
+				name="username"
+				value="Test User"
+				required
+			/><br /><br />
+			<input
+				type="number"
+				name="star"
+				value="5"
+				min="1"
+				max="5"
+				required
+			/><br /><br />
+			<textarea name="detail" required>Test review</textarea><br /><br />
+			<input
+				type="file"
+				id="images"
+				name="images[]"
+				multiple
+				accept="image/*"
+			/><br /><br />
+			<button type="submit">Submit</button>
+		</form>
+
+		<script>
+			document.getElementById('test-form').onsubmit = function (e) {
+				e.preventDefault();
+
+				const formData = new FormData();
+				formData.append('id_food', 1);
+				formData.append('username', this.username.value);
+				formData.append('star', this.star.value);
+				formData.append('detail', this.detail.value);
+
+				const fileInput = document.getElementById('images');
+				console.log('Files:', fileInput.files);
+
+				if (fileInput.files.length > 0) {
+					for (let i = 0; i < fileInput.files.length; i++) {
+						console.log('Adding file:', fileInput.files[i].name);
+						formData.append('images[]', fileInput.files[i]);
+					}
+				}
+
+				console.log('FormData entries:');
+				for (let pair of formData.entries()) {
+					console.log(pair[0], pair[1]);
+				}
+				fetch('api/add_review.php', {
+					method: 'POST',
+					body: formData,
+				})
+					.then((r) => r.json())
+					.then((data) => {
+						console.log('Response:', data);
+						alert(JSON.stringify(data));
+					})
+					.catch((err) => {
+						console.error('Error:', err);
+						alert('Error: ' + err.message);
+					});
+			};
+		</script>
+	</body>
+</html>

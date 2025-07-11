@@ -152,37 +152,48 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
     padding-left: 2px;
   }
   #add-review-form {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto auto;
+    gap: 16px;
     margin-top: 18px;
-    flex-wrap: wrap;
-    background: #f6fff6;
-    border-radius: 8px;
-    padding: 12px 10px 10px 10px;
-    box-shadow: 0 1px 4px #0001;
+    background: linear-gradient(135deg, #f8fff8 0%, #f0fcf0 100%);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(107, 191, 89, 0.2);
   }
   #add-review-form input[name=username] {
-    min-width: 140px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1.2px solid #b5b5b5;
-    font-size: 1em;
+    grid-column: 1;
+    grid-row: 1;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 2px solid #e8f5e8;
+    font-size: 1.05em;
     background: #fff;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+  #add-review-form input[name=username]:focus {
+    outline: none;
+    border-color: #6BBF59;
+    box-shadow: 0 0 0 3px rgba(107, 191, 89, 0.1);
   }
   #add-review-form .star-group {
+    grid-column: 2;
+    grid-row: 1;
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 4px;
     font-size: 1.8em;
     cursor: pointer;
-    margin-top: 2px;
     user-select: none;
-    padding: 4px 8px;
-    border-radius: 8px;
-    background: rgba(245, 179, 1, 0.05);
-    border: 1px solid rgba(245, 179, 1, 0.2);
-    transition: all .2s ease;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(245, 179, 1, 0.08);
+    border: 2px solid rgba(245, 179, 1, 0.25);
+    transition: all .3s ease;
+    justify-self: end;
   }
   #add-review-form .star-group:hover {
     background: rgba(245, 179, 1, 0.1);
@@ -214,45 +225,162 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
     100% { transform: scale(1); }
   }
   #add-review-form textarea {
-    min-width: 220px;
-    min-height: 32px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1.2px solid #b5b5b5;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-height: 80px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 2px solid #e8f5e8;
     resize: vertical;
-    font-size: 1em;
+    font-size: 1.05em;
     background: #fff;
+    font-family: inherit;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+  }
+  #add-review-form textarea:focus {
+    outline: none;
+    border-color: #6BBF59;
+    box-shadow: 0 0 0 3px rgba(107, 191, 89, 0.1);
+  }
+  #add-review-form textarea::placeholder {
+    color: #999;
+    font-style: italic;
+  }
+  #add-review-form .image-upload-section {
+    grid-column: 1;
+    grid-row: 3;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  #add-review-form .image-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border: 2px solid #42a5f5;
+    border-radius: 8px;
+    color: #1565c0;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+  #add-review-form .image-upload-btn:hover {
+    background: linear-gradient(135deg, #bbdefb, #90caf9);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(66, 165, 245, 0.3);
+  }
+  #add-review-form .image-upload-btn i {
+    font-size: 1.1em;
+  }
+  #add-review-form input[type="file"] {
+    display: none;
+  }
+  #add-review-form .image-preview {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  #add-review-form .image-preview-item {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #e0e0e0;
+  }
+  #add-review-form .image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  #add-review-form .image-preview-item .remove-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    background: #e74c3c;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
   #add-review-form button[type=submit] {
-    background: #6BBF59;
+    grid-column: 2;
+    grid-row: 3;
+    background: linear-gradient(135deg, #6BBF59, #4e9c3e);
     color: #fff;
     border: none;
-    border-radius: 6px;
-    padding: 10px 24px;
+    border-radius: 8px;
+    padding: 12px 28px;
     font-weight: 700;
-    font-size: 1.08em;
+    font-size: 1.1em;
     cursor: pointer;
-    transition: background .18s;
-    box-shadow: 0 1px 4px #0001;
-    margin-left: 8px;
+    transition: all .3s ease;
+    box-shadow: 0 4px 12px rgba(107, 191, 89, 0.3);
+    justify-self: end;
+    align-self: start;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
   #add-review-form button[type=submit]:hover {
-    background: #4e9c3e;
+    background: linear-gradient(135deg, #4e9c3e, #3d7b2f);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(107, 191, 89, 0.4);
+  }
+  #add-review-form button[type=submit]:active {
+    transform: translateY(0);
   }
   @media (max-width: 600px) {
     #add-review-form {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 8px;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto auto auto;
+      gap: 12px;
+    }
+    #add-review-form input[name=username] {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    #add-review-form .star-group {
+      grid-column: 1;
+      grid-row: 2;
+      justify-self: center;
+      font-size: 1.6em;
     }
     #add-review-form textarea {
-      min-width: 100px;
+      grid-column: 1;
+      grid-row: 3;
+      min-height: 70px;
+    }
+    #add-review-form .image-upload-section {
+      grid-column: 1;
+      grid-row: 4;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    #add-review-form button[type=submit] {
+      grid-column: 1;
+      grid-row: 5;
+      justify-self: stretch;
+      padding: 14px 20px;
     }
   }
   </style>
   <div class="review-section">
     <div id="review-list"></div>
-    <form id="add-review-form" autocomplete="off">
+    <form id="add-review-form" autocomplete="off" enctype="multipart/form-data">
       <input name="username" placeholder="Tên của bạn" required>
       <div class="star-group" id="star-group">
         <span class="star" data-star="1">&#9733;</span>
@@ -262,8 +390,18 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
         <span class="star" data-star="5">&#9733;</span>
         <input type="hidden" name="star" id="star-input" required>
       </div>
-      <textarea name="detail" placeholder="Nội dung đánh giá" required></textarea>
-      <button type="submit">Gửi đánh giá</button>
+      <textarea name="detail" placeholder="Chia sẻ trải nghiệm của bạn về món ăn này..." required></textarea>
+      <div class="image-upload-section">
+        <label for="review-images" class="image-upload-btn">
+          <i class="fas fa-camera"></i>
+          Thêm ảnh
+        </label>
+        <input type="file" id="review-images" name="images[]" multiple accept="image/*" onchange="debugFileInput(this)">
+        <div class="image-preview" id="image-preview"></div>
+      </div>
+      <button type="submit">
+        <i class="fas fa-paper-plane"></i> Gửi đánh giá
+      </button>
     </form>
   </div>
   <script>
@@ -298,6 +436,64 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
           highlightStars(selected);
         });
       });
+    })();
+
+    // Image upload functionality
+    (function() {
+      const fileInput = document.getElementById('review-images');
+      const imagePreview = document.getElementById('image-preview');
+
+      // Initialize global selectedFiles array
+      if (!window.selectedFiles) {
+        window.selectedFiles = [];
+      }
+      let selectedFiles = window.selectedFiles;
+
+      fileInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+
+        files.forEach(file => {
+          if (file.type.startsWith('image/') && selectedFiles.length < 3) {
+            selectedFiles.push(file);
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const previewItem = document.createElement('div');
+              previewItem.className = 'image-preview-item';
+              previewItem.innerHTML = `
+                <img src="${e.target.result}" alt="Preview">
+                <button type="button" class="remove-btn" onclick="removeImage(${selectedFiles.length - 1})">×</button>
+              `;
+              imagePreview.appendChild(previewItem);
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+        // Reset input to allow selecting same file again
+        fileInput.value = '';
+      });
+
+      // Make removeImage function global
+      window.removeImage = function(index) {
+        window.selectedFiles.splice(index, 1);
+        imagePreview.innerHTML = '';
+
+        // Rebuild preview
+        window.selectedFiles.forEach((file, i) => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const previewItem = document.createElement('div');
+            previewItem.className = 'image-preview-item';
+            previewItem.innerHTML = `
+              <img src="${e.target.result}" alt="Preview">
+              <button type="button" class="remove-btn" onclick="removeImage(${i})">×</button>
+            `;
+            imagePreview.appendChild(previewItem);
+          };
+          reader.readAsDataURL(file);
+        });
+      };
     })();
 
     // Initialize reviews immediately (not waiting for DOMContentLoaded)
