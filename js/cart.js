@@ -45,36 +45,25 @@ if (window.cartJsInitialized) {
 
 		function refreshSummary() {
 			let totalQty = 0;
-			let totalPrice = 0;
+			let subtotal = 0;
 
 			document.querySelectorAll('.cart-item').forEach((item) => {
-				const cb = item.querySelector('.cart-checkbox');
-				const qty =
-					parseInt(item.querySelector('.cart-qty-input').value, 10) ||
-					0;
-				const line =
-					parseInt(
-						item
-							.querySelector('.cart-line-total')
-							.textContent.replace(/\D/g, ''),
-						10
-					) || 0;
-				if (cb.checked) {
-					totalQty += qty;
-					totalPrice += line;
-				}
+				const qty = parseInt(item.querySelector('.cart-qty-input').value, 10) || 0;
+				const line = parseInt(item.querySelector('.cart-line-total').textContent.replace(/\D/g, ''), 10) || 0;
+				totalQty += qty;
+				subtotal += line;
 			});
 
-			if (countEl) countEl.textContent = `(${totalQty} món ăn)`;
-			if (buyBtn) buyBtn.textContent = `Mua Hàng (${totalQty})`;
-			if (checkAllEl) {
-				const all = Array.from(
-					document.querySelectorAll('.cart-checkbox')
-				);
-				const checked = all.filter((cb) => cb.checked);
-				checkAllEl.checked =
-					all.length > 0 && all.length === checked.length;
-			}
+			// Cập nhật nút Mua Hàng và đếm
+			const checkoutCountEl = document.getElementById('checkout-count');
+			if (checkoutCountEl) checkoutCountEl.textContent = totalQty;
+
+			// Cập nhật các con số bên phải
+			const fmt = (x) => x.toLocaleString('vi-VN') + ' đ';
+			document.getElementById('subtotal').textContent = fmt(subtotal);
+			document.getElementById('discount').textContent = '0 đ';
+			document.getElementById('shipping').textContent = '0 đ';
+			document.getElementById('total').textContent = fmt(subtotal);
 		}
 		function handleIncrease(itemId, qtyChange, maxQty) {
 			const qtyInput = document.getElementById(`qty-${itemId}`);
@@ -165,7 +154,7 @@ if (window.cartJsInitialized) {
 				})
 				.catch((error) => {
 					console.error('Lỗi kết nối:', error);
-					alert('Lỗi kết nối máy chủ. Vui lòng thử lại.');
+					// alert('Lỗi kết nối máy chủ. Vui lòng thử lại.');
 				});
 		}
 		document
@@ -271,21 +260,10 @@ if (window.cartJsInitialized) {
 		let subtotal = 0;
 
 		document.querySelectorAll('.cart-item').forEach((item) => {
-			const cb = item.querySelector('.cart-checkbox');
-			const qty =
-				parseInt(item.querySelector('.cart-qty-input').value, 10) || 0;
-			const line =
-				parseInt(
-					item
-						.querySelector('.cart-line-total')
-						.textContent.replace(/\D/g, ''),
-					10
-				) || 0;
-
-			if (cb && cb.checked) {
-				totalQty += qty;
-				subtotal += line;
-			}
+			const qty = parseInt(item.querySelector('.cart-qty-input').value, 10) || 0;
+			const line = parseInt(item.querySelector('.cart-line-total').textContent.replace(/\D/g, ''), 10) || 0;
+			totalQty += qty;
+			subtotal += line;
 		});
 
 		// Cập nhật nút Mua Hàng và đếm
@@ -295,7 +273,6 @@ if (window.cartJsInitialized) {
 		// Cập nhật các con số bên phải
 		const fmt = (x) => x.toLocaleString('vi-VN') + ' đ';
 		document.getElementById('subtotal').textContent = fmt(subtotal);
-		// nếu bạn có giảm giá hoặc phí ship, thay đổi ở đây:
 		document.getElementById('discount').textContent = '0 đ';
 		document.getElementById('shipping').textContent = '0 đ';
 		document.getElementById('total').textContent = fmt(subtotal);
@@ -322,3 +299,5 @@ if (window.cartJsInitialized) {
 		.forEach((cb) => cb.addEventListener('change', refreshSummary));
 	refreshSummary();
 }
+
+

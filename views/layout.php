@@ -73,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
         $check = $pdo->prepare("SELECT id FROM cart_items WHERE user_id = ? AND item_id = ?");
         $check->execute([$userId, $itemId]);
 
+        $upd = null;
         if ($check->fetch()) {
             // Nếu đã có thì UPDATE
             $upd = $pdo->prepare("UPDATE cart_items SET quantity = ? WHERE user_id = ? AND item_id = ?");
@@ -83,8 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
             $ins->execute([$userId, $itemId, $qty]);
         }
 
-        // Nếu không có bản ghi nào được cập nhật, INSERT mới
-        if ($upd->rowCount() === 0) {
+        // Nếu có đối tượng $upd và không có bản ghi nào được cập nhật, INSERT mới
+        if ($upd && $upd->rowCount() === 0) {
             $ins = $pdo->prepare(
                 "INSERT INTO cart_items (user_id, item_id, quantity)
                  VALUES (:uid, :iid, :qty)"

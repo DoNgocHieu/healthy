@@ -395,6 +395,10 @@ function updateTotal() {
   // Tổng tiền = tạm tính - giảm giá + ship
   let total = subtotal - discount + shipping;
   totalEl.textContent = total.toLocaleString('vi-VN') + ' đ';
+
+  // Cập nhật số lượng món
+  const count = document.querySelectorAll('.cart-item').length;
+  document.getElementById('checkout-count').textContent = count;
 }
 
 // Gọi khi trang load
@@ -416,4 +420,18 @@ document.querySelectorAll('.qty-increase, .qty-decrease, .cart-qty-input').forEa
 document.addEventListener('DOMContentLoaded', function() {
   updateTotal();
 });
+</script>
+<script>
+  // Thay đổi địa chỉ giao hàng
+  document.getElementById('btnSelectAddress').addEventListener('click', function(e) {
+    e.preventDefault();
+    const form = document.getElementById('selectAddressForm');
+    const addressId = <?= json_encode($selected ? $selected['id'] : null) ?>;
+    if (addressId) {
+      document.getElementById('select_address_id').value = addressId;
+      form.submit();
+    } else {
+      alert('Vui lòng chọn địa chỉ giao hàng.');
+    }
+  });
 </script>
