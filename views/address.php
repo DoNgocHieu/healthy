@@ -2,14 +2,20 @@
 // views/address.php
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/helpers.php';
 $pdo = getDb();
 
-// Nếu chưa login
+// Bảo vệ route
 if (empty($_SESSION['user_id'])) {
-  header('Location: /healthy/views/layout.php?page=login');
-  exit;
+    header('Location: /healthy/views/layout.php?page=login');
+    exit;
 }
 $userId = $_SESSION['user_id'];
+
+// Get user info
+$stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
+$stmt->execute([$userId]);
+$userInfo = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Lấy profile
 $stmt = $pdo->prepare(
@@ -18,10 +24,16 @@ $stmt = $pdo->prepare(
      WHERE p.user_id = :uid"
 );
 $stmt->execute([':uid' => $userId]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['avatar'=>null,'fullname'=>''];
-$avatarUrl = $user['avatar']
-    ? '/healthy/' . ltrim($user['avatar'], '/')
-    : '/healthy/img/default-avatar.png';
+$profile = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['avatar' => null, 'fullname' => null];
+
+// Merge user info
+$user = array_merge($userInfo ?: [], $profile);
+
+// User display name
+$displayName = !empty($user['fullname']) ? $user['fullname'] : (!empty($user['username']) ? $user['username'] : 'User');
+
+// Get avatar URL
+$avatarUrl = getAvatarUrl($user['avatar']);
 
 // Xử lý POST
 $errors = [];
@@ -122,7 +134,7 @@ $addresses = $stmt->fetchAll(PDO::FETCH_ASSOC);
         src="<?= htmlspecialchars($avatarUrl) ?>"
         class="avatar-preview"
         alt="Avatar">
-      <p><?= htmlspecialchars($user['fullname'] ?: $_SESSION['username']) ?></p>
+      <p><?= htmlspecialchars($displayName) ?></p>
     </div>
     <a href="layout.php?page=info" class="active">Thông tin tài khoản</a>
     <a href="layout.php?page=points">Điểm & voucher</a>
@@ -139,7 +151,7 @@ $addresses = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </ul>
     <?php endif; ?>
 <div class="address-list">
-  <?php foreach($addresses as $addr): 
+  <?php foreach($addresses as $addr):
     // Tách chuỗi address thành 4 phần:
     $parts    = array_map('trim', explode(',', $addr['address']));
     $houseNo  = $parts[0] ?? '';

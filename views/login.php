@@ -1,8 +1,12 @@
 <?php
+// Session đã được start trong layout.php
 if (isset($_SESSION['user_id'])) {
-    $dest = $_SESSION['after_login_redirect'] ?? 'layout.php?page=home';
-    unset($_SESSION['after_login_redirect']);
-    header("Location: $dest");
+    // Nếu đã đăng nhập, kiểm tra role để redirect
+    if ($_SESSION['role'] === 'admin') {
+        header('Location: ../admin/dashboard.php');
+    } else {
+        header('Location: layout.php?page=home');
+    }
     exit;
 }
 

@@ -1,6 +1,25 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/SiteSettingsManager.php';
+
 $page = $_GET['page'] ?? 'home';
+
+// Load site settings
+$settingsManager = new SiteSettingsManager();
+$siteSettings = [];
+try {
+    $allSettings = $settingsManager->getSettingsByGroup();
+    foreach ($allSettings as $setting) {
+        $siteSettings[$setting['setting_key']] = $setting['setting_value'];
+    }
+} catch (Exception $e) {
+    // Fallback values nếu không load được settings
+    $siteSettings = [
+        'site_name' => 'BROCCOLI',
+        'site_logo' => '../img/logo.png',
+        'site_slogan' => 'Healthy Food For Life'
+    ];
+}
 
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
@@ -15,9 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['ajax']) && $_GET['ajax'
   }
 
   $stmt = $pdo->prepare("
-    SELECT item_id, quantity 
-      FROM cart_items 
-     WHERE user_id = ? 
+    SELECT item_id, quantity
+      FROM cart_items
+     WHERE user_id = ?
        AND is_deleted = 0
   ");
   $stmt->execute([$userId]);
@@ -50,12 +69,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
 
     if ($qty > 0) {
         // Cố gắng UPDATE trước
-        $upd = $pdo->prepare(
-            "UPDATE cart_items
-                SET quantity = :qty, is_deleted = 0
-              WHERE user_id = :uid AND item_id = :iid"
-        );
-        $upd->execute([':qty'=>$qty, ':uid'=>$userId, ':iid'=>$itemId]);
+        // Kiểm tra xem item đã có trong giỏ hàng chưa
+        $check = $pdo->prepare("SELECT id FROM cart_items WHERE user_id = ? AND item_id = ?");
+        $check->execute([$userId, $itemId]);
+
+        if ($check->fetch()) {
+            // Nếu đã có thì UPDATE
+            $upd = $pdo->prepare("UPDATE cart_items SET quantity = ? WHERE user_id = ? AND item_id = ?");
+            $upd->execute([$qty, $userId, $itemId]);
+        } else {
+            // Nếu chưa có thì INSERT
+            $ins = $pdo->prepare("INSERT INTO cart_items (user_id, item_id, quantity, added_at) VALUES (?, ?, ?, NOW())");
+            $ins->execute([$userId, $itemId, $qty]);
+        }
 
         // Nếu không có bản ghi nào được cập nhật, INSERT mới
         if ($upd->rowCount() === 0) {
@@ -84,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
     $totalStmt = $pdo->prepare(
         "SELECT SUM(ci.quantity * i.price) FROM cart_items ci
          JOIN items i ON ci.item_id = i.id
-        WHERE ci.user_id = ? AND ci.is_deleted = 0"
+         WHERE ci.user_id = ?"
     );
     $totalStmt->execute([$userId]);
     $grandTotal = $totalStmt->fetchColumn() ?: 0;
@@ -99,12 +125,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
     exit;
 }
 ?>
-  <link rel="icon" type="image/png" href="../img/logo.png" />
+<?php if ($page !== 'admin'): ?>
+  <link rel="icon" type="image/png" href="<?php echo htmlspecialchars($siteSettings['site_logo'] ?? '../img/logo.png'); ?>" />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="../css/site.css" />
   <link rel="stylesheet" href="../css/menu_options.css" />
-  
+
   <script src="<?= BASE_URL ?>/js/qty.js" defer></script>
   <script defer src="../js/site.js"></script>
     <div id="fb-root"></div>
@@ -113,8 +140,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
   </script>
 <header class="navbar">
   <div class="logo">
-    <img src="../img/logo.png" alt="Broccoli Logo" class="logo-img" />
-    <span>BROCCOLI</span>
+    <img src="<?php echo htmlspecialchars($siteSettings['site_logo'] ?? '../img/logo.png'); ?>"
+         alt="<?php echo htmlspecialchars($siteSettings['site_name'] ?? 'Broccoli'); ?> Logo"
+         class="logo-img" />
+    <span><?php echo htmlspecialchars($siteSettings['site_name'] ?? 'BROCCOLI'); ?></span>
   </div>
   <nav class="main-nav">
     <ul>
@@ -136,6 +165,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
       <i class="fa fa-user user-icon"></i>
       <ul class="user-dropdown">
         <?php if (!empty($_SESSION['user_id'])): ?>
+          <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+            <li><a href="/healthy/views/layout.php?page=admin&section=dashboard">Quản lý</a></li>
+          <?php endif; ?>
           <li><a href="/healthy/views/layout.php?page=info">Thông tin</a></li>
           <li><a href="/healthy/views/layout.php?page=logout">Đăng xuất</a></li>
         <?php else: ?>
@@ -146,24 +178,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
     </div>
   </div>
 </header>
+<?php endif; ?>
 
+<?php if ($page !== 'admin'): ?>
 <main>
+<?php endif; ?>
   <?php
   $allowPages = [
     'login','signin','monmoi','khaivi','trongoi','dauhu','nam',
     'raucuqua','monchinh','canh','lau','trabanh',
-    'item','vct','lh','home','hd1','cart','dl','BBCX','info','logout','forgot_password','points','address','checkout','footer'
+    'item','vct','lh','home','hd1','cart','dl','BBCX','info','logout','forgot_password','points','address','checkout','footer',
+    'order_confirm','order_success','orders','admin'
   ];
 
   if (in_array($page, $allowPages) && file_exists($page . '.php')) {
-    include $page . '.php';
-    if ($page === 'home' && file_exists('hd1.php')) include 'hd1.php';
+    // Nếu là admin page, chỉ include và không thêm footer
+    if ($page === 'admin') {
+      include $page . '.php';
+      exit; // Dừng ngay để không load footer
+    } else {
+      include $page . '.php';
+      if ($page === 'home' && file_exists('hd1.php')) include 'hd1.php';
+    }
   }
-  
+
   ?>
+<?php if ($page !== 'admin'): ?>
    <?php include __DIR__ . '/footer.php'; ?>
 </main>
 <script>
   window.BASE_URL = '<?= rtrim(dirname($_SERVER['SCRIPT_NAME']),"/\\") ?>';
   window.isLoggedIn = <?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>;
 </script>
+<?php endif; ?>

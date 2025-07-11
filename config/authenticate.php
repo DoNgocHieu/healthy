@@ -22,9 +22,9 @@ if (!$login || !$password) {
 
 // Tìm user theo username hoặc email
 $stmt = $mysqli->prepare("
-    SELECT id, password 
-    FROM users 
-    WHERE username = ? OR email = ? 
+    SELECT id, password, role, username
+    FROM users
+    WHERE username = ? OR email = ?
     LIMIT 1
 ");
 $stmt->bind_param('ss', $login, $login);
@@ -38,7 +38,7 @@ if ($stmt->num_rows === 0) {
     exit;
 }
 
-$stmt->bind_result($userId, $hashedPassword);
+$stmt->bind_result($userId, $hashedPassword, $userRole, $username);
 $stmt->fetch();
 $stmt->close();
 
@@ -50,9 +50,16 @@ if (!password_verify($password, $hashedPassword)) {
 }
 
 // Đăng nhập thành công → tạo session
-$_SESSION['user_id']  = $userId;
-$_SESSION['username'] = $login;
+$_SESSION['user_id'] = $userId;
+$_SESSION['username'] = $username;
+$_SESSION['role'] = $userRole;
 
-// Redirect về home
-header('Location: /healthy/views/layout.php?page=home');
-exit;
+// Kiểm tra và điều hướng dựa trên role
+if ($userRole === 'admin') {
+    header('Location: /healthy/views/layout.php?page=admin&section=dashboard');
+    exit;
+} else {
+    // Redirect về trang chủ cho user thường
+    header('Location: /healthy/views/layout.php?page=home');
+    exit;
+}

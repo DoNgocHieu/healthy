@@ -1,29 +1,41 @@
 <?php
 // views/point.php
-// 1. Khởi session và bảo vệ route
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/helpers.php';
 $pdo = getDb();
+
+// Bảo vệ route
 if (empty($_SESSION['user_id'])) {
     header('Location: /healthy/views/layout.php?page=login');
     exit;
 }
 $userId = $_SESSION['user_id'];
 
-// Lấy thông tin user + avatar + điểm
+// Get user info
+$stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
+$stmt->execute([$userId]);
+$userInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Lấy thông tin điểm
 $stmt = $pdo->prepare(
     "SELECT p.points, p.avatar, p.fullname
      FROM profiles p
      WHERE p.user_id = :uid"
 );
 $stmt->execute([':uid' => $userId]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['points'=>0,'avatar'=>null,'fullname'=>''];
-$points    = (int)$user['points'];
-$avatarUrl = $user['avatar']
-    ? '/healthy/' . ltrim($user['avatar'], '/')
-    : '/healthy/img/default-avatar.png';
+$profile = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['points' => 0, 'avatar' => null, 'fullname' => null];
 
-// Lấy danh sách voucher còn hiệu lực
+// Merge user info
+$user = array_merge($userInfo ?: [], $profile);
+
+// User display name
+$displayName = !empty($user['fullname']) ? $user['fullname'] : (!empty($user['username']) ? $user['username'] : 'User');
+
+// Get avatar URL
+$avatarUrl = getAvatarUrl($user['avatar']);
+
+// Lấy danh sách voucher có sẵn
 $stmt = $pdo->prepare(
     "SELECT id, code, description, points_required, expires_at
      FROM vouchers
@@ -35,51 +47,69 @@ $stmt->execute();
 $vouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-  <link rel="stylesheet" href="../css/points.css"/>
-  <div class="container">
+<link rel="stylesheet" href="<?= getAssetUrl('css/points.css') ?>">
+
+<div class="container">
   <nav class="menu">
     <div class="menu-profile">
       <img
         src="<?= htmlspecialchars($avatarUrl) ?>"
         class="avatar-preview"
         alt="Avatar">
-      <p><?= htmlspecialchars($user['fullname'] ?: $_SESSION['username']) ?></p>
+      <p><?= htmlspecialchars($displayName) ?></p>
     </div>
-    <a href="layout.php?page=info" class="active">Thông tin tài khoản</a>
-    <a href="layout.php?page=points">Điểm & voucher</a>
+    <a href="layout.php?page=info">Thông tin tài khoản</a>
+    <a href="layout.php?page=points" class="active">Điểm & Voucher</a>
     <a href="layout.php?page=address">Địa chỉ giao hàng</a>
-    <a href="layout.php?page=orders">Đơn hàng hiện tại</a>
+    <a href="layout.php?page=orders">Đơn hàng của tôi</a>
   </nav>
 
-    <!-- Nội dung chính -->
-    <section class="main">
-      <h2>Điểm tích lũy & Voucher</h2>
-      <div class="points-balance">
-        Bạn đang có: <span class="points"><?= $points ?> điểm</span>
+  <div class="content">
+    <section class="points-section">
+      <h2>Điểm tích lũy</h2>
+      <div class="points-card">
+        <div class="points-balance">
+          <span class="points-amount"><?= number_format($user['points']) ?></span>
+          <span class="points-label">điểm</span>
+        </div>
+        <p class="points-info">
+          Bạn có thể sử dụng điểm để đổi các voucher giảm giá hấp dẫn!
+        </p>
       </div>
+    </section>
 
-      <h3>Danh sách Voucher</h3>
-      <div class="voucher-list">
-        <?php if (empty($vouchers)): ?>
-          <p>Hiện tại chưa có voucher nào.</p>
-        <?php endif; ?>
-
-        <?php foreach ($vouchers as $v): ?>
-          <div class="voucher-item">
-            <h4><?= htmlspecialchars($v['description']) ?></h4>
-            <p>
-              Mã: <strong><?= htmlspecialchars($v['code']) ?></strong><br/>
-              Tiêu hao: <?= (int)$v['points_required'] ?> điểm
-              <?php if ($v['expires_at']): ?>
-                <br><small>Hạn dùng đến: <?= htmlspecialchars($v['expires_at']) ?></small>
+    <section class="vouchers-section">
+      <h2>Voucher có sẵn</h2>
+      <div class="vouchers-grid">
+        <?php foreach ($vouchers as $voucher): ?>
+          <div class="voucher-card">
+            <div class="voucher-info">
+              <h3><?= htmlspecialchars($voucher['code']) ?></h3>
+              <p><?= htmlspecialchars($voucher['description']) ?></p>
+              <?php if ($voucher['expires_at']): ?>
+                <small>Hết hạn: <?= date('d/m/Y', strtotime($voucher['expires_at'])) ?></small>
               <?php endif; ?>
-            </p>
-            <form method="post" action="layout.php?page=redeem" class="redeem-form">
-              <input type="hidden" name="voucher_id" value="<?= (int)$v['id'] ?>">
-              <button type="submit" class="btn-redeem" <?= $points < (int)$v['points_required'] ? 'disabled' : '' ?>>Đổi ngay</button>
-            </form>
+            </div>
+            <div class="voucher-points">
+              <span><?= number_format($voucher['points_required']) ?> điểm</span>
+              <button class="btn btn-redeem" <?= $user['points'] >= $voucher['points_required'] ? '' : 'disabled' ?>>
+                Đổi ngay
+              </button>
+            </div>
           </div>
         <?php endforeach; ?>
       </div>
     </section>
   </div>
+</div>
+
+<script>
+document.querySelectorAll('.btn-redeem').forEach(button => {
+    button.addEventListener('click', function() {
+        if (confirm('Bạn có chắc muốn đổi voucher này?')) {
+            // Thêm logic đổi voucher ở đây
+            alert('Chức năng đang được phát triển!');
+        }
+    });
+});
+</script>

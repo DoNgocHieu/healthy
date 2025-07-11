@@ -5,6 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/helpers.php';
 $pdo = getDb();
 
 // Bảo vệ route: chỉ cho user đã login
@@ -17,8 +18,31 @@ $userId  = $_SESSION['user_id'];
 $errors  = [];
 $success = false;
 
-// Base URL prefix để hiển thị hình ảnh chính xác
-$baseUrl = dirname($_SERVER['PHP_SELF'], 2);
+// Get user info
+$stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
+$stmt->execute([$userId]);
+$userInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Lấy profile
+$stmt = $pdo->prepare(
+    "SELECT p.avatar, p.fullname, p.gender, p.dob
+     FROM profiles p
+     WHERE p.user_id = :uid"
+);
+$stmt->execute([':uid' => $userId]);
+$profile = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['avatar' => null, 'fullname' => null, 'gender' => null, 'dob' => null];
+
+// Merge user info
+$user = array_merge($userInfo ?: [], $profile);
+
+// User display name
+$displayName = !empty($user['fullname']) ? $user['fullname'] : (!empty($user['username']) ? $user['username'] : 'User');
+
+// Get avatar URL
+$avatarUrl = getAvatarUrl($user['avatar']);
+
+// Tách dob thành năm-tháng-ngày
+list($dobYear, $dobMonth, $dobDay) = array_pad(explode('-', $user['dob'] ?? ''), 3, '');
 
 // Xử lý POST khi bấm Lưu
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -81,28 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $success = true;
     }
 }
-
-// Lấy dữ liệu user + profile qua PDO để show form
-$stmt = $pdo->prepare(
-    "SELECT u.email,
-            COALESCE(p.fullname, '') AS fullname,
-            COALESCE(p.gender,   '') AS gender,
-            COALESCE(p.dob,      '') AS dob,
-            COALESCE(p.avatar,   '') AS avatar
-     FROM users u
-     LEFT JOIN profiles p ON p.user_id = u.id
-     WHERE u.id = :uid"
-);
-$stmt->execute([':uid' => $userId]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
-
-// Tách dob thành năm-tháng-ngày
-list($dobYear, $dobMonth, $dobDay) = array_pad(explode('-', $user['dob'] ?? ''), 3, '');
-
-// Xác định URL avatar (nếu có) hoặc mặc định
-$avatarUrl = $user['avatar']
-    ? rtrim($baseUrl, '/') . '/' . $user['avatar']
-    : rtrim($baseUrl, '/') . '/img/default-avatar.png';
 ?>
 
 <link rel="stylesheet" href="../css/info.css">
@@ -114,7 +116,7 @@ $avatarUrl = $user['avatar']
         src="<?= htmlspecialchars($avatarUrl) ?>"
         class="avatar-preview"
         alt="Avatar">
-      <p><?= htmlspecialchars($user['fullname'] ?: $_SESSION['username']) ?></p>
+      <p><?= htmlspecialchars($displayName) ?></p>
     </div>
     <a href="layout.php?page=info" class="active">Thông tin tài khoản</a>
     <a href="layout.php?page=points">Điểm & Voucher</a>

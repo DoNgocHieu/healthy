@@ -1,0 +1,172 @@
+GIAI ĐOẠN 1: CƠ SỞ HẠ TẦNG & AUTHENTICATION
+
+Cấu trúc Database
+
+Tạo/cập nhật tất cả các bảng đã đề xuất
+Thiết lập relationships và constraints
+Tạo indexes cho performance
+Authentication System
+
+Đăng ký tài khoản
+Đăng nhập/Đăng xuất
+Quên mật khẩu (tích hợp PHPMailer)
+Xác thực email
+Session management
+User Profile Management
+
+CRUD thông tin cá nhân
+Upload và quản lý avatar
+Đổi mật khẩu
+Quản lý địa chỉ
+GIAI ĐOẠN 2: CORE FEATURES - SHOPPING
+
+Catalog & Search
+
+Tối ưu hiển thị danh sách món ăn
+Implement tìm kiếm với filters
+Phân trang và sắp xếp
+Chi tiết món ăn
+Shopping Cart Enhancement
+
+Persistent cart (giữ giỏ hàng sau logout)
+Real-time update quantity
+Validate stock
+Cart summary
+Favorite System
+
+Toggle yêu thích món ăn
+Danh sách yêu thích
+Counter hiển thị số lượng
+Remove from favorites
+GIAI ĐOẠN 3: ORDER & PAYMENT
+
+Order Management
+
+Tạo đơn hàng
+Quản lý trạng thái đơn hàng
+Order history
+Order tracking
+Payment Integration
+
+COD implementation
+QR Code payment
+Payment verification
+Payment history
+Points & Voucher System
+
+Tích điểm theo đơn hàng
+Quản lý voucher
+Áp dụng voucher/điểm khi thanh toán
+Lịch sử sử dụng
+GIAI ĐOẠN 4: REVIEW & RATING
+
+Review System
+
+Đánh giá sao
+Viết review
+Upload hình ảnh
+Edit/Delete review
+Rating Analytics
+
+Thống kê theo sao
+Hiển thị tổng quan
+Filter và sort reviews
+Report inappropriate reviews
+GIAI ĐOẠN 5: ADMIN PANEL
+
+Dashboard
+
+Overview statistics
+Quick actions
+Notifications
+Recent activities
+User Management
+
+CRUD users
+User roles/permissions
+User activities tracking
+Block/Unblock users
+Content Management
+
+Quản lý món ăn
+Quản lý bài viết
+Quản lý vouchers
+Media management
+Order & Revenue
+
+Order processing
+Revenue statistics
+Payment tracking
+Export reports
+GIAI ĐOẠN 6: OPTIMIZATION & TESTING
+
+Performance
+
+Cache implementation
+Image optimization
+Database optimization
+Load testing
+Security
+
+Input validation
+XSS protection
+CSRF protection
+SQL injection prevention
+Testing
+
+Unit testing
+Integration testing
+User acceptance testing
+Security testing
+
+CÔNG NGHỆ SỬ DỤNG:
+
+Frontend:
+
+HTML5, CSS3
+JavaScript (jQuery)
+Bootstrap 5
+AJAX cho real-time updates
+Chart.js cho thống kê
+Backend:
+
+PHP 8.x
+MySQL
+PDO cho database operations
+PHPMailer cho email
+Composer cho dependency management
+Security:
+
+PHP password_hash()
+Prepared statements
+HTTPS
+Session management
+CSRF tokens
+Payment:
+
+VNPay hoặc MoMo cho QR
+RESTful API integration
+Storage:
+
+Local storage cho cart
+File system cho uploads
+MySQL cho data
+MONITORING & MAINTENANCE:
+
+Logging:
+
+Error logs
+Access logs
+Payment logs
+User activity logs
+Backup:
+
+Daily database backup
+Media files backup
+Configuration backup
+Monitoring:
+
+Server health
+Database performance
+Error tracking
+User behavior analytics

@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1:3306 
--- Thời gian đã tạo: Th7 08, 2025 lúc 07:58 PM
--- Phiên bản máy phục vụ: 10.4.32-MariaDB
--- Phiên bản PHP: 8.2.12
+-- Host: 127.0.0.1:3306
+-- Generation Time: Jul 11, 2025 at 02:32 AM
+-- Server version: 9.1.0
+-- PHP Version: 8.3.14
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,53 +18,59 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Cơ sở dữ liệu: `broccoli`
+-- Database: `broccoli`
 --
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `cart_items`
+-- Table structure for table `cart_items`
 --
 
-CREATE TABLE `cart_items` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `user_id` int(10) UNSIGNED NOT NULL,
-  `item_id` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL,
-  `added_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS `cart_items`;
+CREATE TABLE IF NOT EXISTS `cart_items` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int UNSIGNED NOT NULL,
+  `item_id` int NOT NULL,
+  `quantity` int NOT NULL,
+  `added_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `idx_cart_user` (`user_id`),
+  KEY `idx_cart_item` (`item_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `cart_items`
+-- Dumping data for table `cart_items`
 --
 
-INSERT INTO `cart_items` (`id`, `user_id`, `item_id`, `quantity`, `added_at`) VALUES
-(1, 2, 6, 1, '2025-07-09 00:13:28'),
-(2, 2, 7, 6, '2025-07-09 00:18:48'),
-(3, 2, 4, 5, '2025-07-09 00:19:13'),
-(4, 2, 8, 4, '2025-07-09 00:19:17'),
-(5, 2, 1, 4, '2025-07-09 00:33:30'),
-(6, 2, 42, 3, '2025-07-09 00:54:57');
+INSERT INTO `cart_items` (`id`, `user_id`, `item_id`, `quantity`, `added_at`, `is_deleted`) VALUES
+(7, 4, 1, 2, '2025-07-11 04:49:14', 1),
+(8, 4, 2, 2, '2025-07-11 04:51:49', 1),
+(9, 4, 3, 2, '2025-07-11 05:22:04', 1);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `categories`
+-- Table structure for table `categories`
 --
 
-CREATE TABLE `categories` (
-  `TT` varchar(10) NOT NULL,
-  `name` varchar(150) NOT NULL,
-  `img` varchar(150) NOT NULL
+DROP TABLE IF EXISTS `categories`;
+CREATE TABLE IF NOT EXISTS `categories` (
+  `TT` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `img` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`TT`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `categories`
+-- Dumping data for table `categories`
 --
 
 INSERT INTO `categories` (`TT`, `name`, `img`) VALUES
 ('C', 'CANH', 'c.png'),
+('CT011', 'iPhone 14 Pro Max 128GB', 'uploads/categories/687060a739f6c_download (1).jpg'),
+('CT012', 'Nguyen Tien Dat', 'uploads/categories/687060df1012a_download (1).jpg'),
 ('DH', 'ĐẬU HŨ', 'dh.png'),
 ('KV', 'KHAI VỊ', 'kvc.png'),
 ('L', 'LẨU', 'l.png'),
@@ -78,27 +84,56 @@ INSERT INTO `categories` (`TT`, `name`, `img`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `items`
+-- Table structure for table `comments`
 --
 
-CREATE TABLE `items` (
-  `id` int(15) NOT NULL,
-  `TT` varchar(10) NOT NULL,
-  `name` varchar(150) NOT NULL,
-  `price` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL,
-  `description` text NOT NULL,
-  `image_url` varchar(150) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS `comments`;
+CREATE TABLE IF NOT EXISTS `comments` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `id_food` int NOT NULL,
+  `id_account` int NOT NULL,
+  `username` varchar(200) NOT NULL,
+  `star` int NOT NULL,
+  `date` varchar(50) NOT NULL,
+  `detail` text NOT NULL,
+  `photos` text NOT NULL,
+  PRIMARY KEY (`id`,`id_food`)
+) ENGINE=MyISAM AUTO_INCREMENT=98 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `items`
+-- Dumping data for table `comments`
+--
+
+INSERT INTO `comments` (`id`, `id_food`, `id_account`, `username`, `star`, `date`, `detail`, `photos`) VALUES
+(97, 1, 3, 'DN', 4, '05-07-25 06:59:55', 'Good', '');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `items`
+--
+
+DROP TABLE IF EXISTS `items`;
+CREATE TABLE IF NOT EXISTS `items` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `TT` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `price` int NOT NULL,
+  `quantity` int NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `image_url` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `items_ibfk_1` (`TT`)
+) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `items`
 --
 
 INSERT INTO `items` (`id`, `TT`, `name`, `price`, `quantity`, `description`, `image_url`) VALUES
-(1, 'MM', 'ĐẬU HŨ RANG MUỐI KIỂU HONG KONG', 87000, 50, 'Món khai vị kết hợp đậu hũ Triều Châu và nấm đùi gà, mang đến trải nghiệm ẩm thực nhất. Đậu hũ Triều Châu chiên vàng giòn bên ngoài, lớp vỏ dai đặc trưng giữ cho bên trong rất mềm mại và thơm béo. Khi ăn, lớp vỏ giòn rụm tan, vị bùi béo của nhân đậu hũ lan tỏa. Nấm đùi gà sơ chế, xào chín tới để giữ độ giòn sần sật, tạo sự cân bằng về cấu trúc miếng ăn.\r\n\r\nTỏi ớt muối rang kiểu Hong Kong là điểm nhấn với hương tỏi phi thơm lừng, vị cay của ớt và vị mặn mòi của muối rang. Khi kết hợp với đậu hũ và nấm, tỏi ớt muối tạo nên sự phối hợp hài hòa giữa vị mặn, cay, bùi và béo. Thường kèm chén tương ớt pha chua ngọt với chút chanh và đường thốt nốt, giúp làm dịu bớt vị mặn cay và tăng thêm hương vị. Với cách trình bày tinh tế, trang trí vài lá húng quế hoặc rau mùi, món khai vị này không chỉ hấp dẫn thị giác mà còn kích thích vị giác, hoàn hảo để khởi đầu bữa tiệc.', 'DAUHURMHK.png'),
-(2, 'MM', 'CHẢ NẤM CHIÊN - SỐT CHUA NGỌT', 92000, 50, 'Chả nấm Bếp nhà làm là món ăn thơm ngon, hấp dẫn ngay từ lần đầu thưởng thức. Những miếng chả được chế biến từ nấm tươi, giữ nguyên độ mềm dẻo và hương vị tự nhiên bùi bùi đặc trưng. Khi chiên vàng giòn, lớp vỏ ngoài của chả nấm giòn rụm, tạo cảm giác thú vị khi cắn, trong khi phần nhân bên trong vẫn mềm mại và thơm béo. \r\nSốt chua ngọt đậm đà được chế biến từ vải thiều chín mọng, nhãn lồng ngọt dịu và vị thanh mát tự nhiên. Hành tây được xào chín tới giữ vị ngọt, còn ớt chuông đỏ và xanh tăng thêm sắc màu. Tất cả hòa quyện hoàn hảo, tạo nên hương vị hài hòa giữa vị bùi béo của nấm và vị chua ngọt của trái cây. Món ăn không chỉ hấp dẫn thị giác với màu sắc tươi, mà còn kích thích vị giác nhờ sự đa dạng về kết cấu và hương vị. Thưởng thức chả nấm chấm cùng sốt vải nhãn sẽ mang lại trải nghiệm ẩm thực tuyệt vời, phù hợp làm khai vị trong bữa tiệc gia đình hoặc họp mặt bạn bè.', 'CHANCSCN.png'),
-(3, 'MM', 'MIẾN TRỘN TỨ XUYÊN', 82000, 80, 'Sợi miến khoai tây mềm dai ôm lấy từng ngụm sốt Tứ Xuyên rực đỏ, sóng sánh vị cay tê từ xuyên tiêu, đủ khiến đầu lưỡi reo vui ngay lần chạm đầu tiên. Khi miến trườn qua kẽ răng, hương thơm nồng của tỏi phi hòa lẫn với vị ngọt thanh của nấm kim châm trắng nõn và nấm mỡ béo mềm, tạo ra tầng dư vị chuyển biến liên tục. Ớt chuông đỏ, vàng cắt hạt lựu điểm xuyết sắc màu, thả vào sức sống giòn ngọt, chống lại nét cay nồng, giúp cân bằng khoang miệng. Tất cả nguyên liệu được xào nhanh trên lửa lớn, để miến giữ nguyên độ dai, sốt bám bên ngoài mà không bị quánh. Hạt tiêu xanh nhẹ nhàng phả mùi thơm ấm, khiến từng hơi thở cũng đượm hương. Dầu mè cuối cùng phủ bóng mịn, quyện vào sợi miến như dải lụa cay nồng lấp lánh. Chỉ một đũa đưa lên, vị giác lập tức bùng nổ, ấm nồng, tê, ngọt, béo đan xen kéo dài, để lại dư âm quyến rũ khiến người thưởng thức chỉ muốn gắp thêm mãi. Hậu vị cay dịu, lưu luyến đầu lưỡi.', 'MIENTTX.png'),
+(1, 'MM', 'ĐẬU HŨ RANG MUỐI KIỂU HONG KONG', 87000, 48, 'Món khai vị kết hợp đậu hũ Triều Châu và nấm đùi gà, mang đến trải nghiệm ẩm thực nhất. Đậu hũ Triều Châu chiên vàng giòn bên ngoài, lớp vỏ dai đặc trưng giữ cho bên trong rất mềm mại và thơm béo. Khi ăn, lớp vỏ giòn rụm tan, vị bùi béo của nhân đậu hũ lan tỏa. Nấm đùi gà sơ chế, xào chín tới để giữ độ giòn sần sật, tạo sự cân bằng về cấu trúc miếng ăn.\r\n\r\nTỏi ớt muối rang kiểu Hong Kong là điểm nhấn với hương tỏi phi thơm lừng, vị cay của ớt và vị mặn mòi của muối rang. Khi kết hợp với đậu hũ và nấm, tỏi ớt muối tạo nên sự phối hợp hài hòa giữa vị mặn, cay, bùi và béo. Thường kèm chén tương ớt pha chua ngọt với chút chanh và đường thốt nốt, giúp làm dịu bớt vị mặn cay và tăng thêm hương vị. Với cách trình bày tinh tế, trang trí vài lá húng quế hoặc rau mùi, món khai vị này không chỉ hấp dẫn thị giác mà còn kích thích vị giác, hoàn hảo để khởi đầu bữa tiệc.', 'DAUHURMHK.png'),
+(2, 'MM', 'CHẢ NẤM CHIÊN - SỐT CHUA NGỌT', 92000, 48, 'Chả nấm Bếp nhà làm là món ăn thơm ngon, hấp dẫn ngay từ lần đầu thưởng thức. Những miếng chả được chế biến từ nấm tươi, giữ nguyên độ mềm dẻo và hương vị tự nhiên bùi bùi đặc trưng. Khi chiên vàng giòn, lớp vỏ ngoài của chả nấm giòn rụm, tạo cảm giác thú vị khi cắn, trong khi phần nhân bên trong vẫn mềm mại và thơm béo. \r\nSốt chua ngọt đậm đà được chế biến từ vải thiều chín mọng, nhãn lồng ngọt dịu và vị thanh mát tự nhiên. Hành tây được xào chín tới giữ vị ngọt, còn ớt chuông đỏ và xanh tăng thêm sắc màu. Tất cả hòa quyện hoàn hảo, tạo nên hương vị hài hòa giữa vị bùi béo của nấm và vị chua ngọt của trái cây. Món ăn không chỉ hấp dẫn thị giác với màu sắc tươi, mà còn kích thích vị giác nhờ sự đa dạng về kết cấu và hương vị. Thưởng thức chả nấm chấm cùng sốt vải nhãn sẽ mang lại trải nghiệm ẩm thực tuyệt vời, phù hợp làm khai vị trong bữa tiệc gia đình hoặc họp mặt bạn bè.', 'CHANCSCN.png'),
+(3, 'MM', 'MIẾN TRỘN TỨ XUYÊN', 82000, 78, 'Sợi miến khoai tây mềm dai ôm lấy từng ngụm sốt Tứ Xuyên rực đỏ, sóng sánh vị cay tê từ xuyên tiêu, đủ khiến đầu lưỡi reo vui ngay lần chạm đầu tiên. Khi miến trườn qua kẽ răng, hương thơm nồng của tỏi phi hòa lẫn với vị ngọt thanh của nấm kim châm trắng nõn và nấm mỡ béo mềm, tạo ra tầng dư vị chuyển biến liên tục. Ớt chuông đỏ, vàng cắt hạt lựu điểm xuyết sắc màu, thả vào sức sống giòn ngọt, chống lại nét cay nồng, giúp cân bằng khoang miệng. Tất cả nguyên liệu được xào nhanh trên lửa lớn, để miến giữ nguyên độ dai, sốt bám bên ngoài mà không bị quánh. Hạt tiêu xanh nhẹ nhàng phả mùi thơm ấm, khiến từng hơi thở cũng đượm hương. Dầu mè cuối cùng phủ bóng mịn, quyện vào sợi miến như dải lụa cay nồng lấp lánh. Chỉ một đũa đưa lên, vị giác lập tức bùng nổ, ấm nồng, tê, ngọt, béo đan xen kéo dài, để lại dư âm quyến rũ khiến người thưởng thức chỉ muốn gắp thêm mãi. Hậu vị cay dịu, lưu luyến đầu lưỡi.', 'MIENTTX.png'),
 (4, 'MM', 'BÚN MÌ VÀNG PHÚC KIẾN', 92000, 80, 'Bún gạo trắng mảnh và mì vàng Phúc Kiến dai dẻo quấn lấy nhau, tựa dải lụa đôi mềm mại, vừa nhẹ vừa đàn hồi. Khi trộn, từng sợi thấm đẫm sốt XO sóng sánh, ngào ngạt hải sản khô, tôm nõn, giăm bông, rượu Thiệu Hưng, hành tím và ớt sa tế, đánh thức khứu giác ngay giây đầu. Nấm mỡ cắt lát dày, xào nhanh trên lửa lớn, tỏa hương béo ngậy, phảng phất vị đất, chen giữa bún mì, tạo khoảng nghỉ dịu ngọt. Giá đỗ tươi xanh, giòn mát, chần chớp nhoáng để giữ nguyên độ tươi, lan tỏa hương thảo mộc, cân bằng nền vị đậm đà mặn cay. Một thìa dầu mè cuối, cùng hành lá thái nhỏ và tiêu xay, phủ lớp hương ấm áp, làm hậu vị kéo dài. Khẩu phần hội tụ tinh bột đủ, protein từ nấm, vitamin A, C, E của giá, cùng khoáng chất trong hải sản, giúp cơ thể nạp năng lượng bền bỉ mà không nặng nề. Mỗi đũa gắp lên, vị giác bừng sáng, thơm, cay, ngọt, béo đan quyện, để lại dư âm tinh tế, đầy lôi cuốn, khiến người ăn nhớ mãi mãi.', 'BUNMVPK.png'),
 (5, 'MM', 'CƠM CHIÊN Ô LIU ĐEN TRIỀU SƠN', 95000, 80, 'Cải cà na, còn gọi ô liu đen kiểu Triều Sơn, vốn là gia vị bí truyền của cộng đồng Hoa kiều Chợ Lớn. Những quả ô liu nhỏ được muối ủ chín, thẫm đen, phảng phất mùi thơm nồng vị biển và đậu lên men. Khi bằm sơ rồi phi thơm với dầu, cải cà na lan tỏa hương umami khó tả, quyện vào từng hạt cơm tơi óng ánh. Nấm mỡ thái lát dày, xào nhanh lửa lớn, tiết ra chất béo tự nhiên ngọt thanh, làm chất dẫn để hương ô liu thấm sâu hơn. Hành lá cắt khúc cho vào cuối, giữ nguyên sắc xanh giòn và mùi thơm hăng nhẹ, kết nối tất cả thành bản giao hưởng vị giác. Món cơm chiên giản dị bỗng hóa thành “đặc sản” hiếm có: mặn mà, béo bùi, thoang thoảng vị khói, đọng lại dư âm thanh mát của hành, tạo cảm giác vừa lạ vừa gần. Thực khách chỉ cần một muỗng đầu tiên đã lập tức bị cuốn vào ẩm thực xưa của Chợ Lớn, nơi giao thoa văn hóa Hoa – Việt sống động qua hạt cơm.', 'COMCODTS.png'),
 (6, 'MM', 'CANH CỦ SEN NẤM BỤNG DÊ', 110000, 60, 'Củ sen cắt khoanh dày, trắng ngà, giòn ngọt, thả vào nồi canh tiềm đang sôi lăn tăn, vừa đủ để hạt bột bắn nhẹ, phóng thích mùi đất thuần khiết. Đậu phộng rang sơ, vỏ lụa nứt thơm, góp vị béo bùi, tạo độ sánh nhẹ khi hầm lâu. Nấm tuyết trắng trong như vụn mây, nở bung thành từng chùm rì rào, đem lại cảm giác mát lành, hỗ trợ làm dịu cổ họng. Nấm bụng dê – loại nấm hiếm với thân tròn, cắn vào đàn hồi, tiết vị ngọt umami độc đáo, khiến thìa canh thêm chiều sâu. Tất cả hòa tan trong nước dùng rau củ thanh khiết được ninh từ củ cải, ngô ngọt và cà rốt, phảng phất hương táo đỏ và kỷ tử, cho vị hậu ngọt tinh tế. Một nhúm gừng lát mỏng và vài hạt tiêu sọ thả cuối, đủ dậy hương ấm, cân bằng tính hàn của nấm tuyết. Khi múc ra bát, sắc trắng, vàng, nâu xen kẽ, bốc khói nhẹ, mời gọi. Hớp đầu tiên, vị ngọt dịu lan đều, đọng lại vị bùi của đậu và sự giòn man mát của củ sen, mang đến cảm giác thanh tao, giàu dưỡng chất, giúp giải nhiệt và bồi bổ cơ thể sau ngày dài mệt mỏi.', 'CANHCSNBD.png'),
@@ -181,83 +216,218 @@ INSERT INTO `items` (`id`, `TT`, `name`, `price`, `quantity`, `description`, `im
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `points_history`
+-- Table structure for table `orders`
 --
 
-CREATE TABLE `points_history` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `user_id` int(10) UNSIGNED NOT NULL COMMENT 'Tham chiếu users.id',
-  `change_amount` int(11) NOT NULL COMMENT 'Số điểm cộng (+) hoặc trừ (–)',
-  `type` enum('earn','redeem') NOT NULL COMMENT 'Loại thay đổi',
-  `reference_id` int(10) UNSIGNED DEFAULT NULL COMMENT 'Ví dụ: order_id, voucher_id,…',
-  `description` varchar(255) DEFAULT NULL COMMENT 'Mô tả thêm',
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+DROP TABLE IF EXISTS `orders`;
+CREATE TABLE IF NOT EXISTS `orders` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `order_status` enum('pending','processing','shipping','completed','cancelled') DEFAULT 'pending',
+  `payment_status` enum('pending','paid') DEFAULT 'pending',
+  `payment_method` enum('COD','transfer','momo') NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  `shipping_fee` decimal(10,2) DEFAULT '0.00',
+  `discount` decimal(10,2) DEFAULT '0.00',
+  `points_used` int DEFAULT '0',
+  `points_value` decimal(10,2) DEFAULT '0.00',
+  `points_earned` int DEFAULT '0',
+  `shipping_address` text NOT NULL,
+  `notes` text,
+  `voucher_id` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_orders_users` (`user_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id`, `user_id`, `order_status`, `payment_status`, `payment_method`, `total_amount`, `subtotal`, `shipping_fee`, `discount`, `points_used`, `points_value`, `points_earned`, `shipping_address`, `notes`, `voucher_id`, `created_at`, `updated_at`) VALUES
+(1, 1, 'pending', 'pending', 'COD', 150000.00, 150000.00, 0.00, 0.00, 0, 0.00, 0, '123 Main St', NULL, NULL, '2025-07-10 23:44:19', '2025-07-10 23:44:19'),
+(2, 1, 'processing', 'pending', 'transfer', 250000.00, 250000.00, 0.00, 0.00, 0, 0.00, 0, '456 Oak St', NULL, NULL, '2025-07-10 23:44:19', '2025-07-10 23:44:19'),
+(3, 1, 'completed', 'paid', 'momo', 350000.00, 350000.00, 0.00, 0.00, 0, 0.00, 0, '789 Pine St', NULL, NULL, '2025-07-10 23:44:19', '2025-07-10 23:44:19');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_items`
+--
+
+DROP TABLE IF EXISTS `order_items`;
+CREATE TABLE IF NOT EXISTS `order_items` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `order_id` int NOT NULL,
+  `item_id` int NOT NULL,
+  `quantity` int NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `order_id` (`order_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `password_resets`
+--
+
+DROP TABLE IF EXISTS `password_resets`;
+CREATE TABLE IF NOT EXISTS `password_resets` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `token` varchar(64) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `token` (`token`)
+) ENGINE=MyISAM AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `password_resets`
+--
+
+INSERT INTO `password_resets` (`id`, `user_id`, `token`, `expires_at`, `created_at`) VALUES
+(21, 3, '90bb064835b41875954e4f0b5cb5d4825833a9e202d4eab7824287a18974fec9', '2025-07-10 13:28:29', '2025-07-10 12:28:29'),
+(20, 3, '7fa7d6fd9fa154a2cef7d761ee215023c63c1949d4b09c10a54f2385e153b627', '2025-07-10 13:27:46', '2025-07-10 12:27:46'),
+(19, 3, 'be3d42d7864714668bf06244b1d79f59cd24d8c352b7276d78873e05d79ca5a8', '2025-07-10 13:27:10', '2025-07-10 12:27:10'),
+(18, 3, 'e27b6277b7e3c2565647b037542dd6b2389ca54d782f83087c6a9bcf0ddc5ae7', '2025-07-10 13:25:05', '2025-07-10 12:25:05');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `points_history`
+--
+
+DROP TABLE IF EXISTS `points_history`;
+CREATE TABLE IF NOT EXISTS `points_history` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int UNSIGNED NOT NULL COMMENT 'Tham chiếu users.id',
+  `change_amount` int NOT NULL COMMENT 'Số điểm cộng (+) hoặc trừ (–)',
+  `type` enum('earn','redeem') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Loại thay đổi',
+  `reference_id` int UNSIGNED DEFAULT NULL COMMENT 'Ví dụ: order_id, voucher_id,…',
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Mô tả thêm',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_ph_user` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `profiles`
+-- Table structure for table `posts`
 --
 
-CREATE TABLE `profiles` (
-  `user_id` int(10) UNSIGNED NOT NULL,
-  `fullname` varchar(100) DEFAULT NULL,
-  `gender` enum('male','female') DEFAULT NULL,
+DROP TABLE IF EXISTS `posts`;
+CREATE TABLE IF NOT EXISTS `posts` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `content` text COLLATE utf8mb4_general_ci NOT NULL,
+  `thumbnail` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `author_id` int UNSIGNED NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `author_id` (`author_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `posts`
+--
+
+INSERT INTO `posts` (`id`, `title`, `content`, `thumbnail`, `author_id`, `created_at`, `updated_at`) VALUES
+(1, 'sdfsdfds', 'sdfsdfsdfsdf', 'uploads/posts/687072f116e87_download (1).jpg', 4, '2025-07-11 09:12:01', '2025-07-11 09:16:56');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `profiles`
+--
+
+DROP TABLE IF EXISTS `profiles`;
+CREATE TABLE IF NOT EXISTS `profiles` (
+  `user_id` int UNSIGNED NOT NULL,
+  `fullname` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `phone` varchar(15) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `gender` enum('male','female') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `dob` date DEFAULT NULL,
-  `avatar` varchar(255) DEFAULT NULL,
-  `points` int(11) NOT NULL DEFAULT 0
+  `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `points` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `profiles`
+-- Dumping data for table `profiles`
 --
 
-INSERT INTO `profiles` (`user_id`, `fullname`, `gender`, `dob`, `avatar`, `points`) VALUES
-(2, 'Cốc Thiệu Thanh', 'male', '2000-06-08', 'uploads/avatars/avt_2_1751303678.jpg', 0);
+INSERT INTO `profiles` (`user_id`, `fullname`, `phone`, `gender`, `dob`, `avatar`, `points`) VALUES
+(2, 'Cốc Thiệu Thanh', NULL, 'male', '2000-06-08', 'uploads/avatars/avt_2_1751303678.jpg', 0),
+(4, 'Nguyễn Tiến Đạt', NULL, 'male', '2004-04-24', 'uploads/avatars/avt_4_1752183520.jpg', 0);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `users`
+-- Table structure for table `users`
 --
 
-CREATE TABLE `users` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `points_total` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `role` enum('admin','user') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'user',
+  `avatar_url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `fullname` varchar(100) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `phone` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `address` text COLLATE utf8mb4_general_ci,
+  `points` int DEFAULT '0',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `points_total` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`),
+  KEY `idx_role` (`role`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `users`
+-- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `email`, `password`, `created_at`, `points_total`) VALUES
-(1, 'Niên Cốc', 'dangthixuan08062004@gmai.com', '$2y$10$CK8X8W7d5EmEMfbstOCFSOOSASd57KxmanmoDlx2Y.j6JmKrhDwPO', '2025-06-29 14:28:09', 0),
-(2, 'cb86', 'dangthixuan2272004@gmai.com', '$2y$10$Vhzvp0t4t25LVzRl5olTDe2m8pn92yOHiRiklswNmKIe8/LP5r5mC', '2025-06-30 23:55:54', 0);
+INSERT INTO `users` (`id`, `username`, `email`, `role`, `avatar_url`, `password`, `fullname`, `phone`, `address`, `points`, `created_at`, `points_total`) VALUES
+(1, 'Niên Cốc', 'dangthixuan08062004@gmai.com', 'user', NULL, '$2y$10$CK8X8W7d5EmEMfbstOCFSOOSASd57KxmanmoDlx2Y.j6JmKrhDwPO', '', NULL, NULL, 0, '2025-06-29 14:28:09', 0),
+(2, 'cb86', 'dangthixuan2272004@gmai.com', 'user', NULL, '$2y$10$Vhzvp0t4t25LVzRl5olTDe2m8pn92yOHiRiklswNmKIe8/LP5r5mC', '', NULL, NULL, 0, '2025-06-30 23:55:54', 0),
+(3, 'dongochieu333@gmail.com', 'dongochieu333@gmail.com', 'user', NULL, '$2y$10$vqHXyNdHGkjMQdaZxErlP.Jo7Uy1.2K9wHFfRtljhwQB6xcw1LIzS', '', NULL, NULL, 0, '2025-07-10 17:28:23', 0),
+(4, 'admin', 'admin@example.com', 'admin', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '', NULL, NULL, 0, '2025-07-11 04:34:50', 0),
+(5, 'user', 'user@example.com', 'user', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '', NULL, NULL, 0, '2025-07-11 04:34:50', 0),
+(8, '', 'user1@example.com', 'user', NULL, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Nguyễn Văn A', '0987654321', NULL, 0, '2025-07-11 06:51:05', 0);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `user_addresses`
+-- Table structure for table `user_addresses`
 --
 
-CREATE TABLE `user_addresses` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `user_id` int(10) UNSIGNED NOT NULL,
-  `fullname` varchar(100) NOT NULL,
-  `phone` varchar(20) NOT NULL,
-  `address` text NOT NULL,
-  `is_default` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1 = địa chỉ mặc định',
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TABLE IF EXISTS `user_addresses`;
+CREATE TABLE IF NOT EXISTS `user_addresses` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int UNSIGNED NOT NULL,
+  `fullname` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `is_default` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 = địa chỉ mặc định',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_user_addresses_user` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `user_addresses`
+-- Dumping data for table `user_addresses`
 --
 
 INSERT INTO `user_addresses` (`id`, `user_id`, `fullname`, `phone`, `address`, `is_default`, `created_at`, `updated_at`) VALUES
@@ -265,29 +435,33 @@ INSERT INTO `user_addresses` (`id`, `user_id`, `fullname`, `phone`, `address`, `
 (3, 2, 'Lannnn', '0933805504', '143/55, Lê Lợi, phường Hạnh Thông, Quận Gò Vấp, Hồ Chí Minh', 0, '2025-07-01 03:43:58', '2025-07-08 14:49:42'),
 (4, 2, 'Niên Cốc', '0333278393', '123, Tên Lửa, Phường Trung Mỹ Tây, Quận 12, Hồ Chí Minh', 0, '2025-07-01 14:14:09', '2025-07-08 14:15:06'),
 (5, 2, 'Bùi Kiên', '0333278393', '133/22, Lê Thúc Hoạch, Phường Tân Định, Quận 1, Hồ Chí Minh', 0, '2025-07-07 01:10:39', '2025-07-07 03:07:10'),
-(6, 2, 'Võ Xuân Quỳnh', '0333296470', '133/22, Nguyễn Cư Trinh, Phường Tân Định, Quận 1, Hồ Chí Minh', 0, '2025-07-08 12:14:57', '2025-07-08 12:14:57');
+(6, 2, 'Võ Xuân Quỳnh', '0333296470', '133/22, Nguyễn Cư Trinh, Phường Tân Định, Quận 1, Hồ Chí Minh', 0, '2025-07-08 12:14:57', '2025-07-08 12:14:57'),
+(7, 4, 'Nguyễn Tiến Đạt', '09888888', 'HCM', 0, '2025-07-11 04:52:19', '2025-07-11 04:52:19');
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `vouchers`
+-- Table structure for table `vouchers`
 --
 
-CREATE TABLE `vouchers` (
-  `id` int(11) NOT NULL,
-  `code` varchar(50) NOT NULL COMMENT 'Mã voucher',
-  `description` varchar(255) DEFAULT NULL COMMENT 'Mô tả',
-  `points_required` int(11) NOT NULL COMMENT 'Số điểm cần để đổi',
-  `discount_type` enum('amount','percent') NOT NULL DEFAULT 'amount',
+DROP TABLE IF EXISTS `vouchers`;
+CREATE TABLE IF NOT EXISTS `vouchers` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Mã voucher',
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'Mô tả',
+  `points_required` int NOT NULL COMMENT 'Số điểm cần để đổi',
+  `discount_type` enum('amount','percent') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'amount',
   `discount_value` decimal(10,2) NOT NULL COMMENT 'Giá trị giảm (số tiền hoặc %)',
-  `active` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1=đang mở,0=đóng',
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `expires_at` datetime DEFAULT NULL COMMENT 'Ngày hết hạn (NULL = vô thời hạn)'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `active` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1=đang mở,0=đóng',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `expires_at` datetime DEFAULT NULL COMMENT 'Ngày hết hạn (NULL = vô thời hạn)',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `vouchers`
+-- Dumping data for table `vouchers`
 --
 
 INSERT INTO `vouchers` (`id`, `code`, `description`, `points_required`, `discount_type`, `discount_value`, `active`, `created_at`, `updated_at`, `expires_at`) VALUES
@@ -304,137 +478,43 @@ INSERT INTO `vouchers` (`id`, `code`, `description`, `points_required`, `discoun
 (11, 'NEWBROC', 'Giảm 10% cho thành viên mới (hạn 30 ngày kể từ ngày tạo)', 0, 'percent', 10.00, 1, '2025-07-01 01:50:38', '2025-07-01 01:50:38', '2025-07-31 01:50:38');
 
 --
--- Chỉ mục cho các bảng đã đổ
+-- Constraints for dumped tables
 --
 
 --
--- Chỉ mục cho bảng `cart_items`
---
-ALTER TABLE `cart_items`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_cart_user` (`user_id`),
-  ADD KEY `idx_cart_item` (`item_id`);
-
---
--- Chỉ mục cho bảng `categories`
---
-ALTER TABLE `categories`
-  ADD PRIMARY KEY (`TT`);
-
---
--- Chỉ mục cho bảng `items`
---
-ALTER TABLE `items`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `items_ibfk_1` (`TT`);
-
---
--- Chỉ mục cho bảng `points_history`
---
-ALTER TABLE `points_history`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_ph_user` (`user_id`);
-
---
--- Chỉ mục cho bảng `profiles`
---
-ALTER TABLE `profiles`
-  ADD PRIMARY KEY (`user_id`);
-
---
--- Chỉ mục cho bảng `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `email` (`email`);
-
---
--- Chỉ mục cho bảng `user_addresses`
---
-ALTER TABLE `user_addresses`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_user_addresses_user` (`user_id`);
-
---
--- Chỉ mục cho bảng `vouchers`
---
-ALTER TABLE `vouchers`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `code` (`code`);
-
---
--- AUTO_INCREMENT cho các bảng đã đổ
---
-
---
--- AUTO_INCREMENT cho bảng `cart_items`
---
-ALTER TABLE `cart_items`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT cho bảng `items`
---
-ALTER TABLE `items`
-  MODIFY `id` int(15) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
-
---
--- AUTO_INCREMENT cho bảng `points_history`
---
-ALTER TABLE `points_history`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT cho bảng `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT cho bảng `user_addresses`
---
-ALTER TABLE `user_addresses`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT cho bảng `vouchers`
---
-ALTER TABLE `vouchers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
-
---
--- Các ràng buộc cho các bảng đã đổ
---
-
---
--- Các ràng buộc cho bảng `cart_items`
+-- Constraints for table `cart_items`
 --
 ALTER TABLE `cart_items`
   ADD CONSTRAINT `fk_cart_item` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_cart_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Các ràng buộc cho bảng `items`
+-- Constraints for table `items`
 --
 ALTER TABLE `items`
   ADD CONSTRAINT `items_ibfk_1` FOREIGN KEY (`TT`) REFERENCES `categories` (`TT`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Các ràng buộc cho bảng `points_history`
+-- Constraints for table `points_history`
 --
 ALTER TABLE `points_history`
   ADD CONSTRAINT `fk_ph_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Các ràng buộc cho bảng `profiles`
+-- Constraints for table `posts`
+--
+ALTER TABLE `posts`
+  ADD CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `profiles`
 --
 ALTER TABLE `profiles`
   ADD CONSTRAINT `fk_profiles_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_profiles_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Các ràng buộc cho bảng `user_addresses`
+-- Constraints for table `user_addresses`
 --
 ALTER TABLE `user_addresses`
   ADD CONSTRAINT `fk_user_addresses_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;

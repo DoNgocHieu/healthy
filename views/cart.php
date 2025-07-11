@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addcart'])) {
         $newQty = $row['quantity'] + $addQty;
         $pdo->prepare("
           UPDATE cart_items
-             SET quantity   = ?, 
+             SET quantity   = ?,
                  is_deleted = 0
            WHERE user_id = ? AND item_id = ?
         ")->execute([$newQty, $userId, $itemId]);
@@ -94,8 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addcart'])) {
 if (isset($_GET['del'])) {
     $itemId = intval($_GET['del']);
     $stmt = $pdo->prepare("
-      UPDATE cart_items 
-         SET is_deleted = 1 
+      UPDATE cart_items
+         SET is_deleted = 1
        WHERE user_id = ? AND item_id = ?
     ");
     $stmt->execute([$userId, $itemId]);
@@ -105,15 +105,14 @@ if (isset($_GET['del'])) {
 
 // Load cart để hiển thị
 $stmt = $pdo->prepare("
-   SELECT 
+   SELECT
      ci.item_id   AS item_id,
      ci.quantity  AS qty,
      i.name, i.price, i.image_url, i.quantity AS stock_qty
    FROM cart_items ci
-   JOIN items i 
+   JOIN items i
      ON ci.item_id = i.id
    WHERE ci.user_id = ?
-     AND ci.is_deleted = 0
    ORDER BY ci.added_at DESC
 ");
 $stmt->execute([$userId]);
@@ -246,12 +245,12 @@ if (!empty($_SESSION['selected_address_id'])) {
         <?php if ($isDefault): ?>
           <span class="badge"       style="
         position: absolute;
-        top: 1.5rem;      
-        right: 1.5rem;   
+        top: 1.5rem;
+        right: 1.5rem;
         margin-left: 0;
         color: red;
         background-color: #ffe5e5;
-        padding: 0.5rem 1rem;  
+        padding: 0.5rem 1rem;
         margin-top:1px;
         border-radius: 4px;
         margin-left:2rem;
@@ -266,7 +265,7 @@ if (!empty($_SESSION['selected_address_id'])) {
   <?php else: ?>
     <p class="address-details">Vui lòng thêm địa chỉ</p>
   <?php endif; ?>
-  
+
 <a href="#" id="btnSelectAddress" class="change-address">
   <?= $selected ? 'Thay đổi địa chỉ' : 'Đặt Địa Chỉ' ?>
 </a>
