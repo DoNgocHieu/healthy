@@ -102,8 +102,9 @@
     if (qty <= 0) {
       container.innerHTML = `
         <button class="add-btn"
-                onclick="event.stopPropagation(); addToCart(${id});">
-          Thêm vào giỏ
+                onclick="event.stopPropagation(); addToCart(${id});"
+                style="background:none;border:none;cursor:pointer;">
+          <i class="fa fa-shopping-cart" style="font-size:1.5em;color:#4caf50;"></i>
         </button>`;
       return;
     }
