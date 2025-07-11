@@ -1,17 +1,17 @@
 <?php
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
-define('DB_PASS', '');     
+define('DB_PASS', '');
 define('DB_NAME', 'broccoli');
 define('DB_PORT', 3306);
 define('DB_CHARSET', 'utf8mb4');
-define('BASE_URL', '/healthy'); 
+define('BASE_URL', '/healthy');
 
 function getDbConnection() {
     $mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
     if ($mysqli->connect_errno) {
-        die("Kết nối MySQL thất bại: (" 
-            . $mysqli->connect_errno . ") " 
+        die("Kết nối MySQL thất bại: ("
+            . $mysqli->connect_errno . ") "
             . $mysqli->connect_error);
     }
     $mysqli->set_charset(DB_CHARSET);
@@ -39,5 +39,5 @@ function getDb() {
     return $pdo;
 }
 
-$mysqli = getDbConnection();  
+$mysqli = getDbConnection();
 $pdo     = getDb();

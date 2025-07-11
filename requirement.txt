@@ -1,0 +1,45 @@
+Đối với khách hàng:
+
+- Đăng ký tài khoản.
+
+- Đăng nhập hệ thống.
+
+- Quên mật khẩu
+
+- Quản lý thông tin.( sử dụng voucher tích điểm, thêm sửa xóa địa chỉ, thay đổi email, tên đăng nhập, đổi mật khẩu, avt, xác nhận đặt hàng , đã hủy, giao thành công, trạng thái đơn hàng như đang giao khi admin bấm giao hàng, khi nhận được user sẽ bấm nhận hàng thành công, …na ná shoppe food)
+
+- Tìm kiếm, xem chi tiết món ăn, thêm món vào giỏ hàng ,
+
+- Ví dụ: nếu thêm món đó vào giỏ hàng là 3 thì khi đăng xuất rồi login lại vào item thì qty=3 luôn á để kiểm soát món cho user.
+
+- Thêm, xóa món ăn khỏi giỏ hàng.
+
+- Thêm, sửa, xóa địa chỉ giao hàng ( ở giỏ hàng )
+
+- Sử dụng các ưu đãi để đặt hàng, ( voucher hoặc đổi điểm )
+
+- Tích hợp thanh toán quét mã qr, cod.
+
+- Favarite ví dụ như thêm trái tim vô item hoặc bài viết rồi thống kê lại trên icon trái tim là bài viết yêu thích với món ăn yêu thích có thể gỡ bài hoặc gỡ món nếu không thích vị thui
+
+- Đánh giá món ăn. ( sao, kèm hình ảnh, comment )
+
+- ( xem đánh giá thống kê đánh giá theo từng sao và tổng sao na ná như shoppe á
+
+Đối với quản trị viên:
+
+- Đăng nhập vào hệ thống quản trị.
+
+- Quản lý người dùng. ( tìm kiếm, xóa tài khoản )
+
+- Quản lý danh sách món ăn (tìm kiếm, thêm, sửa, xóa).
+
+- Quản lý voucher( tìm kiếm, thêm, sửa, xóa voucher)
+
+- Thống kê đơn hàng, doanh thu. (số lượng đơn hủy, đơn mới nhận, đang giao khi giao xong bên user bấm nhận hàng thành công bên này tự load thành đơn đặt hàng thành công, doanh thu tiền mặt doanh thu chuyển khoản, số tiền sử dụng voucher, theo ngày tháng năm)
+
+- Quản lý bài viết.( tìm kiếm, thêm bài viết, xóa bài viết, sửa bài viết)
+
+- Quản lý đánh giá. ( xem đánh giá thống kê đánh giá theo từng sao và tổng sao na ná như shoppe á )
+
+- quản lí đặt hàng

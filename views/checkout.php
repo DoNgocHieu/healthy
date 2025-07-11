@@ -82,6 +82,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         // giữ nguyên selected
         $_SESSION['selected_address_id'] = (int)$_POST['address_id'];
+
+        // Nếu là AJAX request thì trả về JSON
+        if (isset($_POST['ajax']) && $_POST['ajax'] === '1') {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'status' => 'ok',
+                'id' => (int)$_POST['address_id'],
+                'fullname' => $_POST['fullname'],
+                'address' => $_POST['address'],
+                'phone' => $_POST['phone']
+            ]);
+            exit;
+        }
     }
     elseif ($action === 'add_checkout') {
         // thêm địa chỉ
@@ -95,11 +108,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           ':ad' =>$_POST['address'],
           ':ph' =>$_POST['phone']
         ]);
-        // set mới cho cart
-        $_SESSION['selected_address_id'] = $pdo->lastInsertId();
+
+        $newId = $pdo->lastInsertId();
+        $_SESSION['selected_address_id'] = $newId;
+
+        // Nếu là AJAX request thì trả về JSON
+        if (isset($_POST['ajax']) && $_POST['ajax'] === '1') {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'status' => 'ok',
+                'id' => $newId,
+                'fullname' => $_POST['fullname'],
+                'address' => $_POST['address'],
+                'phone' => $_POST['phone']
+            ]);
+            exit;
+        }
     }
-    // trở lại cart để refresh modal
-    header('Location: '.$_SERVER['REQUEST_URI']);
+
+    // Nếu là form submit thường, chuyển đến trang order_confirm
+    header('Location: layout.php?page=order_confirm');
     exit;
 }
 
@@ -124,6 +152,9 @@ $selectedId = $_SESSION['selected_address_id']
   <input type="hidden" name="action" value="select_address">
   <input type="hidden" id="selectedAddressId" name="address_id">
 </form>
+
+<!-- Nút chuyển đến trang xác nhận đơn hàng -->
+<a href="layout.php?page=order_confirm" class="btn-confirm-order">Xác nhận đơn hàng</a>
 
 <!-- Modal chọn/add/edit địa chỉ -->
 <div id="addressModal" class="modal">
@@ -202,118 +233,146 @@ $selectedId = $_SESSION['selected_address_id']
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const modal    = document.getElementById('addressModal');
-  const openBtn  = document.getElementById('btnSelectAddress');
+  const modal = document.getElementById('addressModal');
+  const openBtn = document.getElementById('btnSelectAddress');
   const closeBtn = modal.querySelector('.close');
-  const list     = document.getElementById('address-list');
-  const selForm  = document.getElementById('selectAddressForm');
-  const hidId    = document.getElementById('selectedAddressId');
+  const list = document.getElementById('address-list');
+  const selForm = document.getElementById('selectAddressForm');
+  const hidId = document.getElementById('selectedAddressId');
   const btnConfirmAll = document.getElementById('btnConfirmAddress');
-  const btnAdd       = document.getElementById('btnAddAddress');
-  const addForm      = document.getElementById('addAddressForm');
-  const cancelAdd    = document.getElementById('cancelAdd');
-document.addEventListener('DOMContentLoaded', () => {
-  const AJAX_URL = '<?= htmlspecialchars($_SERVER['PHP_SELF'] . "?page=cart") ?>';
+  const btnAdd = document.getElementById('btnAddAddress');
+  const addForm = document.getElementById('addAddressForm');
+  const cancelAdd = document.getElementById('cancelAdd');
 
-  document.getElementById('address-list')?.addEventListener('click', e => {
-    // Hủy thì như cũ
-    if (e.target.matches('.btn-cancel')) {
-      const item = e.target.closest('.address-item');
-      item.querySelector('.edit-form').reset();
-      item.querySelector('.edit-form').style.display = 'none';
-      item.querySelector('.view-mode').style.display   = '';
-    }
-
-    // Lưu qua AJAX
-    if (e.target.matches('.btn-save')) {
-      const form = e.target.closest('.edit-form');
-      const data = new FormData(form);
-      data.append('ajax', '1');
-      data.append('action', 'edit_checkout');
-
-      fetch(AJAX_URL, {
-        method: 'POST',
-        body: data
-      })
-      .then(res => res.json())
-      .then(json => {
-        if (json.status === 'ok') {
-          // cập nhật view-mode
-          const item = form.closest('.address-item');
-          const vm   = item.querySelector('.view-mode');
-          vm.innerHTML = `
-            <label>
-              <input type="radio" name="addr" value="${json.id}">
-              <strong>${json.fullname}</strong><br>
-              ${json.address.replace(/\n/g,'<br>')}<br>
-              ${json.phone}
-            </label>
-            <button type="button" class="btn-edit">Sửa</button>
-          `;
-          // ẩn form, show view-mode
-          form.style.display = 'none';
-          vm.style.display   = '';
-        } else {
-          alert('Lưu thất bại, thử lại.');
-        }
-      })
-      .catch(() => alert('Lỗi mạng, không thể lưu.'));
-    }
-  });
-});
-  // Mở modal
+  // Xử lý đóng/mở modal
   openBtn?.addEventListener('click', e => {
     e.preventDefault();
     modal.classList.add('show');
   });
-  // Đóng modal
-  closeBtn.addEventListener('click', () => modal.classList.remove('show'));
-  modal.addEventListener('click', e => { if (e.target===modal) modal.classList.remove('show'); });
 
-  // Xác nhận 1 item
-  list.addEventListener('click', e => {
-    const btn = e.target.closest('.btn-confirm-item');
-    if (!btn) return;
-    const item = btn.closest('.address-item');
-    const id   = item.dataset.id;
-    // chọn radio
-    item.querySelector('input[name="addr"]').checked = true;
-    // submit
-    hidId.value = id;
-    selForm.submit();
+  closeBtn?.addEventListener('click', () => {
+    modal.classList.remove('show');
   });
 
-  // Xác nhận chung
+  modal?.addEventListener('click', e => {
+    if (e.target === modal) {
+      modal.classList.remove('show');
+    }
+  });
+
+  // Xử lý form thêm địa chỉ
+  addForm?.addEventListener('submit', e => {
+    e.preventDefault();
+    const formData = new FormData(addForm);
+    formData.append('ajax', '1');
+
+    fetch(window.location.href, {
+      method: 'POST',
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'ok') {
+        // Tự động chọn địa chỉ mới
+        hidId.value = data.id;
+        selForm.submit();
+
+        // Đóng modal và chuyển trang
+        modal.classList.remove('show');
+        setTimeout(() => {
+          window.location.href = 'layout.php?page=order_confirm';
+        }, 500);
+      } else {
+        alert('Thêm địa chỉ thất bại');
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Đã có lỗi xảy ra');
+    });
+  });
+
+  // Xử lý nút xác nhận
   btnConfirmAll?.addEventListener('click', () => {
     const checked = list.querySelector('input[name="addr"]:checked');
-    if (!checked) return alert('Vui lòng chọn 1 địa chỉ!');
+    if (!checked) {
+      alert('Vui lòng chọn 1 địa chỉ!');
+      return;
+    }
+
     hidId.value = checked.value;
     selForm.submit();
+
+    modal.classList.remove('show');
+    setTimeout(() => {
+      window.location.href = 'layout.php?page=order_confirm';
+    }, 500);
   });
 
-  // Thêm mới: show form add, ẩn list + buttons
+  // Ẩn/hiện form thêm mới
   btnAdd?.addEventListener('click', () => {
     addForm.style.display = 'block';
-    btnAdd.style.display  = 'none';
+    btnAdd.style.display = 'none';
     btnConfirmAll.style.display = 'none';
   });
+
   cancelAdd?.addEventListener('click', () => {
     addForm.style.display = 'none';
-    btnAdd.style.display  = '';
+    btnAdd.style.display = '';
     btnConfirmAll.style.display = '';
   });
 
-  // Sửa inline
-  list.addEventListener('click', e => {
+  // Xử lý sửa địa chỉ
+  list?.addEventListener('click', e => {
     if (e.target.matches('.btn-edit')) {
       const item = e.target.closest('.address-item');
       item.querySelector('.view-mode').style.display = 'none';
       item.querySelector('.edit-form').style.display = 'block';
     }
+
     if (e.target.matches('.btn-cancel')) {
       const item = e.target.closest('.address-item');
-      item.querySelector('.edit-form').style.display   = 'none';
-      item.querySelector('.view-mode').style.display    = '';
+      const form = item.querySelector('.edit-form');
+      form.reset();
+      form.style.display = 'none';
+      item.querySelector('.view-mode').style.display = '';
+    }
+
+    if (e.target.matches('.btn-save')) {
+      const form = e.target.closest('.edit-form');
+      const formData = new FormData(form);
+      formData.append('ajax', '1');
+
+      fetch(window.location.href, {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'ok') {
+          const item = form.closest('.address-item');
+          const vm = item.querySelector('.view-mode');
+
+          vm.innerHTML = `
+            <label>
+              <input type="radio" name="addr" value="${data.id}">
+              <strong>${data.fullname}</strong><br>
+              ${data.address.replace(/\n/g,'<br>')}<br>
+              ${data.phone}
+            </label>
+            <button type="button" class="btn-edit">Sửa</button>
+          `;
+
+          form.style.display = 'none';
+          vm.style.display = '';
+        } else {
+          alert('Cập nhật thất bại');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Đã có lỗi xảy ra');
+      });
     }
   });
 });
