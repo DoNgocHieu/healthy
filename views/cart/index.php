@@ -148,7 +148,7 @@ $addresses = $profile->getUserAddresses($userId);
                             </div>
 
                             <div class="d-grid gap-2">
-                                <a href="/healthy/views/checkout/index.php" class="btn btn-primary btn-lg">
+                                <a href="/healthy/views/checkout/index.php" class="btn btn-primary ">
                                     Đặt hàng (<?php echo number_format($cart->getCartTotal(), 0, ',', '.'); ?>đ)
                                 </a>
                                 <a href="/healthy/views/catalog/index.php" class="btn btn-outline-secondary">
@@ -282,6 +282,15 @@ $addresses = $profile->getUserAddresses($userId);
                 $(this).parent().remove();
             });
         }
+
+        // document.querySelector('.cart-checkout-btn').addEventListener('click', function(e) {
+        //   const count = document.querySelectorAll('.cart-item').length;
+        //   if (count < 1) {
+        //     alert('Vui lòng chọn ít nhất một món để mua hàng');
+        //     e.preventDefault();
+        //     return false;
+        //   }
+        // });
     </script>
 </body>
 </html>

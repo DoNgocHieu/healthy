@@ -2,6 +2,8 @@
 <!-- Thêm vào <head> -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 <?php
 // views/address.php
 if (session_status() === PHP_SESSION_NONE) session_start();
@@ -270,6 +272,27 @@ let map = L.map('map').setView([10.7769, 106.7009], 12);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap contributors'
 }).addTo(map);
+
+// Thêm nút search
+L.Control.geocoder({
+  defaultMarkGeocode: false
+})
+.on('markgeocode', function(e) {
+  const bbox = e.geocode.bbox;
+  const poly = L.polygon([
+    bbox.getSouthEast(),
+    bbox.getNorthEast(),
+    bbox.getNorthWest(),
+    bbox.getSouthWest()
+  ]).addTo(map);
+  map.fitBounds(poly.getBounds());
+
+  // Đặt marker và điền địa chỉ vào ô input
+  if (marker) map.removeLayer(marker);
+  marker = L.marker(e.geocode.center).addTo(map);
+  document.getElementById('address').value = e.geocode.name || '';
+})
+.addTo(map);
 
 let marker;
 map.on('click', function(e) {

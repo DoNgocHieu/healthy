@@ -63,16 +63,16 @@ $orders = $order->getUserOrders($page);
                                 <?php
                                 $statusClass = [
                                     'pending' => 'bg-warning',
-                                    'processing' => 'bg-primary',
                                     'shipping' => 'bg-info',
                                     'completed' => 'bg-success',
+                                    'processing' => 'bg-primary',
                                     'cancelled' => 'bg-danger'
                                 ];
                                 $statusText = [
-                                    'pending' => 'Chờ xử lý',
-                                    'processing' => 'Đang xử lý',
+                                    'pending' => 'Chờ xác nhận',                                    
                                     'shipping' => 'Đang giao hàng',
                                     'completed' => 'Đã hoàn thành',
+                                    'processing' => 'Đang xử lý',
                                     'cancelled' => 'Đã hủy'
                                 ];
                                 ?>

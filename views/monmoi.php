@@ -44,7 +44,7 @@ $mysqli->close();
         $inCartQty = $_SESSION['cart'][$id]['qty'] ?? 0;
       ?>
         <div class="monmoi-card" onclick="showItemModalById(<?= $id ?>)">
-          <img src="/healthy/uploads/posts/<?=htmlspecialchars($it['image_url'],ENT_QUOTES)?>"
+          <img src="/healthy/img/<?=htmlspecialchars($it['image_url'],ENT_QUOTES)?>"
                alt="<?=htmlspecialchars($it['name'],ENT_QUOTES)?>">
           <div class="name"><?=htmlspecialchars($it['name'],ENT_QUOTES)?></div>
           <div class="price"><?=number_format($it['price'],0,',','.')?> đ</div>
