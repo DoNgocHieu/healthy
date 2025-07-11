@@ -6,9 +6,17 @@ if (!isset($_SESSION['cart']) && isset($_COOKIE['cart_sync'])) {
     $_SESSION['cart'] = json_decode($_COOKIE['cart_sync'], true);
 }
 
-$sql = "SELECT id, name, price, description, image_url, quantity
-        FROM items WHERE TT='MM'";
-$res = $mysqli->query($sql) or die("SQL ERROR (items): ".$mysqli->error);
+
+// Lấy mã danh mục từ URL, ví dụ: monmoi.php?tt=MM
+$tt = $_GET['tt'] ?? 'MM'; // Mặc định là 'MM' nếu không truyền
+
+$sql = "SELECT id, name, price, description, image_url, quantity 
+        FROM items WHERE TT = ?";
+$stmt = $mysqli->prepare($sql);
+$stmt->bind_param('s', $tt);
+$stmt->execute();
+$res = $stmt->get_result();
+
 
 $items = [];
 while ($row = $res->fetch_assoc()) {
@@ -38,6 +46,7 @@ $mysqli->close();
         $stockQty  = (int)$it['quantity'];
         $inCartQty = $_SESSION['cart'][$id]['qty'] ?? 0;
       ?>
+
         <div class="monmoi-card" onclick="showItemModalById(<?= $id ?>)" data-item-id="<?= $id ?>">
           <div class="card-header">
             <button class="favorite-btn" data-item-id="<?= $id ?>" title="Thêm vào yêu thích" onclick="event.stopPropagation()">
@@ -291,8 +300,26 @@ body {
 }
 </style>
 <script>
+
   window.isLoggedIn = <?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>;
   console.log('isLoggedIn =', window.isLoggedIn);
   loadReviews(id_food);
   addReviewHandler(id_food);
+
+function showItemModalById(id) {
+  fetch('/healthy/views/item.php?id=' + id, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: 'ajax=1'
+  })
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('itemModalContent').innerHTML = html;
+      document.getElementById('itemModalOverlay').style.display = 'block';
+    });
+}
+function closeItemModal() {
+  document.getElementById('itemModalOverlay').style.display = 'none';
+}
 </script>
+

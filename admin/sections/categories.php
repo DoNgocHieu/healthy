@@ -301,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const currentImageDiv = document.getElementById('currentImage');
                     if (category.img) {
                         currentImageDiv.innerHTML = `
-                            <img src="/healthy/${category.img}" alt="${category.name}" style="max-height: 100px;" class="img-thumbnail">
+                            <img src="../img/${category.img}" alt="${category.name}" style="max-height: 100px;" class="img-thumbnail">
                             <p class="mt-2">Hình ảnh hiện tại</p>
                         `;
                     } else {
