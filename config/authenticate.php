@@ -22,7 +22,7 @@ if (!$login || !$password) {
 
 // Tìm user theo username hoặc email
 $stmt = $mysqli->prepare("
-    SELECT id, password, role, username
+    SELECT id, password, role, username, banned
     FROM users
     WHERE username = ? OR email = ?
     LIMIT 1
@@ -38,13 +38,20 @@ if ($stmt->num_rows === 0) {
     exit;
 }
 
-$stmt->bind_result($userId, $hashedPassword, $userRole, $username);
+$stmt->bind_result($userId, $hashedPassword, $userRole, $username, $banned);
 $stmt->fetch();
 $stmt->close();
 
 // Kiểm tra mật khẩu
 if (!password_verify($password, $hashedPassword)) {
     $_SESSION['login_error'] = 'Mật khẩu không đúng.';
+    header('Location: /healthy/views/layout.php?page=login');
+    exit;
+}
+
+// Kiểm tra banned
+if (!empty($banned)) {
+    $_SESSION['login_error'] = 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên!';
     header('Location: /healthy/views/layout.php?page=login');
     exit;
 }

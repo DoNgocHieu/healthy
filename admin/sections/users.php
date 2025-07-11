@@ -8,18 +8,25 @@ class UserAdmin {
         $this->db = Database::getInstance()->getConnection();
     }
 
+    // Thêm phương thức để ban/unban người dùng
+    public function setBanStatus($userId, $banned) {
+        $stmt = $this->db->prepare("UPDATE users SET banned=? WHERE id=? AND role!='admin'");
+        return $stmt->execute([$banned, $userId]);
+    }
+
     public function getUsers($page = 1, $perPage = 10) {
         try {
             $offset = ($page - 1) * $perPage;
 
-            // Đếm tổng số người dùng
-            $stmt = $this->db->query('SELECT COUNT(*) as total FROM users');
+            // Đếm tổng số người dùng (bỏ admin)
+            $stmt = $this->db->query("SELECT COUNT(*) as total FROM users WHERE role != 'admin'");
             $total = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-            // Lấy danh sách người dùng
+            // Lấy danh sách người dùng (bỏ admin, lấy cả banned)
             $query = "
-                SELECT id, username, email, fullname, phone, address, role, created_at
+                SELECT id, username, email, fullname, phone, address, role, banned, created_at
                 FROM users
+                WHERE role != 'admin'
                 ORDER BY created_at DESC
                 LIMIT ? OFFSET ?
             ";
@@ -55,7 +62,16 @@ $userAdmin = new UserAdmin();
 $currentPage = isset($_GET['p']) ? (int)$_GET['p'] : 1;
 $perPage = 10;
 
-// Lấy danh sách người dùng
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['user_id'])) {
+    $uid = (int)$_POST['user_id'];
+    $action = $_POST['action'];
+    if ($uid > 0 && in_array($action, ['ban', 'unban'])) {
+        $banned = $action === 'ban' ? 1 : 0;
+        $userAdmin->setBanStatus($uid, $banned);
+    }
+}
+
+// Thêm dòng này để lấy danh sách user và tổng số trang
 $result = $userAdmin->getUsers($currentPage, $perPage);
 $users = $result['users'];
 $totalPages = $result['totalPages'];
@@ -86,6 +102,8 @@ $totalPages = $result['totalPages'];
                 <th>Địa chỉ</th>
                 <th>Vai trò</th>
                 <th>Ngày tạo</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -99,11 +117,33 @@ $totalPages = $result['totalPages'];
                 <td><?php echo htmlspecialchars((string)($user['address'] ?? '')); ?></td>
                 <td><?php echo $user['role'] === 'admin' ? 'Admin' : 'User'; ?></td>
                 <td><?php echo $user['created_at'] ? htmlspecialchars(date('d/m/Y H:i', strtotime($user['created_at']))) : ''; ?></td>
+                <td>
+                    <?php
+                        echo !empty($user['banned']) ? '<span class="text-danger">Banned</span>' : '<span class="text-success">Active</span>';
+                    ?>
+                </td>
+                <td>
+                    <?php if ($user['role'] !== 'admin'): ?>
+                        <?php if (!empty($user['banned'])): ?>
+                            <form method="post" style="display:inline">
+                                <input type="hidden" name="action" value="unban">
+                                <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
+                                <button type="submit" class="btn btn-success btn-sm">Unban</button>
+                            </form>
+                        <?php else: ?>
+                            <form method="post" style="display:inline">
+                                <input type="hidden" name="action" value="ban">
+                                <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
+                                <button type="submit" class="btn btn-danger btn-sm">Ban</button>
+                            </form>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </td>
             </tr>
             <?php endforeach; ?>
             <?php if (empty($users)): ?>
             <tr>
-                <td colspan="8" class="text-center">Chưa có người dùng nào</td>
+                <td colspan="10" class="text-center">Chưa có người dùng nào</td>
             </tr>
             <?php endif; ?>
         </tbody>
