@@ -81,18 +81,18 @@ $vouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <section class="vouchers-section">
       <h2>Voucher có sẵn</h2>
       <div class="vouchers-grid">
-        <?php foreach ($vouchers as $voucher): ?>
+        <?php foreach ($vouchers as $v): ?>
           <div class="voucher-card">
             <div class="voucher-info">
-              <h3><?= htmlspecialchars($voucher['code']) ?></h3>
-              <p><?= htmlspecialchars($voucher['description']) ?></p>
-              <?php if ($voucher['expires_at']): ?>
-                <small>Hết hạn: <?= date('d/m/Y', strtotime($voucher['expires_at'])) ?></small>
-              <?php endif; ?>
+              <h3><?= htmlspecialchars($v['code']) ?></h3>
+              <p><?= htmlspecialchars($v['description']) ?></p>
+              <small>
+                <?= $v['expires_at'] ? 'Hết hạn: ' . date('d/m/Y', strtotime($v['expires_at'])) : 'Không giới hạn' ?>
+              </small>
             </div>
             <div class="voucher-points">
-              <span><?= number_format($voucher['points_required']) ?> điểm</span>
-              <button class="btn btn-redeem" <?= $user['points'] >= $voucher['points_required'] ? '' : 'disabled' ?>>
+              <span><?= number_format($v['points_required']) ?> điểm</span>
+              <button class="btn-redeem" <?= $user['points'] < $v['points_required'] ? 'disabled' : '' ?>>
                 Đổi ngay
               </button>
             </div>

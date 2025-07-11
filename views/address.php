@@ -1,3 +1,7 @@
+<link rel="stylesheet" href="../css/address.css">
+<!-- Thêm vào <head> -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <?php
 // views/address.php
 if (session_status() === PHP_SESSION_NONE) session_start();
@@ -79,15 +83,11 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
   $house_no  = trim($_POST['house_no']  ?? '');
   $fullname  = trim($_POST['fullname']  ?? '');
   $phone     = trim($_POST['phone']     ?? '');
+  $address   = trim($_POST['address']   ?? '');
 
-  if (!$district||!$ward||!$street||!$house_no||!$fullname||!$phone) {
+  if (!$fullname || !$phone || !$address) {
     $errors[] = 'Vui lòng điền đầy đủ thông tin.';
   } else {
-    $address = sprintf(
-      '%s, %s, %s, %s, Hồ Chí Minh',
-      $house_no, $street, $ward, $district
-    );
-
     if ($action==='add') {
       $ins = $pdo->prepare(
         "INSERT INTO user_addresses (user_id, fullname, phone, address)
@@ -126,7 +126,7 @@ $stmt->execute([':uid'=>$userId]);
 $addresses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
-<link rel="stylesheet" href="../css/address.css">
+
 <div class="container">
   <nav class="menu">
     <div class="menu-profile">
@@ -184,10 +184,7 @@ $addresses = $stmt->fetchAll(PDO::FETCH_ASSOC);
           data-id="<?= $addr['id'] ?>"
           data-fullname="<?= htmlspecialchars($addr['fullname'], ENT_QUOTES) ?>"
           data-phone="<?= htmlspecialchars($addr['phone'], ENT_QUOTES) ?>"
-          data-district="<?= htmlspecialchars($district, ENT_QUOTES) ?>"
-          data-ward="<?= htmlspecialchars($ward, ENT_QUOTES) ?>"
-          data-street="<?= htmlspecialchars($street, ENT_QUOTES) ?>"
-          data-house-no="<?= htmlspecialchars($houseNo, ENT_QUOTES) ?>"
+          data-address="<?= htmlspecialchars($addr['address'], ENT_QUOTES) ?>"
         >Sửa</button>
 
         <!-- Nút Xóa -->
@@ -221,230 +218,31 @@ $addresses = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <label>Số điện thoại</label>
         <input type="text" name="phone" id="phone" required>
       </div>
-      <!-- Quận/Huyện & Phường/Xã -->
-      <div class="form-row">
-        <div class="form-group">
-          <label>Quận/Huyện</label>
-          <select name="district" id="district" required>
-            <option value="">Chọn quận/huyện</option>
-                <option>Quận 1</option>
-                <option>Quận 3</option>
-                <option>Quận 4</option>
-                <option>Quận 5</option>
-                <option>Quận 6</option>
-                <option>Quận 7</option>
-                <option>Quận 8</option>
-                <option>Huyện Bình Chánh</option>
-                <option>Huyện Cần Giờ</option>
-                <option>Huyện Củ Chi</option>
-                <option>Huyện Hóc Môn</option>
-                <option>Huyện Nhà Bè</option>
-                <option>Thành phố Thủ Đức</option>
-                <option>Quận 10</option>
-                <option>Quận 11</option>
-                <option>Quận 12</option>
-                <option>Quận Bình Thạnh</option>
-                <option>Quận Gò Vấp</option>
-                <option>Quận Phú Nhuận</option>
-                <option>Quận Tân Bình</option>
-                <option>Quận Tân Phú</option>
-                <option>Quận Bình Tân</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Phường/Xã</label>
-          <select name="ward" id="ward" required>
-            <option value="">Chọn phường/xã</option>
-          </select>
-        </div>
-      </div>
-      <!-- Đường & Số nhà -->
+      <!-- Tìm địa chỉ -->
       <div class="form-group">
-        <label>Đường</label>
-        <input type="text" name="street" id="street" required>
+       
       </div>
-      <div class="form-group">
-        <label>Số nhà, căn hộ</label>
-        <input type="text" name="house_no" id="house_no" required>
-      </div>
+      <input type="text" name="address" id="address" placeholder="Địa chỉ sẽ hiển thị ở đây..." required readonly>
+      <div id="map" style="height: 300px; margin-bottom: 10px;"></div>
       <button type="submit" class="btn-save">Lưu</button>
     </form>
   </div>
 </div>
 
 <script>
-const wardsByDistrict = {
-  'Quận 1': [
-    'Phường Tân Định',
-    'Phường Bến Thành',
-    'Phường Sài Gòn',
-    'Phường Cầu Ông Lãnh'
-  ],
-  'Quận 3': [
-    'Phường Bàn Cờ',
-    'Phường Xuân Hòa',
-    'Phường Nhiêu Lộc'
-  ],
-  'Quận 4': [
-    'Phường Vĩnh Hội',
-    'Phường Khánh Hội',
-    'Phường Xóm Chiếu'
-  ],
-  'Quận 5': [
-    'Phường Chợ Quán',
-    'Phường An Đông',
-    'Phường Chợ Lớn'
-  ],
-  'Quận 6': [
-    'Phường Bình Tiên',
-    'Phường Bình Tây',
-    'Phường Bình Phú',
-    'Phường Phú Lâm'
-  ],
-  'Quận 7': [
-    'Phường Tân Mỹ',
-    'Phường Tân Hưng',
-    'Phường Tân Thuận',
-    'Phường Phú Thuận'
-  ],
-  'Quận 8': [
-    'Phường Chánh Hưng',
-    'Phường Bình Đông',
-    'Phường Phú Định'
-  ],
-  'Quận 10': [
-    'Phường Vườn Lài',
-    'Phường Diên Hồng',
-    'Phường Hòa Hưng'
-  ],
-  'Quận 11': [
-    'Phường Hòa Bình',
-    'Phường Phú Thọ',
-    'Phường Bình Thới',
-    'Phường Minh Phụng'
-  ],
-  'Quận 12': [
-    'Phường Đông Hưng Thuận',
-    'Phường Trung Mỹ Tây',
-    'Phường Tân Thới Hiệp',
-    'Phường An Phú Đông'
-  ],
-  'Quận Bình Thạnh': [
-    'Phường Gia Định',
-    'Phường Bình Thạnh',
-    'Phường Bình Lợi Trung',
-    'Phường Bình Quới'
-  ],
-  'Quận Bình Tân': [
-    'Phường Bình Tân',
-    'Phường Bình Trị Đông',
-    'Phường Bình Hưng Hòa',
-    'Phường An Lạc',
-    'Phường Tân Tạo'
-  ],
-  'Quận Gò Vấp': [
-    'Phường Hạnh Thông',
-    'Phường Gò Vấp',
-    'Phường An Hội Tây',
-    'Phường An Hội Đông'
-  ],
-  'Quận Phú Nhuận': [
-    'Phường Đức Nhuận',
-    'Phường Cầu Kiệu'
-  ],
-  'Quận Tân Bình': [
-    'Phường Tân Sơn Hòa',
-    'Phường Tân Sơn Nhất',
-    'Phường Tân Hòa',
-    'Phường Bảy Hiền',
-    'Phường Tân Bình',
-    'Phường Tân Sơn'
-  ],
-  'Quận Tân Phú': [
-    'Phường Tây Thạnh',
-    'Phường Tân Sơn Nhì',
-    'Phường Phú Thọ Hòa',
-    'Phường Phú Thạnh',
-    'Phường Tân Phú'
-  ],
-  'Huyện Bình Chánh': [
-    'Xã Vĩnh Lộc',
-    'Xã Tân Vĩnh Lộc',
-    'Xã Bình Lợi',
-    'Xã Tân Nhựt',
-    'Xã Bình Chánh',
-    'Xã Hưng Long',
-    'Xã Bình Hưng'
-  ],
-  'Huyện Cần Giờ': [
-    'Xã Bình Khánh',
-    'Xã Cần Giờ',
-    'Xã An Thới Đông',
-    'Xã Thạnh An'
-  ],
-  'Huyện Củ Chi': [
-    'Xã An Nhơn Tây',
-    'Xã Thái Mỹ',
-    'Xã Nhuận Đức',
-    'Xã Tân An Hội',
-    'Xã Củ Chi',
-    'Xã Phú Hòa Đông',
-    'Xã Bình Mỹ'
-  ],
-  'Huyện Hóc Môn': [
-    'Xã Hóc Môn',
-    'Xã Bà Điểm',
-    'Xã Xuân Thới Sơn',
-    'Xã Đông Thạnh'
-  ],
-  'Huyện Nhà Bè': [
-    'Xã Nhà Bè',
-    'Xã Hiệp Phước'
-  ],
-  'Thành phố Thủ Đức': [
-    'Phường Hiệp Bình',
-    'Phường Tam Bình',
-    'Phường Thủ Đức',
-    'Phường Linh Xuân',
-    'Phường Long Bình',
-    'Phường Tăng Nhơn Phú',
-    'Phường Phước Long',
-    'Phường Long Phước',
-    'Phường Long Trường',
-    'Phường An Khánh',
-    'Phường Bình Trưng',
-    'Phường Cát Lái'
-  ]
-};
+
 const modal    = document.getElementById('addressModal');
 const btnAdd   = document.getElementById('btnAdd');
 const closeBtn = modal.querySelector('.close');
 const form     = document.getElementById('addressForm');
 const title    = document.getElementById('modalTitle');
 
-// Đổ phường/xã tương ứng với quận
-function updateWards() {
-  const distSel = document.getElementById('district');
-  const wardSel = document.getElementById('ward');
-  wardSel.innerHTML = '<option value="">Chọn phường/xã</option>';
-  const list = wardsByDistrict[distSel.value] || [];
-  list.forEach(name => {
-    const opt = document.createElement('option');
-    opt.value = name;
-    opt.text  = name;
-    wardSel.appendChild(opt);
-  });
-}
-
-// Gắn listener khi user chọn quận thủ công (add case)
-document.getElementById('district')
-        .addEventListener('change', updateWards);
 
 // Mở modal thêm
 btnAdd.onclick = () => {
   title.textContent   = 'Thêm địa chỉ';
   form.reset();
-  form.action.value   = 'add';
+  document.getElementById('formAction').value = 'add';
   document.getElementById('addressId').value = '';
   modal.style.display = 'block';
 };
@@ -453,22 +251,11 @@ btnAdd.onclick = () => {
 document.querySelectorAll('.btn-edit').forEach(btn => {
   btn.onclick = () => {
     title.textContent   = 'Sửa địa chỉ';
-    form.action.value   = 'edit';
+    document.getElementById('formAction').value = 'edit';
     document.getElementById('addressId').value = btn.dataset.id;
     document.getElementById('fullname').value  = btn.dataset.fullname;
     document.getElementById('phone').value     = btn.dataset.phone;
-
-    // Prefill quận
-    document.getElementById('district').value = btn.dataset.district;
-    // Đổ phường/xã tương ứng
-    updateWards();
-    // Prefill phường
-    document.getElementById('ward').value     = btn.dataset.ward;
-
-    // Prefill đường + số nhà
-    document.getElementById('street').value    = btn.dataset.street;
-    document.getElementById('house_no').value  = btn.dataset.houseNo;
-
+    document.getElementById('address').value   = btn.dataset.address; // Sửa dòng này
     modal.style.display = 'block';
   };
 });
@@ -479,4 +266,26 @@ window.onclick = e => {
   if (e.target === modal) modal.style.display = 'none';
 };
 
+let map = L.map('map').setView([10.7769, 106.7009], 12); 
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+let marker;
+map.on('click', function(e) {
+  if (marker) map.removeLayer(marker);
+  marker = L.marker(e.latlng).addTo(map);
+
+  // Gọi Nominatim API để lấy địa chỉ
+  fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('address').value = data.display_name || '';
+    });
+});
+
+// Đảm bảo modal luôn ẩn khi trang vừa load
+window.onload = function() {
+  document.getElementById('addressModal').style.display = 'none';
+};
 </script>

@@ -78,19 +78,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $orderStmt = $pdo->prepare("
                     INSERT INTO orders (
                         user_id,
-                        address_id,
+                        shipping_address,
                         payment_method,
                         subtotal,
                         shipping_fee,
                         discount,
-                        total,
-                        status,
+                        total_amount,
+                        order_status,
                         created_at
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
                 ");
                 $orderStmt->execute([
                     $userId,
-                    $selectedAddress['id'],
+                    $selectedAddress['address'], // hoặc ghép fullname, phone, address nếu muốn đầy đủ
                     $_POST['payment_method'],
                     $subtotal,
                     $shipping,

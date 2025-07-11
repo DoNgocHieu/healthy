@@ -112,7 +112,7 @@ $stmt = $pdo->prepare("
    FROM cart_items ci
    JOIN items i
      ON ci.item_id = i.id
-   WHERE ci.user_id = ?
+   WHERE ci.user_id = ? AND ci.is_deleted = 0
    ORDER BY ci.added_at DESC
 ");
 $stmt->execute([$userId]);

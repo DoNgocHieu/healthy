@@ -17,17 +17,14 @@ if (!$orderId) {
 }
 
 // Lấy thông tin đơn hàng
-$orderStmt = $pdo->prepare("
-    SELECT o.*,
-           ua.fullname, ua.phone, ua.address,
-           u.email
+$stmt = $pdo->prepare("
+    SELECT o.*, u.email
     FROM orders o
-    JOIN user_addresses ua ON o.address_id = ua.id
     JOIN users u ON o.user_id = u.id
     WHERE o.id = ? AND o.user_id = ?
 ");
-$orderStmt->execute([$orderId, $userId]);
-$order = $orderStmt->fetch(PDO::FETCH_ASSOC);
+$stmt->execute([$orderId, $userId]);
+$order = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$order) {
     header('Location: layout.php?page=cart');
@@ -218,30 +215,39 @@ $bankInfo = [
 
     <div class="order-info">
         <h2>Thông tin đơn hàng</h2>
+        <?php
+        // Tách shipping_address nếu có dạng "Tên, SĐT, Địa chỉ"
+        $shippingParts = explode(',', $order['shipping_address'] ?? '');
+        $fullname = trim($shippingParts[0] ?? '');
+        $phone = trim($shippingParts[1] ?? '');
+        $address = implode(',', array_slice($shippingParts, 2));
+        ?>
         <div class="info-grid">
             <div class="info-item">
                 <h3>Người nhận</h3>
-                <p><?= htmlspecialchars($order['fullname']) ?></p>
+                <p><?= htmlspecialchars($fullname) ?></p>
             </div>
             <div class="info-item">
                 <h3>Số điện thoại</h3>
-                <p><?= htmlspecialchars($order['phone']) ?></p>
+                <p><?= htmlspecialchars($phone) ?></p>
+            </div>
+            <div class="info-item">
+                <h3>Địa chỉ giao hàng</h3>
+                <p><?= nl2br(htmlspecialchars($address)) ?></p>
             </div>
             <div class="info-item">
                 <h3>Email</h3>
-                <p><?= htmlspecialchars($order['email']) ?></p>
-            </div>
-            <div class="info-item">
-                <h3>Địa chỉ</h3>
-                <p><?= nl2br(htmlspecialchars($order['address'])) ?></p>
+                <p><?= htmlspecialchars($order['email'] ?? '') ?></p>
             </div>
             <div class="info-item">
                 <h3>Phương thức thanh toán</h3>
-                <p><?= $order['payment_method'] === 'cod' ? 'Thanh toán khi nhận hàng' : 'Chuyển khoản ngân hàng' ?></p>
+                <p>
+                    <?= $order['payment_method'] === 'cod' ? 'Thanh toán khi nhận hàng' : 'Chuyển khoản ngân hàng' ?>
+                </p>
             </div>
             <div class="info-item">
                 <h3>Tổng tiền</h3>
-                <p><?= number_format($order['total'], 0, ',', '.') ?> đ</p>
+                <p><?= number_format($order['total_amount'] ?? 0, 0, ',', '.') ?> đ</p>
             </div>
         </div>
     </div>
