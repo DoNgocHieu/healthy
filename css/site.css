@@ -466,7 +466,6 @@ footer {
     display: block;
     text-align: center;
     line-height: 13px;
-    margin-left: -7px;
 }
 .search-list {
   list-style: none;
@@ -542,4 +541,17 @@ footer {
 .tym-btn:hover {
   background: #e74c3c;
   color: #fff;
+}
+.favorite-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
