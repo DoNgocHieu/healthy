@@ -3,10 +3,8 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../config/config.php';
 $pdo    = getDb();
 $userId = $_SESSION['user_id'] ?? null;
-if (!$userId) {
-  header('Location: layout.php?page=login');
-  exit;
-}
+
+// Handle AJAX cart operations only (redirect logic moved to layout.php)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
   header('Content-Type: application/json; charset=utf-8');
 
@@ -91,6 +89,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addcart'])) {
   echo json_encode(['status' => 'ok', 'qty' => $addQty]);
   exit;
 }
+
+// Check login for displaying cart content
+if (!$userId) {
+    echo '<div style="text-align:center;padding:50px;">
+            <h3>Vui lòng đăng nhập để xem giỏ hàng</h3>
+            <a href="layout.php?page=login" class="btn">Đăng nhập</a>
+          </div>';
+    return;
+}
+
 if (isset($_GET['del'])) {
   $itemId = intval($_GET['del']);
   $stmt = $pdo->prepare("

@@ -27,7 +27,25 @@
 
 	function updateCartIcon() {
 		const cart = JSON.parse(localStorage.getItem('cart')) || {};
-		const total = Object.values(cart).reduce(
+
+		// Clean up null/undefined values
+		const cleanCart = {};
+		Object.keys(cart).forEach((key) => {
+			if (
+				cart[key] &&
+				typeof cart[key] === 'object' &&
+				cart[key].qty !== undefined
+			) {
+				cleanCart[key] = cart[key];
+			}
+		});
+
+		// Save cleaned cart back to localStorage
+		if (Object.keys(cleanCart).length !== Object.keys(cart).length) {
+			localStorage.setItem('cart', JSON.stringify(cleanCart));
+		}
+
+		const total = Object.values(cleanCart).reduce(
 			(sum, it) => sum + (it.qty || 0),
 			0
 		);

@@ -378,6 +378,12 @@ function showItemModalById(id) {
       const overlay = document.getElementById('itemModalOverlay');
       overlay.style.display = 'flex'; // Use flex instead of block
 
+      // Hide the default modal close button since the item.php has its own
+      const defaultCloseBtn = overlay.querySelector('.modal-close');
+      if (defaultCloseBtn) {
+        defaultCloseBtn.style.display = 'none';
+      }
+
       // Execute scripts in the loaded content
       const scripts = document.getElementById('itemModalContent').querySelectorAll('script');
       scripts.forEach(script => {
@@ -396,6 +402,12 @@ function showItemModalById(id) {
 }
 function closeItemModal() {
   document.getElementById('itemModalOverlay').style.display = 'none';
+
+  // Show the default close button again for next time
+  const defaultCloseBtn = document.querySelector('.modal-close');
+  if (defaultCloseBtn) {
+    defaultCloseBtn.style.display = 'flex';
+  }
 }
 
 // Close modal when clicking outside

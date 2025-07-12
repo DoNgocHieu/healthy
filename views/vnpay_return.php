@@ -1,9 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 
-define('VNP_TMNCODE', 'NJJ0R8FS'); // Terminal ID provided by VNPay
-define('VNP_HASHSECRET', 'BYKJBHPPZKQMKBIBGGXIYKWYFAYSJXCW'); // Secret key provided by VNPay
-define('VNP_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'); // Sandbox URL
 // Lấy các tham số trả về từ VNPay
 $vnp_ResponseCode = $_GET['vnp_ResponseCode'] ?? '';
 $vnp_TxnRef = $_GET['vnp_TxnRef'] ?? '';
@@ -42,28 +39,33 @@ $secureHash = hash_hmac('sha512', $hashData, VNP_HASHSECRET);
 if ($secureHash == $vnp_SecureHash) {
     // Lấy order ID từ mã giao dịch
     $orderId = substr($vnp_TxnRef, 5); // Bỏ prefix 'ORDER'
-    
+
     if ($vnp_ResponseCode == '00') {
         // Thanh toán thành công
         $pdo = getDb();
         $stmt = $pdo->prepare("
-            UPDATE orders 
-            SET 
-                payment_status = 'completed',
+            UPDATE orders
+            SET
+                payment_status = 'paid',
+                payment_method = 'vnpay',
                 payment_transaction_no = ?,
                 payment_bank_code = ?,
                 payment_date = ?,
                 updated_at = NOW()
             WHERE id = ?
         ");
-        
+
+        // Parse VNPay date format (YmdHis) to MySQL datetime
+        $paymentDate = DateTime::createFromFormat('YmdHis', $vnp_PayDate);
+        $paymentDateStr = $paymentDate ? $paymentDate->format('Y-m-d H:i:s') : date('Y-m-d H:i:s');
+
         $stmt->execute([
             $vnp_TransactionNo,
             $vnp_BankCode,
-            date('Y-m-d H:i:s', strtotime($vnp_PayDate)),
+            $paymentDateStr,
             $orderId
         ]);
-        
+
         header('Location: layout.php?page=order_success&id=' . $orderId);
     } else {
         // Thanh toán thất bại

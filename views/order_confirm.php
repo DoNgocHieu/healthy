@@ -6,9 +6,13 @@ $pdo = getDb();
 $userId = $_SESSION['user_id'] ?? null;
 $error = null;
 
+// Check login (redirect logic moved to layout.php)
 if (!$userId) {
-    header('Location: layout.php?page=login');
-    exit;
+    echo '<div style="text-align:center;padding:50px;">
+            <h3>Vui lòng đăng nhập để đặt hàng</h3>
+            <a href="layout.php?page=login" class="btn">Đăng nhập</a>
+          </div>';
+    return;
 }
 
 // Lấy các món hàng được chọn từ giỏ hàng
@@ -48,111 +52,13 @@ $addrStmt = $pdo->prepare("
     WHERE user_id = ? AND id = ?
 ");
 $selectedAddressId = $_SESSION['selected_address_id'] ?? null;
-$addrStmt->execute([$userId, $selectedAddressId]);
-$selectedAddress = $addrStmt->fetch(PDO::FETCH_ASSOC);
-
-// Xử lý submit đơn hàng
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (empty($_POST['payment_method'])) {
-        $error = 'Vui lòng chọn phương thức thanh toán';
-    } elseif (!$selectedAddress) {
-        $error = 'Vui lòng chọn địa chỉ giao hàng';
-    } elseif (empty($cartItems)) {
-        $error = 'Giỏ hàng trống';
-    } else {
-        // Kiểm tra số lượng trong kho
-        $outOfStock = [];
-        foreach ($cartItems as $item) {
-            if ($item['quantity'] > $item['stock_qty']) {
-                $outOfStock[] = $item['name'];
-            }
-        }
-
-        if (!empty($outOfStock)) {
-            $error = 'Xin lỗi, những món sau đã hết hàng hoặc không đủ số lượng: ' . implode(', ', $outOfStock);
-        } else {
-            try {
-                $pdo->beginTransaction();
-
-                // Tạo đơn hàng mới
-                $orderStmt = $pdo->prepare("
-                    INSERT INTO orders (
-                        user_id,
-                        shipping_address,
-                        payment_method,
-                        subtotal,
-                        shipping_fee,
-                        discount,
-                        total_amount,
-                        order_status,
-                        created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
-                ");
-                $fullShipping = $selectedAddress['fullname'] . ', ' . $selectedAddress['phone'] . ', ' . $selectedAddress['address'];
-                $orderStmt->execute([
-                    $userId,
-                    $fullShipping, // Lưu cả tên, SĐT, địa chỉ
-                    $_POST['payment_method'],
-                    $subtotal,
-                    $shipping,
-                    $discount,
-                    $total
-                ]);
-
-                $orderId = $pdo->lastInsertId();
-
-                // Thêm chi tiết đơn hàng và cập nhật số lượng trong kho
-                foreach ($cartItems as $item) {
-                    // Thêm vào order_items
-                    $detailStmt = $pdo->prepare("
-                        INSERT INTO order_items (order_id, item_id, quantity, price)
-                        VALUES (?, ?, ?, ?)
-                    ");
-                    $detailStmt->execute([
-                        $orderId,
-                        $item['item_id'],
-                        $item['quantity'],
-                        $item['price']
-                    ]);
-
-                    // Cập nhật số lượng trong kho
-                    $updateStockStmt = $pdo->prepare("
-                        UPDATE items
-                        SET quantity = quantity - ?
-                        WHERE id = ?
-                    ");
-                    $updateStockStmt->execute([
-                        $item['quantity'],
-                        $item['item_id']
-                    ]);
-                }
-
-                // Xóa giỏ hàng
-                $clearCartStmt = $pdo->prepare("
-                    UPDATE cart_items
-                    SET is_deleted = 1
-                    WHERE user_id = ?
-                ");
-                $clearCartStmt->execute([$userId]);
-
-                $pdo->commit();
-
-                if ($_POST['payment_method'] === 'vnpay') {
-                    header("Location: layout.php?page=vnpay_pay&id=$orderId");
-                    exit;
-                } else {
-                    // Chuyển hướng bình thường
-                    header("Location: layout.php?page=order_success&id=$orderId");
-                    exit;
-                }
-
-            } catch (Exception $e) {
-                $pdo->rollBack();
-                $error = 'Đã có lỗi xảy ra, vui lòng thử lại sau: ' . $e->getMessage();
-            }
-        }
-    }
+$selectedAddress = null;
+if ($selectedAddressId) {
+    $addrStmt->execute([$userId, $selectedAddressId]);
+    $selectedAddress = $addrStmt->fetch(PDO::FETCH_ASSOC);
 }
+
+// Display form only (POST processing moved to layout.php)
 ?>
 
 <link rel="stylesheet" href="../css/checkout.css">
@@ -201,23 +107,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
     </div>
 
-    <form method="POST" class="checkout-form">
+    <form method="POST" action="layout.php?page=order_confirm" class="checkout-form">
         <div class="checkout-section">
             <h2>Phương thức thanh toán</h2>
             <div class="payment-methods">
                 <label class="payment-method">
                     <input type="radio" name="payment_method" value="cod">
-                    <span>Thanh toán khi nhận hàng</span>
+                    <div class="payment-info">
+                        <i class="fas fa-truck payment-icon"></i>
+                        <div>
+                            <span class="payment-title">Thanh toán khi nhận hàng</span>
+                            <small class="payment-desc">Thanh toán bằng tiền mặt khi nhận hàng</small>
+                        </div>
+                    </div>
                 </label>
 
                 <label class="payment-method">
                     <input type="radio" name="payment_method" value="bank_transfer">
-                    <span>Chuyển khoản ngân hàng</span>
+                    <div class="payment-info">
+                        <i class="fas fa-university payment-icon"></i>
+                        <div>
+                            <span class="payment-title">Chuyển khoản ngân hàng</span>
+                            <small class="payment-desc">Chuyển khoản trực tiếp qua ngân hàng</small>
+                        </div>
+                    </div>
                 </label>
 
                 <label class="payment-method">
                     <input type="radio" name="payment_method" value="vnpay">
-                    <span>Thanh toán online qua VNPAY</span>
+                    <div class="payment-info">
+                        <i class="fas fa-credit-card payment-icon text-primary"></i>
+                        <div>
+                            <span class="payment-title">Thanh toán online qua VNPay</span>
+                            <small class="payment-desc">Thanh toán an toàn qua thẻ ATM, Visa, MasterCard</small>
+                        </div>
+                    </div>
+                    <div class="vnpay-logos">
+                        <small>Hỗ trợ: <strong>Vietcombank, BIDV, VietinBank, Agribank...</strong></small>
+                    </div>
                 </label>
             </div>
         </div>

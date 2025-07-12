@@ -3,134 +3,12 @@
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../config/config.php';
 $pdo = getDb();
-if ($_SERVER['REQUEST_METHOD']==='POST'
-    && ($_POST['ajax'] ?? '')==='1'
-    && ($_POST['action'] ?? '')==='edit_checkout'
-) {
-    // thực hiện UPDATE như cũ…
-    $stmt = $pdo->prepare("UPDATE user_addresses
-                              SET fullname=:fn, address=:ad, phone=:ph
-                            WHERE id=:aid AND user_id=:uid");
-    $stmt->execute([ /* ... */ ]);
 
-    header('Content-Type: application/json');
-    echo json_encode([
-      'status'   => 'ok',
-      'id'       => (int)$_POST['address_id'],
-      'fullname' => $_POST['fullname'],
-      'address'  => $_POST['address'],
-      'phone'    => $_POST['phone']
-    ]);
-    exit;
-}
 // Nếu chưa login, redirect
 if (empty($_SESSION['user_id'])) {
     header('Location: layout.php?page=login');
     exit;
 }
-if ($_SERVER['REQUEST_METHOD']==='POST'
-    && isset($_POST['ajax'])
-    && $_POST['ajax']==='1'
-    && ($_POST['action'] ?? '')==='edit_checkout'
-) {
-    $stmt = $pdo->prepare("
-      UPDATE user_addresses
-         SET fullname = :fn,
-             address  = :ad,
-             phone    = :ph
-       WHERE id = :aid
-         AND user_id = :uid
-    ");
-    $stmt->execute([
-      ':fn'  => $_POST['fullname'],
-      ':ad'  => $_POST['address'],
-      ':ph'  => $_POST['phone'],
-      ':aid' => (int)$_POST['address_id'],
-      ':uid' => $_SESSION['user_id']
-    ]);
-    // Trả về JSON chứa dữ liệu đã lưu
-    header('Content-Type: application/json');
-    echo json_encode([
-      'status'   => 'ok',
-      'id'       => (int)$_POST['address_id'],
-      'fullname' => $_POST['fullname'],
-      'address'  => $_POST['address'],
-      'phone'    => $_POST['phone']
-    ]);
-    exit;
-}
-// Xử lý POST từ form add/edit/confirm
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
-    if ($action === 'select_address') {
-        // chọn địa chỉ cho cart
-        $_SESSION['selected_address_id'] = (int)$_POST['address_id'];
-    }
-    elseif ($action === 'edit_checkout') {
-        // edit địa chỉ
-        $stmt = $pdo->prepare("
-          UPDATE user_addresses
-             SET fullname=:fn, address=:ad, phone=:ph
-           WHERE id=:aid AND user_id=:uid
-        ");
-        $stmt->execute([
-          ':fn'   => $_POST['fullname'],
-          ':ad'   => $_POST['address'],
-          ':ph'   => $_POST['phone'],
-          ':aid'  => (int)$_POST['address_id'],
-          ':uid'  => $_SESSION['user_id']
-        ]);
-        // giữ nguyên selected
-        $_SESSION['selected_address_id'] = (int)$_POST['address_id'];
-
-        // Nếu là AJAX request thì trả về JSON
-        if (isset($_POST['ajax']) && $_POST['ajax'] === '1') {
-            header('Content-Type: application/json');
-            echo json_encode([
-                'status' => 'ok',
-                'id' => (int)$_POST['address_id'],
-                'fullname' => $_POST['fullname'],
-                'address' => $_POST['address'],
-                'phone' => $_POST['phone']
-            ]);
-            exit;
-        }
-    }
-    elseif ($action === 'add_checkout') {
-        // thêm địa chỉ
-        $ins = $pdo->prepare("
-          INSERT INTO user_addresses (user_id,fullname,address,phone)
-          VALUES (:uid,:fn,:ad,:ph)
-        ");
-        $ins->execute([
-          ':uid'=>$_SESSION['user_id'],
-          ':fn' =>$_POST['fullname'],
-          ':ad' =>$_POST['address'],
-          ':ph' =>$_POST['phone']
-        ]);
-
-        $newId = $pdo->lastInsertId();
-        $_SESSION['selected_address_id'] = $newId;
-
-        // Nếu là AJAX request thì trả về JSON
-        if (isset($_POST['ajax']) && $_POST['ajax'] === '1') {
-            header('Content-Type: application/json');
-            echo json_encode([
-                'status' => 'ok',
-                'id' => $newId,
-                'fullname' => $_POST['fullname'],
-                'address' => $_POST['address'],
-                'phone' => $_POST['phone']
-            ]);
-            exit;
-        }
-    }
-
-    // Nếu là form submit thường, chuyển đến trang order_confirm
-    header('Location: layout.php?page=order_confirm');
-    exit;
-}
-
 // Lấy danh sách địa chỉ
 $stmt = $pdo->prepare("
     SELECT id, fullname, phone, address, is_default
@@ -273,21 +151,17 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(res => res.json())
     .then(data => {
       if (data.status === 'ok') {
-        // Tự động chọn địa chỉ mới
-        hidId.value = data.id;
-        selForm.submit();
+        console.log('New address added:', data.id);
 
-        // Đóng modal và chuyển trang
+        // Close modal and redirect immediately
         modal.classList.remove('show');
-        setTimeout(() => {
-          window.location.href = 'layout.php?page=order_confirm';
-        }, 500);
+        window.location.href = 'layout.php?page=order_confirm';
       } else {
         alert('Thêm địa chỉ thất bại');
       }
     })
     .catch(err => {
-      console.error(err);
+      console.error('Error adding address:', err);
       alert('Đã có lỗi xảy ra');
     });
   });
@@ -300,13 +174,26 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    console.log('Selected address:', checked.value);
     hidId.value = checked.value;
-    selForm.submit();
 
-    modal.classList.remove('show');
-    setTimeout(() => {
+    // Submit form and redirect immediately
+    fetch(window.location.href, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `action=select_address&address_id=${checked.value}`
+    })
+    .then(() => {
+      modal.classList.remove('show');
       window.location.href = 'layout.php?page=order_confirm';
-    }, 500);
+    })
+    .catch(err => {
+      console.error('Error selecting address:', err);
+      // Fallback: try normal form submission
+      selForm.submit();
+    });
   });
 
   // Ẩn/hiện form thêm mới
