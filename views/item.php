@@ -18,8 +18,7 @@ $maxQty     = intval($item['quantity']);
 $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
 ?>
 
-<script defer src="../js/qty.js"></script>
-<script defer src="../js/favorites.js"></script>
+
 
 <?php if ($isAjax): ?>
   <button class="item-detail-modal-close"
@@ -33,10 +32,6 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
     </svg>
   </button>
 <?php endif; ?>
-<script>
-  initializeFromStorage();
-  updateCartIcon();
-</script>
 <div class="item-detail-container">
   <div class="item-detail-row">
 
@@ -94,7 +89,7 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
   <?php endif; ?>
 </div>
     <div class="item-detail-img">
-      <img src="../img/<?=htmlspecialchars($item['image_url'], ENT_QUOTES)?>"
+      <img src="/healthy/img/<?=htmlspecialchars($item['image_url'], ENT_QUOTES)?>"
            alt="<?=htmlspecialchars($item['name'], ENT_QUOTES)?>">
     </div>
   </div>
@@ -380,7 +375,7 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
   </style>
   <div class="review-section">
     <div id="review-list"></div>
-    <form id="add-review-form" autocomplete="off" enctype="multipart/form-data">
+    <form id="add-review-form" autocomplete="off" enctype="multipart/form-data" method="POST">
       <input name="username" placeholder="Tên của bạn" required>
       <div class="star-group" id="star-group">
         <span class="star" data-star="1">&#9733;</span>
@@ -495,10 +490,167 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
         });
       };
     })();
+  </script>
 
-    // Initialize reviews immediately (not waiting for DOMContentLoaded)
-    if (typeof loadReviews === 'function') loadReviews(<?= $id ?>);
-    if (typeof addReviewHandler === 'function') addReviewHandler(<?= $id ?>);
+  <script>
+    // Define review functions inline
+    function loadReviews(id_food) {
+      console.log('GỌI loadReviews với id:', id_food);
+      const reviewList = document.getElementById('review-list');
+      if (!reviewList) {
+        console.log('Không tìm thấy #review-list');
+        return;
+      }
+      reviewList.innerHTML = '<div style="text-align:center;padding:20px;color:#666;"><i class="fa fa-spinner fa-spin"></i> Đang tải đánh giá...</div>';
+
+      fetch(`/healthy/api/get_reviews.php?id_food=${id_food}`)
+        .then((r) => {
+          console.log('Response status:', r.status);
+          return r.json();
+        })
+        .then((data) => {
+          console.log('Parsed data:', data);
+
+          if (!data.reviews || !data.reviews.length) {
+            reviewList.innerHTML = '<div style="text-align:center;padding:30px;color:#999;background:#f8f8f8;border-radius:10px;border:2px dashed #ddd;"><i class="fa fa-comment-o" style="font-size:2em;margin-bottom:10px;display:block;"></i>Chưa có đánh giá nào cho món này.<br><small>Hãy là người đầu tiên đánh giá!</small></div>';
+            return;
+          }
+
+          const reviewsHtml = data.reviews.map((rv) => {
+            let photosHtml = '';
+            if (rv.images && Array.isArray(rv.images) && rv.images.length > 0) {
+              photosHtml = '<div class="review-photos" style="margin:10px 0 0 4px;display:flex;gap:8px;flex-wrap:wrap;">' +
+                rv.images.map(filename => `<img src="/healthy/uploads/reviews/${filename}" style="width:80px;height:80px;border-radius:8px;border:2px solid #e8f0e8;object-fit:cover;cursor:pointer;" onclick="window.open(this.src, '_blank')">`).join('') +
+                '</div>';
+            }
+
+            return `
+              <div class="review-item">
+                <div class="review-head">
+                  <span class="review-user">${rv.username}</span>
+                  <span class="review-star">${'★'.repeat(rv.star)}${'☆'.repeat(5 - rv.star)}</span>
+                  <span class="review-date">${rv.date}</span>
+                </div>
+                <div class="review-detail">${rv.detail}</div>
+                ${photosHtml}
+              </div>
+            `;
+          });
+
+          reviewList.innerHTML = reviewsHtml.join('');
+          console.log('Reviews loaded successfully');
+        })
+        .catch((err) => {
+          console.error('Fetch error:', err);
+          reviewList.innerHTML = '<div style="text-align:center;padding:20px;color:#e74c3c;background:#fff5f5;border-radius:10px;border:2px solid #fecaca;"><i class="fa fa-exclamation-triangle"></i> Lỗi tải đánh giá.</div>';
+        });
+    }
+
+    function addReviewHandler(id_food) {
+      const form = document.getElementById('add-review-form');
+      if (!form) {
+        console.error('Form not found!');
+        return;
+      }
+
+      console.log('Setting up form handler for id_food:', id_food);
+
+      form.onsubmit = function (e) {
+        e.preventDefault();
+        console.log('Form submitted');
+
+        const username = form.username.value.trim();
+        const star = parseInt(form.star.value, 10);
+        const detail = form.detail.value.trim();
+        if (!username || !star || !detail) {
+          alert('Vui lòng nhập đầy đủ thông tin đánh giá!');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('id_food', id_food);
+        formData.append('username', username);
+        formData.append('star', star);
+        formData.append('detail', detail);
+
+        // Add images from selectedFiles array
+        if (window.selectedFiles && window.selectedFiles.length > 0) {
+          console.log('Adding files from selectedFiles array:', window.selectedFiles.length);
+          for (let i = 0; i < window.selectedFiles.length; i++) {
+            const file = window.selectedFiles[i];
+            console.log(`File ${i}:`, {name: file.name, type: file.type, size: file.size});
+            formData.append('images[]', file);
+          }
+        } else {
+          console.log('No files in selectedFiles array');
+        }
+
+        // Debug FormData
+        console.log('FormData entries:');
+        for (let pair of formData.entries()) {
+          console.log(pair[0], ':', pair[1]);
+        }
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+        submitBtn.disabled = true;
+
+        fetch('/healthy/api/add_review.php', {
+          method: 'POST',
+          body: formData,
+          // Don't set Content-Type header - let browser set it for multipart/form-data
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.success) {
+              form.reset();
+              if (window.selectedFiles) window.selectedFiles = [];
+              const imagePreview = document.getElementById('image-preview');
+              if (imagePreview) imagePreview.innerHTML = '';
+              document.querySelectorAll('#star-group .star').forEach((star) => {
+                star.classList.remove('selected');
+              });
+              loadReviews(id_food);
+              alert('Đánh giá đã được gửi thành công!');
+            } else {
+              alert(data.message || 'Lỗi gửi đánh giá!');
+            }
+          })
+          .catch(() => alert('Lỗi kết nối server!'))
+          .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+          });
+      };
+    }
+
+    // Initialize reviews
+    console.log('Initializing reviews for item:', <?= $id ?>);
+
+    loadReviews(<?= $id ?>);
+    addReviewHandler(<?= $id ?>);
+
+    // Add missing functions to prevent errors
+    if (typeof initializeFromStorage === 'undefined') {
+      window.initializeFromStorage = function() {
+        console.log('initializeFromStorage called (stub)');
+      };
+    }
+
+    if (typeof updateCartIcon === 'undefined') {
+      window.updateCartIcon = function() {
+        console.log('updateCartIcon called (stub)');
+      };
+    }
+
+    // Call the functions if they exist
+    if (typeof initializeFromStorage === 'function') {
+      initializeFromStorage();
+    }
+    if (typeof updateCartIcon === 'function') {
+      updateCartIcon();
+    }
   </script>
 </div>
 
