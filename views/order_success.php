@@ -77,6 +77,52 @@ $bankInfo = [
     font-size: 1.1rem;
 }
 
+.vnpay-success-banner {
+    background: linear-gradient(135deg, #00b894, #00a085);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-top: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
+}
+
+.success-icon {
+    font-size: 3rem;
+    opacity: 0.9;
+}
+
+.success-message h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.success-message p {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.success-message small {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.vnpay-success {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.text-success {
+    color: #00b894 !important;
+    font-weight: 600;
+}
+
 .order-info {
     margin-bottom: 2rem;
     padding: 1.5rem;
@@ -211,6 +257,21 @@ $bankInfo = [
     <div class="success-header">
         <h1>Đặt hàng thành công!</h1>
         <p>Cảm ơn bạn đã đặt hàng. Mã đơn hàng của bạn là: #<?= $orderId ?></p>
+
+        <?php if ($order['payment_method'] === 'vnpay' && $order['payment_status'] === 'paid'): ?>
+            <div class="vnpay-success-banner">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="success-message">
+                    <h3>Thanh toán VNPay thành công!</h3>
+                    <p>Giao dịch đã được xử lý an toàn. Đơn hàng của bạn sẽ được chuẩn bị ngay.</p>
+                    <?php if (!empty($order['payment_transaction_no'])): ?>
+                        <small>Mã giao dịch: <?= htmlspecialchars($order['payment_transaction_no']) ?></small>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 
     <div class="order-info">
@@ -242,8 +303,21 @@ $bankInfo = [
             <div class="info-item">
                 <h3>Phương thức thanh toán</h3>
                 <p>
-                    <?= $order['payment_method'] === 'cod' ? 'Thanh toán khi nhận hàng' : 'Chuyển khoản ngân hàng' ?>
+                    <?php
+                    switch($order['payment_method']) {
+                        case 'cod': echo 'Thanh toán khi nhận hàng'; break;
+                        case 'bank_transfer': echo 'Chuyển khoản ngân hàng'; break;
+                        case 'vnpay': echo 'Thanh toán online qua VNPay'; break;
+                        default: echo $order['payment_method']; break;
+                    }
+                    ?>
                 </p>
+                <?php if ($order['payment_method'] === 'vnpay' && $order['payment_status'] === 'paid'): ?>
+                    <div class="vnpay-success">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span class="text-success">Đã thanh toán thành công</span>
+                    </div>
+                <?php endif; ?>
             </div>
             <div class="info-item">
                 <h3>Tổng tiền</h3>

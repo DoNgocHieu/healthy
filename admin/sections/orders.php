@@ -116,11 +116,11 @@ $result = $orderAdmin->getOrders($filters, $page, $perPage);
                         <tr>
                             <td>#<?php echo $order['id']; ?></td>
                             <td>
-                                <?php echo htmlspecialchars($order['fullname']); ?><br>
-                                <small><?php echo htmlspecialchars($order['email']); ?></small>
+                                <?php echo htmlspecialchars($order['fullname'] ?? 'N/A'); ?><br>
+                                <small><?php echo htmlspecialchars($order['email'] ?? 'N/A'); ?></small>
                             </td>
                             <td><?php echo number_format($order['total_amount']); ?>đ</td>
-                            <td><?php echo $order['payment_method']; ?></td>
+                            <td><?php echo htmlspecialchars($order['payment_method'] ?? 'N/A'); ?></td>
                             <td>
                                 <select class="form-select form-select-sm order-status"
                                         data-order-id="<?php echo $order['id']; ?>"
