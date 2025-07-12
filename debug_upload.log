@@ -48,3 +48,255 @@ FILES: Array
 )
 
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryYFl2iBAZArq8gLBU
+
+2025-07-12 04:55:13 - New request
+POST: Array
+(
+    [id_food] => 3
+    [username] => polkl
+    [star] => 3
+    [detail] => hjkkl
+)
+
+FILES: Array
+(
+    [images] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 1458572742_preview_144.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 1458572742_preview_144.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\wamp64\tmp\phpEB6A.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 258350
+                )
+
+        )
+
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryqLgNDiNq45wq7IFn
+
+2025-07-12 05:04:01 - New request
+POST: Array
+(
+    [id_food] => 3
+    [username] => sdfsdf
+    [star] => 3
+    [detail] => sdfdsf
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundarysV7erbcBctZ4Yv10
+
+2025-07-12 05:04:08 - New request
+POST: Array
+(
+    [id_food] => 3
+    [username] => sdfsdf
+    [star] => 3
+    [detail] => sdfds
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryOBVAcZ9GZ5EnrKNh
+
+2025-07-12 05:04:57 - New request
+POST: Array
+(
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryOI1r2EgprOtN7cwm
+
+2025-07-12 05:05:08 - New request
+POST: Array
+(
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryDhDYDAGJWAamPVOM
+
+2025-07-12 05:05:19 - New request
+POST: Array
+(
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundarySAz2xb1h9Bl9pw5A
+
+2025-07-12 05:06:21 - New request
+POST: Array
+(
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryVvxB1Nv6KrShBBqt
+
+2025-07-12 05:06:27 - New request
+POST: Array
+(
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryR3dMmOZWBNYBqb7i
+
+2025-07-12 05:07:49 - New request
+POST: Array
+(
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary2mg27Bapg6GJv9es
+
+2025-07-12 05:07:51 - New request
+POST: Array
+(
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary0peGqX6YZ9tj2xGa
+
+2025-07-12 05:08:07 - New request
+POST: Array
+(
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary8VbunCSqJkzAG1am
+
+2025-07-12 05:08:14 - New request
+POST: Array
+(
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryxhBpoAB5woL8kH5z
+
+2025-07-12 05:11:09 - New request
+POST: Array
+(
+    [id_food] => 2
+    [username] => dfg
+    [star] => 3
+    [detail] => dfgdfg
+)
+
+FILES: Array
+(
+    [images] => Array
+        (
+            [name] => Array
+                (
+                    [0] => ddf7d530-d783-4ee6-a8c1-6f46b88b0d1e.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => ddf7d530-d783-4ee6-a8c1-6f46b88b0d1e.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\wamp64\tmp\php81EA.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 1007020
+                )
+
+        )
+
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryyGENVMEojmkDSEDd
+Validation check:
+id_food: '2' (empty: NO)
+username: 'dfg' (empty: NO)
+star: '3' (empty: NO)
+detail: 'dfgdfg' (empty: NO)
+
+2025-07-12 05:11:15 - New request
+POST: Array
+(
+    [id_food] => 2
+    [username] => sdfgdfg
+    [star] => 3
+    [detail] => dfgfdg
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryiswOhR8LlQPFA9Pp
+Validation check:
+id_food: '2' (empty: NO)
+username: 'sdfgdfg' (empty: NO)
+star: '3' (empty: NO)
+detail: 'dfgfdg' (empty: NO)

@@ -10,7 +10,7 @@ if (!isset($_SESSION['cart']) && isset($_COOKIE['cart_sync'])) {
 // Lấy mã danh mục từ URL, ví dụ: monmoi.php?tt=MM
 $tt = $_GET['tt'] ?? 'MM'; // Mặc định là 'MM' nếu không truyền
 
-$sql = "SELECT id, name, price, description, image_url, quantity 
+$sql = "SELECT id, name, price, description, image_url, quantity
         FROM items WHERE TT = ?";
 $stmt = $mysqli->prepare($sql);
 $stmt->bind_param('s', $tt);
@@ -298,13 +298,73 @@ body {
   background-size: cover;
   font-family: 'Segoe UI', sans-serif;
 }
+
+/* Modal Styles */
+.item-modal-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+  padding: 20px;
+}
+
+.item-modal-bg[style*="display:none"] {
+  display: none !important;
+}
+
+.item-modal-bg[style*="display:flex"] {
+  display: flex !important;
+}
+
+.item-modal-box {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 10001;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  background: #fff;
+  transform: scale(1.1);
+}
+
+.modal-close::before {
+  content: '×';
+  font-weight: bold;
+  color: #666;
+}
 </style>
 <script>
 
   window.isLoggedIn = <?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>;
   console.log('isLoggedIn =', window.isLoggedIn);
-  loadReviews(id_food);
-  addReviewHandler(id_food);
 
 function showItemModalById(id) {
   fetch('/healthy/views/item.php?id=' + id, {
@@ -315,11 +375,34 @@ function showItemModalById(id) {
     .then(res => res.text())
     .then(html => {
       document.getElementById('itemModalContent').innerHTML = html;
-      document.getElementById('itemModalOverlay').style.display = 'block';
+      const overlay = document.getElementById('itemModalOverlay');
+      overlay.style.display = 'flex'; // Use flex instead of block
+
+      // Execute scripts in the loaded content
+      const scripts = document.getElementById('itemModalContent').querySelectorAll('script');
+      scripts.forEach(script => {
+        const newScript = document.createElement('script');
+        if (script.src) {
+          newScript.src = script.src;
+        } else {
+          newScript.textContent = script.textContent;
+        }
+        document.head.appendChild(newScript);
+        if (!script.src) {
+          document.head.removeChild(newScript);
+        }
+      });
     });
 }
 function closeItemModal() {
   document.getElementById('itemModalOverlay').style.display = 'none';
 }
-</script>
 
+// Close modal when clicking outside
+document.getElementById('itemModalOverlay').addEventListener('click', function(e) {
+  // Only close if clicking the overlay background, not the modal content
+  if (e.target === this) {
+    closeItemModal();
+  }
+});
+</script>

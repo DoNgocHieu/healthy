@@ -21,8 +21,16 @@ $username = isset($_POST['username']) ? trim($_POST['username']) : '';
 $star = isset($_POST['star']) ? intval($_POST['star']) : 0;
 $detail = isset($_POST['detail']) ? trim($_POST['detail']) : '';
 
+// Debug validation
+file_put_contents($debug_file, "Validation check:\n", FILE_APPEND);
+file_put_contents($debug_file, "id_food: '$id_food' (empty: " . (!$id_food ? 'YES' : 'NO') . ")\n", FILE_APPEND);
+file_put_contents($debug_file, "username: '$username' (empty: " . (!$username ? 'YES' : 'NO') . ")\n", FILE_APPEND);
+file_put_contents($debug_file, "star: '$star' (empty: " . (!$star ? 'YES' : 'NO') . ")\n", FILE_APPEND);
+file_put_contents($debug_file, "detail: '$detail' (empty: " . (!$detail ? 'YES' : 'NO') . ")\n", FILE_APPEND);
+
 // Validation
 if (!$id_food || !$username || !$star || !$detail) {
+    file_put_contents($debug_file, "VALIDATION FAILED\n", FILE_APPEND);
     echo json_encode(['success' => false, 'message' => 'Vui lòng nhập đầy đủ thông tin']);
     exit;
 }
