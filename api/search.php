@@ -9,17 +9,8 @@ if ($q === '') {
     exit;
 }
 
-
-$userId = $_SESSION['user_id'] ?? 0;
-$sql = "SELECT i.id, i.name, i.price, i.image_url, i.quantity,
-       ci.quantity AS cartQty
-  FROM items i
-  LEFT JOIN cart_items ci
-    ON ci.item_id = i.id AND ci.user_id = ? AND ci.is_deleted = 0
- WHERE i.name LIKE CONCAT('%', ?, '%')
- LIMIT 12";
-$stmt = $mysqli->prepare($sql);
-$stmt->bind_param('is', $userId, $q);
+$stmt = $mysqli->prepare("SELECT id, name, price, image_url FROM items WHERE name LIKE CONCAT('%', ?, '%') LIMIT 12");
+$stmt->bind_param('s', $q);
 $stmt->execute();
 $res = $stmt->get_result();
 $items = [];
@@ -28,9 +19,7 @@ while ($row = $res->fetch_assoc()) {
         'id' => $row['id'],
         'name' => $row['name'],
         'price' => (int)$row['price'],
-        'image_url' => $row['image_url'] ?: 'default.png',
-        'stockQty' => isset($row['quantity']) ? (int)$row['quantity'] : 99,
-        'cartQty' => isset($row['cartQty']) && $row['cartQty'] !== null ? (int)$row['cartQty'] : 1
+        'image_url' => $row['image_url'] ?: 'default.png'
     ];
 }
 $stmt->close();

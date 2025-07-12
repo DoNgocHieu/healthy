@@ -1,3 +1,6 @@
+<!-- QuillJS Snow theme -->
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <?php
 require_once __DIR__ . '/../../config/Database.php';
 
@@ -144,7 +147,8 @@ $posts = $postAdmin->getAllPosts();
                     </div>
                     <div class="mb-3">
                         <label for="content" class="form-label">Nội dung</label>
-                        <textarea class="form-control" id="content" name="content" rows="10" required></textarea>
+                        <div id="quillContent" style="height: 300px;"></div>
+                        <input type="hidden" id="content" name="content" required>
                     </div>
                     <div class="mb-3">
                         <label for="thumbnail" class="form-label">Hình ảnh đại diện</label>
@@ -153,7 +157,7 @@ $posts = $postAdmin->getAllPosts();
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary" id="savePostBtn">Lưu bài viết</button>
+                    <button type="submit" class="btn btn-primary" id="savePostBtn">Lưu bài viết</button>
                 </div>
             </form>
         </div>
@@ -177,7 +181,8 @@ $posts = $postAdmin->getAllPosts();
                     </div>
                     <div class="mb-3">
                         <label for="edit_content" class="form-label">Nội dung</label>
-                        <textarea class="form-control" id="edit_content" name="content" rows="10" required></textarea>
+                        <div id="quillEditContent" style="height: 300px;"></div>
+                        <input type="hidden" id="edit_content" name="content" required>
                     </div>
                     <div class="mb-3">
                         <label for="edit_thumbnail" class="form-label">Hình ảnh đại diện</label>
@@ -232,32 +237,64 @@ function deletePost(postId) {
 
 // Xử lý form tạo bài viết mới
 document.addEventListener('DOMContentLoaded', function() {
-    const savePostBtn = document.getElementById('savePostBtn');
+    // QuillJS cho tạo bài viết
+    var quillToolbar = [
+      [{ 'font': [] }, { 'size': [] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'script': 'sub'}, { 'script': 'super' }],
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'align': [] }],
+      ['blockquote', 'code-block'],
+      ['link', 'image'],
+      ['clean']
+    ];
+    var quill = new Quill('#quillContent', {
+        theme: 'snow',
+        placeholder: 'Nhập nội dung bài viết...',
+        modules: {
+          toolbar: quillToolbar
+        }
+    });
+    // QuillJS cho chỉnh sửa bài viết
+    var quillEdit = new Quill('#quillEditContent', {
+        theme: 'snow',
+        placeholder: 'Nhập nội dung bài viết...',
+        modules: {
+          toolbar: quillToolbar
+        }
+    });
+
     const createPostForm = document.getElementById('createPostForm');
+    const savePostBtn = document.getElementById('savePostBtn');
     const createPostModal = document.getElementById('createPostModal');
 
-    if (savePostBtn) {
-        savePostBtn.addEventListener('click', async function() {
+    if (createPostForm) {
+        createPostForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            document.getElementById('content').value = quill.root.innerHTML;
+            // console.log('Content value:', document.getElementById('content').value);
+            // console.log('Title:', document.getElementById('title').value);
+            // console.log('Thumbnail:', document.getElementById('thumbnail').files[0]);
             if (!createPostForm.checkValidity()) {
                 createPostForm.reportValidity();
                 return;
             }
-
-            const formData = new FormData(createPostForm);
-
+            const formData = new FormData();
+            formData.append('title', document.getElementById('title').value);
+            formData.append('content', document.getElementById('content').value);
+            formData.append('thumbnail', document.getElementById('thumbnail').files[0]);
+            // console.log('FormData:', formData);
             try {
                 savePostBtn.disabled = true;
                 savePostBtn.textContent = 'Đang lưu...';
-
                 const response = await fetch('/healthy/api/create_post.php', {
                     method: 'POST',
-                    body: formData
+                    body: formData // KHÔNG đặt headers Content-Type, fetch sẽ tự động xử lý
                 });
-
                 const result = await response.json();
-
                 if (result.success) {
-                    // Đóng modal và reload trang
                     const modal = bootstrap.Modal.getInstance(createPostModal);
                     modal.hide();
                     location.reload();
@@ -273,5 +310,65 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Đồng bộ Quill khi mở modal chỉnh sửa
+    window.editPost = function(postId) {
+        fetch(`/healthy/api/get_post.php?id=${postId}`)
+            .then(response => response.json())
+            .then(post => {
+                document.getElementById('edit_post_id').value = post.id;
+                document.getElementById('edit_title').value = post.title;
+                // Gán nội dung vào Quill
+                quillEdit.root.innerHTML = post.content || '';
+                document.getElementById('edit_content').value = post.content || '';
+
+                const thumbnailPreview = document.getElementById('current_thumbnail');
+                if (post.thumbnail) {
+                    thumbnailPreview.innerHTML = `<img src="http://localhost/healthy/${post.thumbnail}" alt="Current thumbnail" class="img-thumbnail" style="max-width: 200px; height: 200px; object-fit: cover;">`;
+                } else {
+                    thumbnailPreview.innerHTML = '';
+                }
+
+                const editModal = new bootstrap.Modal(document.getElementById('editPostModal'));
+                editModal.show();
+            });
+    }
+
+    // Khi submit form chỉnh sửa, lấy nội dung từ Quill
+    document.getElementById('editPostForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        document.getElementById('edit_content').value = quillEdit.root.innerHTML;
+        const editPostForm = document.getElementById('editPostForm');
+        if (!editPostForm.checkValidity()) {
+            editPostForm.reportValidity();
+            return;
+        }
+        const formData = new FormData(editPostForm);
+        // Nếu không chọn ảnh mới, input file sẽ rỗng, backend sẽ giữ ảnh cũ
+        try {
+            const response = await fetch('/healthy/api/update_post.php', {
+                method: 'POST',
+                body: formData
+            });
+            // Nếu backend trả về JSON
+            let result;
+            try {
+                result = await response.json();
+            } catch {
+                // Nếu backend redirect, reload trang
+                location.reload();
+                return;
+            }
+            if (result.success) {
+                alert('Cập nhật bài viết thành công');
+                location.reload();
+            } else {
+                alert(result.message || 'Có lỗi xảy ra khi cập nhật bài viết');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi cập nhật bài viết');
+        }
+    });
 });
 </script>
