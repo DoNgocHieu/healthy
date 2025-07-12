@@ -1,4 +1,7 @@
 <link rel="stylesheet" href="../css/address.css">
+
+<link rel="stylesheet" href="../css/info.css">
+
 <!-- Thêm vào <head> -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -138,7 +141,7 @@ $addresses = $stmt->fetchAll(PDO::FETCH_ASSOC);
         alt="Avatar">
       <p><?= htmlspecialchars($displayName) ?></p>
     </div>
-    <a href="layout.php?page=info" class="active">Thông tin tài khoản</a>
+    <a href="layout.php?page=info" >Thông tin tài khoản</a>
     <a href="layout.php?page=points">Điểm & voucher</a>
     <a href="layout.php?page=address">Địa chỉ giao hàng</a>
     <a href="layout.php?page=orders">Đơn hàng hiện tại</a>
@@ -198,9 +201,12 @@ $addresses = $stmt->fetchAll(PDO::FETCH_ASSOC);
       </div>
     </div>
   <?php endforeach; ?>
-</div>
 
+</div>
 <button id="btnAdd" class="btn-add">Thêm địa chỉ mới</button>
+
+        </div>
+
 
 <!-- Modal add/edit -->
 <div id="addressModal" class="modal">
@@ -230,7 +236,6 @@ $addresses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </form>
   </div>
 </div>
-
 <script>
 
 const modal    = document.getElementById('addressModal');

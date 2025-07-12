@@ -156,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           type="text"
           id="fullname"
           name="fullname"
-          value="<?= htmlspecialchars($user['fullname']) ?>"
+          value="<?= htmlspecialchars($user['fullname'] ? $user['fullname'] : $user['username']) ?>"
           required />
       </div>
 

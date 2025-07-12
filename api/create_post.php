@@ -18,6 +18,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $db = Database::getInstance()->getConnection();
 
+// Lấy dữ liệu từ $_POST khi dùng FormData
+$title = isset($_POST['title']) ? trim($_POST['title']) : '';
+$content = isset($_POST['content']) ? trim($_POST['content']) : '';
+
+// Kiểm tra dữ liệu
+if (empty($title) || empty($content)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Tiêu đề và nội dung không được để trống']);
+    exit();
+}
+
 // Xử lý upload hình ảnh
 $thumbnail = null;
 if (isset($_FILES['thumbnail']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
@@ -38,7 +49,7 @@ try {
     $query = "INSERT INTO posts (title, content, thumbnail, author_id, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())";
     $stmt = $db->prepare($query);
 
-    if ($stmt->execute([$_POST['title'], $_POST['content'], $thumbnail, $_SESSION['user_id']])) {
+    if ($stmt->execute([$title, $content, $thumbnail, $_SESSION['user_id']])) {
         echo json_encode(['success' => true, 'message' => 'Bài viết đã được tạo thành công']);
     } else {
         throw new Exception('Failed to create post');

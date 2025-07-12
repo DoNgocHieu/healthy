@@ -1,15 +1,4 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
 
-/* Body và container tổng */
-body {
-  background: url('../img/info.png') no-repeat center center fixed;
-  font-family: 'Segoe UI', sans-serif;
-  background: #f5f5f5;
-}
 /* ==== Modal Overlay ==== */
 .modal {
   display: flex;
