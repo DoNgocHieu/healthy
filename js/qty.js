@@ -34,9 +34,9 @@
 		const icon = document.querySelector('#cart-icon');
 		if (!icon) return;
 		icon.innerHTML = `
-      <i class="fa fa-shopping-cart"></i>
-      ${total > 0 ? `<span class="cart-badge">${total}</span>` : ''}
-    `;
+	  <i class="fa fa-shopping-cart"></i>
+	  ${total > 0 ? `<span class="cart-badge">${total}</span>` : ''}
+	`;
 	}
 
 	function syncWithServer(id, qty) {
@@ -95,42 +95,42 @@
 		// chưa login → show lock
 		if (!window.isLoggedIn) {
 			container.innerHTML = `
-        <button class="lock-btn"
-                onclick="location.href='${LOGIN_ENDPOINT}'">
-          <i class="fa-solid fa-lock"></i>
-        </button>`;
+		<button class="lock-btn"
+				onclick="location.href='${LOGIN_ENDPOINT}'">
+		  <i class="fa-solid fa-lock"></i>
+		</button>`;
 			return;
 		}
 
 		//login & qty=0 → thêm vào giỏ
 		if (qty <= 0) {
 			container.innerHTML = `
-        <button class="add-btn"
-                onclick="event.stopPropagation(); addToCart(${id});"
-                style="background:none;border:none;cursor:pointer;">
-          <i class="fa fa-shopping-cart" style="font-size:1.5em;color:#4caf50;"></i>
-        </button>`;
+		<button class="add-btn"
+				onclick="event.stopPropagation(); addToCart(${id});"
+				style="background:none;border:none;cursor:pointer;">
+		  <i class="fa fa-shopping-cart" style="font-size:1.5em;color:#4caf50;"></i>
+		</button>`;
 			return;
 		}
 
 		// login & qty>0 → ± input
 		container.innerHTML = `
-      <button onclick="event.stopPropagation(); decrement(${id});">
-        <i class="fa-solid fa-minus"></i>
-      </button>
-      <input
-        id="qty-input-${id}"
-        class="qty-display"
-        type="number"
-        min="1"
-        max="${stock}"
-        value="${qty}"
-        oninput="handleQtyInput(${id});"
-        onblur="handleQtyBlur(${id});"
-      />
-      <button onclick="event.stopPropagation(); increment(${id});">
-        <i class="fa-solid fa-plus"></i>
-      </button>`;
+	  <button onclick="event.stopPropagation(); decrement(${id});">
+		<i class="fa-solid fa-minus"></i>
+	  </button>
+	  <input
+		id="qty-input-${id}"
+		class="qty-display"
+		type="number"
+		min="1"
+		max="${stock}"
+		value="${qty}"
+		oninput="handleQtyInput(${id});"
+		onblur="handleQtyBlur(${id});"
+	  />
+	  <button onclick="event.stopPropagation(); increment(${id});">
+		<i class="fa-solid fa-plus"></i>
+	  </button>`;
 	}
 
 	// re-scan và render lại **tất cả** containers + patch modal
@@ -180,12 +180,16 @@
 	window.addToCart = (id) => {
 		if (!checkLoginStatus()) return;
 		const cont = document.getElementById(`cart-controls-${id}`);
-		const stock = getStock(cont);
+		let stock = 99;
+		if (cont) {
+			stock = getStock(cont);
+		}
 		const cart = JSON.parse(localStorage.getItem('cart')) || {};
 		cart[id] = cart[id] || { qty: 0, stock_qty: stock };
 		cart[id].qty = Math.min(cart[id].qty + 1, stock);
 		localStorage.setItem('cart', JSON.stringify(cart));
 		syncWithServer(id, cart[id].qty);
+		updateCartIcon();
 	};
 
 	window.increment = (id) => {
@@ -367,18 +371,18 @@
 					}
 
 					return `
-            <div class="review-item">
-              <div class="review-head">
-                <span class="review-user">${rv.username}</span>
-                <span class="review-star">${'★'.repeat(rv.star)}${'☆'.repeat(
+			<div class="review-item">
+			  <div class="review-head">
+				<span class="review-user">${rv.username}</span>
+				<span class="review-star">${'★'.repeat(rv.star)}${'☆'.repeat(
 						5 - rv.star
 					)}</span>
-                <span class="review-date">${rv.date}</span>
-              </div>
-              <div class="review-detail">${rv.detail}</div>
-              ${photosHtml}
-            </div>
-          `;
+				<span class="review-date">${rv.date}</span>
+			  </div>
+			  <div class="review-detail">${rv.detail}</div>
+			  ${photosHtml}
+			</div>
+		  `;
 				});
 
 				console.log('Generated HTML:', reviewsHtml);

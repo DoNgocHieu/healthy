@@ -159,6 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
     src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v16.0">
   </script>
 <header class="navbar">
+
   <div class="logo">
     <img src="<?php echo htmlspecialchars($siteSettings['site_logo'] ?? '../img/logo.png'); ?>"
          alt="<?php echo htmlspecialchars($siteSettings['site_name'] ?? 'Broccoli'); ?> Logo"
@@ -176,9 +177,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
   </nav>
   <div class="top-search-icons">
     <form action="#" method="GET" class="search-form">
-      <input type="text" name="q" placeholder="Search" />
-      <button type="submit"><i class="fa fa-search"></i></button>
+      <input type="text" name="q" id="searchInput" placeholder="Search" autocomplete="off" />
     </form>
+
+    <!-- Modal kết quả tìm kiếm -->
+    <div id="searchModal" class="search-modal-bg" style="display:none;">
+      <div class="search-modal-box">
+        <button class="modal-close" onclick="closeSearchModal()"></button>
+        <div id="searchResults"></div>
+      </div>
+    </div>
     <a href="layout.php?page=favorites" class="icon-link" title="Favorites"><i class="fa fa-heart"></i></a>
     <a href="layout.php?page=cart" class="icon-link" title="Cart"><i class="fa fa-shopping-cart"></i></a>
     <div class="user-menu">
@@ -202,6 +210,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
 
 <?php if ($page !== 'admin'): ?>
 <main>
+<script>
+function showSearchModal(resultsHtml) {
+  document.getElementById('searchResults').innerHTML = resultsHtml;
+  document.getElementById('searchModal').style.display = 'block';
+  positionSearchModal();
+}
+function closeSearchModal() {
+  document.getElementById('searchModal').style.display = 'none';
+}
+function positionSearchModal() {
+  const input = document.getElementById('searchInput');
+  const modal = document.getElementById('searchModal');
+  const rect = input.getBoundingClientRect();
+  modal.style.left = rect.left + 'px';
+  modal.style.top = (rect.bottom + window.scrollY) + 'px';
+  modal.style.width = input.offsetWidth + 'px';
+}
+let searchTimeout = null;
+const searchInput = document.getElementById('searchInput');
+searchInput.addEventListener('input', function(e) {
+  const q = searchInput.value.trim();
+  clearTimeout(searchTimeout);
+  if (!q) {
+    closeSearchModal();
+    return;
+  }
+  searchTimeout = setTimeout(() => {
+    fetch('/healthy/api/search.php?q=' + encodeURIComponent(q))
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success' && data.items.length > 0) {
+          let html = '<ul class="search-list">';
+          data.items.forEach(item => {
+            html += `<li>
+              <img src="../img/${item.image_url}" alt="${item.name}" />
+              <div class="search-info">
+                <div class="search-title">${item.name}</div>
+                <div class="search-price">${new Intl.NumberFormat('vi-VN').format(item.price)} đ</div>
+                <div class="search-actions">
+                  <button class="add-to-cart-btn" onclick="event.stopPropagation(); if(window.isLoggedIn){addToCart(${item.id})}else{alert('Vui lòng đăng nhập để thêm vào giỏ!');}">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                  </button>
+                  <button class="favorite-btn" data-item-id="${item.id}" title="Thêm vào yêu thích" onclick="event.stopPropagation(); if(window.isLoggedIn){window.favoritesManager && window.favoritesManager.toggleFavorite(${item.id})}else{alert('Vui lòng đăng nhập để thêm vào yêu thích!');}">
+                    <i class="fa-regular fa-heart"></i>
+                  </button>
+                </div>
+              </div>
+            </li>`;
+          });
+          html += '</ul>';
+          showSearchModal(html);
+        } else {
+          showSearchModal('<p>Không tìm thấy kết quả phù hợp.</p>');
+        }
+      })
+      .catch(() => showSearchModal('<p>Lỗi kết nối hoặc không tìm thấy kết quả.</p>'));
+  }, 350);
+});
+searchInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeSearchModal();
+  }
+});
+document.addEventListener('mousedown', function(e) {
+  const modal = document.getElementById('searchModal');
+  const input = document.getElementById('searchInput');
+  if (modal.style.display === 'block' && !modal.contains(e.target) && e.target !== input) {
+    closeSearchModal();
+  }
+});
+</script>
+
 <?php endif; ?>
   <?php
   $allowPages = [
