@@ -8,6 +8,8 @@ $dateFrom = date('Y-m-d', strtotime('-30 days'));
 $dateTo = date('Y-m-d');
 $stats = $orderAdmin->getOrderStats($dateFrom, $dateTo);
 
+
+
 // Helper function để format số an toàn
 function formatNumber($value) {
     return number_format($value ?? 0);

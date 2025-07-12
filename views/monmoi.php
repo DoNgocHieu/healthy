@@ -18,12 +18,31 @@ $stmt->execute();
 $res = $stmt->get_result();
 
 
+// Lấy danh sách id món
 $items = [];
+$itemIds = [];
 while ($row = $res->fetch_assoc()) {
     $items[] = $row;
+    $itemIds[] = (int)$row['id'];
 }
 $res->free();
-$mysqli->close();
+
+// Lấy điểm trung bình cho từng món
+$avgStars = [];
+if ($itemIds) {
+    $mysqli2 = getDbConnection();
+    $idsStr = implode(',', $itemIds);
+    $sqlAvg = "SELECT id_food, ROUND(AVG(star),1) AS avg_star, COUNT(*) AS review_count FROM comments WHERE id_food IN ($idsStr) GROUP BY id_food";
+    $resAvg = $mysqli2->query($sqlAvg);
+    while ($row = $resAvg->fetch_assoc()) {
+        $avgStars[(int)$row['id_food']] = [
+            'avg_star' => (float)$row['avg_star'],
+            'review_count' => (int)$row['review_count']
+        ];
+    }
+    $resAvg->free();
+    $mysqli2->close();
+}
 ?>
 
 <div id="itemModalOverlay" class="item-modal-bg" style="display:none;">
@@ -56,6 +75,21 @@ $mysqli->close();
           <img src="../img/<?=htmlspecialchars($it['image_url'],ENT_QUOTES)?>"
                alt="<?=htmlspecialchars($it['name'],ENT_QUOTES)?>">
           <div class="name"><?=htmlspecialchars($it['name'],ENT_QUOTES)?></div>
+          <?php
+            $avg = $avgStars[$id]['avg_star'] ?? 0;
+            $count = $avgStars[$id]['review_count'] ?? 0;
+          ?>
+          <div class="avg-star" style="margin-bottom:4px;">
+            <?php if ($count > 0): ?>
+              <span style="color:#f5b301;font-size:1.1em;">
+                <?= str_repeat('★', floor($avg)) . str_repeat('☆', 5-floor($avg)) ?>
+                <span style="font-weight:600;">(<?= $avg ?>)</span>
+                <span style="color:#888;font-size:10px;">/ <?= $count ?> đánh giá</span>
+              </span>
+            <?php else: ?>
+              <span style="color:#bbb;font-size:1em;">Chưa có đánh giá</span>
+            <?php endif; ?>
+          </div>
           <div class="price"><?=number_format($it['price'],0,',','.')?> đ</div>
 
           <div class="qty-control" id="cart-controls-<?= $id ?>" onclick="event.stopPropagation()">

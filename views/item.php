@@ -37,8 +37,38 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
 
 <div class="item-detail-info">
   <div class="title-with-heart">
-    <h2><?=htmlspecialchars($item['name'], ENT_QUOTES)?></h2>
-    <button class="favorite-btn favorite-btn-large" data-item-id="<?= $id ?>" title="Thêm vào yêu thích">
+    <div style="width:100%;">
+      <h2 style="margin-bottom:2px;"><?=htmlspecialchars($item['name'], ENT_QUOTES)?></h2>
+      <?php
+        $mysqli2 = getDbConnection();
+        $stmtAvg = $mysqli2->prepare("SELECT ROUND(AVG(star),1) AS avg_star, COUNT(*) AS review_count FROM comments WHERE id_food=?");
+        $stmtAvg->bind_param('i', $id);
+        $stmtAvg->execute();
+        $avgStar = 0;
+        $reviewCount = 0;
+        $resAvg = $stmtAvg->get_result();
+        if ($rowAvg = $resAvg->fetch_assoc()) {
+            $avgStar = (float)$rowAvg['avg_star'];
+            $reviewCount = (int)$rowAvg['review_count'];
+        }
+        $stmtAvg->close();
+        $mysqli2->close();
+      ?>
+      <?php if ($reviewCount > 0): ?>
+        <div class="avg-star" style="margin:0 0 2px 0;text-align:left;">
+          <span style="color:#f5b301;font-size:1.13em;">
+            <?= str_repeat('★', floor($avgStar)) . str_repeat('☆', 5-floor($avgStar)) ?>
+            <span style="font-weight:600;">(<?= $avgStar ?>)</span>
+            <span style="color:#888;font-size:0.97em;">/ <?= $reviewCount ?> đánh giá</span>
+          </span>
+        </div>
+      <?php else: ?>
+        <div class="avg-star" style="margin:0 0 2px 0;text-align:left;">
+          <span style="color:#bbb;font-size:1em;">Chưa có đánh giá</span>
+        </div>
+      <?php endif; ?>
+    </div>
+    <button class="favorite-btn favorite-btn-large" data-item-id="<?= $id ?>" title="Thêm vào yêu thích" style="align-self:flex-start;">
       <i class="fa-regular fa-heart"></i>
     </button>
   </div>
@@ -112,14 +142,14 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
     padding: 1.2rem 0 0.5rem 0;
     border-top: 1.5px solid #e0e0e0;
   }
-  #review-list .review-item {
+#review-list .review-item {
     border-bottom: 1px solid #eee;
-    padding: 10px 0 6px 0;
-    margin-bottom: 2px;
+    padding: 12px 12px 12px 21px;
+    margin-bottom: 9px;
     background: #f9f9f9;
     border-radius: 6px;
     box-shadow: 0 1px 2px #0001;
-  }
+}
   #review-list .review-head {
     display: flex;
     align-items: center;
@@ -375,29 +405,136 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
   </style>
   <div class="review-section">
     <div id="review-list"></div>
-    <form id="add-review-form" autocomplete="off" enctype="multipart/form-data" method="POST">
-      <input name="username" placeholder="Tên của bạn" required>
-      <div class="star-group" id="star-group">
-        <span class="star" data-star="1">&#9733;</span>
-        <span class="star" data-star="2">&#9733;</span>
-        <span class="star" data-star="3">&#9733;</span>
-        <span class="star" data-star="4">&#9733;</span>
-        <span class="star" data-star="5">&#9733;</span>
-        <input type="hidden" name="star" id="star-input" required>
+    <?php
+      $isLoggedIn = isset($_SESSION['user_id']) && $_SESSION['user_id'] > 0;
+      $userId = $isLoggedIn ? $_SESSION['user_id'] : 0;
+      $username = $isLoggedIn ? ($_SESSION['fullname'] ?? $_SESSION['username'] ?? '') : '';
+      $hasReviewed = false;
+      $canReview = false;
+      $reviewData = null;
+      $hasOrder = false;
+      if ($isLoggedIn) {
+        // Kiểm tra đã đánh giá chưa
+        $mysqli = getDbConnection();
+        $stmt = $mysqli->prepare("SELECT * FROM comments WHERE id_food=? AND id_account=? LIMIT 1");
+        $stmt->bind_param('ii', $id, $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+          $hasReviewed = true;
+          $reviewData = $result->fetch_assoc();
+        }
+        $stmt->close();
+        // Kiểm tra đã mua chưa (dùng order_items và orders)
+        $stmt = $mysqli->prepare("SELECT oi.id FROM order_items oi INNER JOIN orders o ON oi.order_id = o.id WHERE o.user_id=? AND o.order_status='completed' AND oi.item_id=? LIMIT 1");
+        $stmt->bind_param('ii', $userId, $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+          $hasOrder = true;
+        }
+        $stmt->close();
+        $mysqli->close();
+        $canReview = $hasOrder && !$hasReviewed;
+      }
+    ?>
+    <script>
+      window.isLoggedIn = <?= json_encode($isLoggedIn) ?>;
+      window.username = <?= json_encode($username) ?>;
+      window.userId = <?= json_encode($userId) ?>;
+      window.hasReviewed = <?= json_encode($hasReviewed) ?>;
+      window.canReview = <?= json_encode($canReview) ?>;
+      window.hasOrder = <?= json_encode($hasOrder) ?>;
+    </script>
+    <?php if (!$isLoggedIn): ?>
+      <div style="text-align:center;padding:30px;color:#e74c3c;background:#fff5f5;border-radius:10px;border:2px solid #fecaca;margin-top:18px;">
+        <i class="fa fa-user-lock" style="font-size:2em;margin-bottom:10px;display:block;"></i>
+        Vui lòng <a href="/healthy/views/layout.php?page=login">đăng nhập</a> để đánh giá món ăn này.
       </div>
-      <textarea name="detail" placeholder="Chia sẻ trải nghiệm của bạn về món ăn này..." required></textarea>
-      <div class="image-upload-section">
-        <label for="review-images" class="image-upload-btn">
-          <i class="fas fa-camera"></i>
-          Thêm ảnh
-        </label>
-        <input type="file" id="review-images" name="images[]" multiple accept="image/*" onchange="debugFileInput(this)">
-        <div class="image-preview" id="image-preview"></div>
+    <?php elseif ($hasReviewed): ?>
+      <div style="text-align:center;padding:30px;color:#6BBF59;background:#f8fff8;border-radius:10px;border:2px solid #b2f5b2;margin-top:18px;">
+        <i class="fa fa-check-circle" style="font-size:2em;margin-bottom:10px;display:block;color:#6BBF59;"></i>
+        Bạn đã đánh giá món này.<br>
+        <strong><?= htmlspecialchars($reviewData['detail'] ?? '') ?></strong><br>
+        <span style="color:#f5b301;font-size:1.2em;"><?= str_repeat('★', intval($reviewData['star'] ?? 0)) . str_repeat('☆', 5-intval($reviewData['star'] ?? 0)) ?></span><br>
+        <span style="color:#0a4d1a;font-weight:600;"><?= htmlspecialchars($username) ?></span>
+        <span style="color:#888;font-size:0.97em;"> <?= htmlspecialchars($reviewData['date'] ?? '') ?></span>
+        <?php if (!empty($reviewData['images'])):
+          $imgs = [];
+          $imgStr = trim($reviewData['images']);
+          if ($imgStr[0] === '[') {
+            $imgs = json_decode($imgStr, true);
+            if (!is_array($imgs)) $imgs = [];
+          } else {
+            $imgs = explode(',', $imgStr);
+          }
+          ?>
+          <div style="margin:10px 0 0 4px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+            <?php foreach ($imgs as $img):
+              $img = trim($img, '"[] ');
+              if ($img): ?>
+                <img src="/healthy/uploads/reviews/<?= htmlspecialchars($img) ?>" style="width:80px;height:80px;border-radius:8px;border:2px solid #e8f0e8;object-fit:cover;cursor:pointer;" onclick="window.open(this.src, '_blank')">
+              <?php endif;
+            endforeach; ?>
+          </div>
+        <?php endif; ?>
+        <form id="delete-review-form" style="margin-top:12px;">
+          <button type="submit" style="background:#e74c3c;color:#fff;padding:8px 18px;border-radius:8px;border:none;font-weight:600;cursor:pointer;">
+            <i class="fa fa-trash"></i> Xóa đánh giá
+          </button>
+        </form>
+        <script>
+        document.getElementById('delete-review-form').onsubmit = function(e) {
+          e.preventDefault();
+          if (!confirm('Bạn có chắc muốn xóa đánh giá này?')) return;
+          fetch('/healthy/api/delete_review.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'id=<?= $reviewData['id'] ?? 0 ?>'
+          })
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) {
+              alert('Đã xóa đánh giá!');
+              location.reload();
+            } else {
+              alert(data.message || 'Lỗi xóa đánh giá!');
+            }
+          })
+          .catch(() => alert('Lỗi kết nối server!'));
+        };
+        </script>
       </div>
-      <button type="submit">
-        <i class="fas fa-paper-plane"></i> Gửi đánh giá
-      </button>
-    </form>
+    <?php elseif (!$hasOrder): ?>
+      <div style="text-align:center;padding:30px;color:#e67e22;background:#fffbe5;border-radius:10px;border:2px solid #ffe0b2;margin-top:18px;">
+        <i class="fa fa-shopping-cart" style="font-size:2em;margin-bottom:10px;display:block;color:#e67e22;"></i>
+        Bạn cần mua món này trước khi đánh giá.
+      </div>
+    <?php elseif ($canReview): ?>
+      <form id="add-review-form" autocomplete="off" enctype="multipart/form-data" method="POST">
+        <input name="username" value="<?= htmlspecialchars($username) ?>" readonly style="background:#f5f5f5;color:#222;font-weight:600;" required>
+        <div class="star-group" id="star-group">
+          <span class="star" data-star="1">&#9733;</span>
+          <span class="star" data-star="2">&#9733;</span>
+          <span class="star" data-star="3">&#9733;</span>
+          <span class="star" data-star="4">&#9733;</span>
+          <span class="star" data-star="5">&#9733;</span>
+          <input type="hidden" name="star" id="star-input" required>
+        </div>
+        <textarea name="detail" placeholder="Chia sẻ trải nghiệm của bạn về món ăn này..." required></textarea>
+        <div class="image-upload-section">
+          <label for="review-images" class="image-upload-btn">
+            <i class="fas fa-camera"></i>
+            Thêm ảnh
+          </label>
+          <input type="file" id="review-images" name="images[]" multiple accept="image/*" onchange="debugFileInput(this)">
+          <div class="image-preview" id="image-preview"></div>
+        </div>
+        <button type="submit">
+          <i class="fas fa-paper-plane"></i> Gửi đánh giá
+        </button>
+      </form>
+    <?php endif; ?>
   </div>
   <script>
     // Star rating UI - Improved logic
@@ -495,53 +632,107 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
   <script>
     // Define review functions inline
     function loadReviews(id_food) {
-      console.log('GỌI loadReviews với id:', id_food);
       const reviewList = document.getElementById('review-list');
-      if (!reviewList) {
-        console.log('Không tìm thấy #review-list');
-        return;
-      }
+      if (!reviewList) return;
       reviewList.innerHTML = '<div style="text-align:center;padding:20px;color:#666;"><i class="fa fa-spinner fa-spin"></i> Đang tải đánh giá...</div>';
-
       fetch(`/healthy/api/get_reviews.php?id_food=${id_food}`)
-        .then((r) => {
-          console.log('Response status:', r.status);
-          return r.json();
-        })
+        .then((r) => r.json())
         .then((data) => {
-          console.log('Parsed data:', data);
-
           if (!data.reviews || !data.reviews.length) {
             reviewList.innerHTML = '<div style="text-align:center;padding:30px;color:#999;background:#f8f8f8;border-radius:10px;border:2px dashed #ddd;"><i class="fa fa-comment-o" style="font-size:2em;margin-bottom:10px;display:block;"></i>Chưa có đánh giá nào cho món này.<br><small>Hãy là người đầu tiên đánh giá!</small></div>';
             return;
           }
-
+          const userId = window.userId;
           const reviewsHtml = data.reviews.map((rv) => {
             let photosHtml = '';
-            if (rv.images && Array.isArray(rv.images) && rv.images.length > 0) {
+            let imgArr = [];
+            if (rv.images) {
+              if (Array.isArray(rv.images)) {
+                imgArr = rv.images;
+              } else if (typeof rv.images === 'string' && rv.images.length > 0) {
+                try {
+                  // Nếu là chuỗi JSON
+                  if (rv.images.trim().startsWith('[')) {
+                    let parsed = JSON.parse(rv.images);
+                    if (Array.isArray(parsed)) {
+                      imgArr = parsed.filter(s => typeof s === 'string' && s.trim().length > 0);
+                    } else if (typeof parsed === 'string') {
+                      imgArr = [parsed];
+                    }
+                  } else {
+                    imgArr = rv.images.split(',').map(s => s.trim()).filter(Boolean);
+                  }
+                } catch(e) {
+                  imgArr = rv.images.split(',').map(s => s.trim()).filter(Boolean);
+                }
+              }
+            }
+            if (imgArr.length > 0) {
               photosHtml = '<div class="review-photos" style="margin:10px 0 0 4px;display:flex;gap:8px;flex-wrap:wrap;">' +
-                rv.images.map(filename => `<img src="/healthy/uploads/reviews/${filename}" style="width:80px;height:80px;border-radius:8px;border:2px solid #e8f0e8;object-fit:cover;cursor:pointer;" onclick="window.open(this.src, '_blank')">`).join('') +
+                imgArr.map(filename => `<img src="/healthy/uploads/reviews/${filename}" style="width:80px;height:80px;border-radius:8px;border:2px solid #e8f0e8;object-fit:cover;cursor:pointer;" onclick="window.open(this.src, '_blank')">`).join('') +
                 '</div>';
             }
-
+            let deleteBtn = '';
+            if (userId && rv.id_account == userId) {
+              deleteBtn = `<form class="delete-review-form" data-id="${rv.id}" style="display:inline;margin-left:12px;">
+                <button type="submit" style="background:#e74c3c;color:#fff;padding:4px 12px;border-radius:6px;border:none;font-weight:600;cursor:pointer;font-size:0.97em;">
+                  <i class="fa fa-trash"></i> Xóa
+                </button>
+              </form>`;
+            }
             return `
               <div class="review-item">
                 <div class="review-head">
                   <span class="review-user">${rv.username}</span>
                   <span class="review-star">${'★'.repeat(rv.star)}${'☆'.repeat(5 - rv.star)}</span>
                   <span class="review-date">${rv.date}</span>
+                  ${deleteBtn}
                 </div>
                 <div class="review-detail">${rv.detail}</div>
                 ${photosHtml}
               </div>
             `;
           });
-
           reviewList.innerHTML = reviewsHtml.join('');
-          console.log('Reviews loaded successfully');
+          // Xử lý nút xóa
+          document.querySelectorAll('.delete-review-form').forEach(form => {
+            form.onsubmit = function(e) {
+              e.preventDefault();
+              if (!confirm('Bạn có chắc muốn xóa đánh giá này?')) return;
+              const idReview = form.getAttribute('data-id');
+              if (!idReview) {
+                alert('ID đánh giá không được cung cấp');
+                return;
+              }
+              fetch('/healthy/api/delete_review.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `id=${encodeURIComponent(idReview)}`
+              })
+                .then(r => r.json())
+                .then(data => {
+                  if (data.success) {
+                    alert('Đã xóa đánh giá!');
+                    // Sau khi xóa, hiện lại form gửi đánh giá nếu user có quyền
+                    if (window.canReview) {
+                      const addReviewForm = document.getElementById('add-review-form');
+                      if (addReviewForm) {
+                        addReviewForm.style.display = '';
+                      } else {
+                        // Nếu form chưa có, reload trang để render lại
+                        location.reload();
+                      }
+                    }
+                    loadReviews(id_food);
+                  } else {
+                    alert(data.message || 'Lỗi xóa đánh giá!');
+                  }
+                })
+                .catch(() => alert('Lỗi kết nối server!'));
+            };
+          });
         })
-        .catch((err) => {
-          console.error('Fetch error:', err);
+        .catch(() => {
           reviewList.innerHTML = '<div style="text-align:center;padding:20px;color:#e74c3c;background:#fff5f5;border-radius:10px;border:2px solid #fecaca;"><i class="fa fa-exclamation-triangle"></i> Lỗi tải đánh giá.</div>';
         });
     }
@@ -611,6 +802,15 @@ $inCartQty  = $_SESSION['cart'][$id]['qty'] ?? 0;
               document.querySelectorAll('#star-group .star').forEach((star) => {
                 star.classList.remove('selected');
               });
+              // Ẩn form, hiện thông báo đã đánh giá
+              form.style.display = 'none';
+              const reviewSection = document.querySelector('.review-section');
+              if (reviewSection) {
+                const msg = document.createElement('div');
+                msg.style = 'text-align:center;padding:30px;color:#6BBF59;background:#f8fff8;border-radius:10px;border:2px solid #b2f5b2;margin-top:18px;';
+                msg.innerHTML = '<i class="fa fa-check-circle" style="font-size:2em;margin-bottom:10px;display:block;color:#6BBF59;"></i>Bạn đã đánh giá món này.';
+                reviewSection.insertBefore(msg, reviewSection.firstChild);
+              }
               loadReviews(id_food);
               alert('Đánh giá đã được gửi thành công!');
             } else {

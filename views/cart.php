@@ -435,7 +435,7 @@ document.querySelector('.cart-checkout-btn').addEventListener('click', function(
     return;
   }
   // Chuyển sang trang xác nhận hoặc gửi dữ liệu lên server
-  window.location.href = 'layout.php?page=checkout';
+  window.location.href = 'layout.php?page=order_confirm';
 });
 </script>
 <script>

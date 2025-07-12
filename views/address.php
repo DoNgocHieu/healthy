@@ -2,6 +2,16 @@
 
 <link rel="stylesheet" href="../css/info.css">
 
+<style>
+  .form-group input[type="text"], .form-group input[type="email"], .form-group select {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.2s;
+}
+</style>
 <!-- Thêm vào <head> -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -252,6 +262,9 @@ btnAdd.onclick = () => {
   document.getElementById('formAction').value = 'add';
   document.getElementById('addressId').value = '';
   modal.style.display = 'block';
+  setTimeout(function() {
+    map.invalidateSize();
+  }, 200);
 };
 
 // Mở modal sửa
@@ -264,6 +277,9 @@ document.querySelectorAll('.btn-edit').forEach(btn => {
     document.getElementById('phone').value     = btn.dataset.phone;
     document.getElementById('address').value   = btn.dataset.address; // Sửa dòng này
     modal.style.display = 'block';
+    setTimeout(function() {
+      map.invalidateSize();
+    }, 200);
   };
 });
 

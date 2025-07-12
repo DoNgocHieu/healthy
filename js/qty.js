@@ -25,36 +25,36 @@
     return isNaN(s) || s < 0 ? Number.MAX_SAFE_INTEGER : s;
   }
 
-	function updateCartIcon() {
-		const cart = JSON.parse(localStorage.getItem('cart')) || {};
+  function updateCartIcon() {
+    const cart = JSON.parse(localStorage.getItem('cart')) || {};
 
-		// Clean up null/undefined values
-		const cleanCart = {};
-		Object.keys(cart).forEach((key) => {
-			if (
-				cart[key] &&
-				typeof cart[key] === 'object' &&
-				cart[key].qty !== undefined
-			) {
-				cleanCart[key] = cart[key];
-			}
-		});
+    // Clean up null/undefined values
+    const cleanCart = {};
+    Object.keys(cart).forEach((key) => {
+      if (
+        cart[key] &&
+        typeof cart[key] === 'object' &&
+        cart[key].qty !== undefined
+      ) {
+        cleanCart[key] = cart[key];
+      }
+    });
 
-		// Save cleaned cart back to localStorage
-		if (Object.keys(cleanCart).length !== Object.keys(cart).length) {
-			localStorage.setItem('cart', JSON.stringify(cleanCart));
-		}
+    // Save cleaned cart back to localStorage
+    if (Object.keys(cleanCart).length !== Object.keys(cart).length) {
+      localStorage.setItem('cart', JSON.stringify(cleanCart));
+    }
 
-		const total = Object.values(cleanCart).reduce(
-			(sum, it) => sum + (it.qty || 0),
-			0
-		);
-		const icon = document.querySelector('#cart-icon');
-		if (!icon) return;
-		icon.innerHTML = `
-	  <i class="fa fa-shopping-cart"></i>
-	  ${total > 0 ? `<span class="cart-badge">${total}</span>` : ""}
-	`;
+    const total = Object.values(cleanCart).reduce(
+      (sum, it) => sum + (it.qty || 0),
+      0
+    );
+    const icon = document.querySelector('#cart-icon');
+    if (!icon) return;
+    icon.innerHTML = `
+    <i class="fa fa-shopping-cart"></i>
+    ${total > 0 ? `<span class="cart-badge">${total}</span>` : ""}
+  `;
   }
 
   function syncWithServer(id, qty) {
@@ -111,42 +111,42 @@
     // chưa login → show lock
     if (!window.isLoggedIn) {
       container.innerHTML = `
-		<button class="lock-btn"
-				onclick="location.href='${LOGIN_ENDPOINT}'">
-		  <i class="fa-solid fa-lock"></i>
-		</button>`;
+    <button class="lock-btn"
+        onclick="location.href='${LOGIN_ENDPOINT}'">
+      <i class="fa-solid fa-lock"></i>
+    </button>`;
       return;
     }
 
     //login & qty=0 → thêm vào giỏ
     if (qty <= 0) {
       container.innerHTML = `
-		<button class="add-btn"
-				onclick="event.stopPropagation(); addToCart(${id});"
-				style="background:none;border:none;cursor:pointer;">
-		  <i class="fa fa-shopping-cart" style="font-size: 24px; color: black;"></i>
-		</button>`;
+    <button class="add-btn"
+        onclick="event.stopPropagation(); addToCart(${id});"
+        style="background:none;border:none;cursor:pointer;">
+      <i class="fa fa-shopping-cart" style="font-size: 24px; color: black;"></i>
+    </button>`;
       return;
     }
 
     // login & qty>0 → ± input
     container.innerHTML = `
-	  <button onclick="event.stopPropagation(); decrement(${id});">
-		<i class="fa-solid fa-minus"></i>
-	  </button>
-	  <input
-		id="qty-input-${id}"
-		class="qty-display"
-		type="number"
-		min="1"
-		max="${stock}"
-		value="${qty}"
-		oninput="handleQtyInput(${id});"
-		onblur="handleQtyBlur(${id});"
-	  />
-	  <button onclick="event.stopPropagation(); increment(${id});">
-		<i class="fa-solid fa-plus"></i>
-	  </button>`;
+    <button onclick="event.stopPropagation(); decrement(${id});">
+    <i class="fa-solid fa-minus"></i>
+    </button>
+    <input
+    id="qty-input-${id}"
+    class="qty-display"
+    type="number"
+    min="1"
+    max="${stock}"
+    value="${qty}"
+    oninput="handleQtyInput(${id});"
+    onblur="handleQtyBlur(${id});"
+    />
+    <button onclick="event.stopPropagation(); increment(${id});">
+    <i class="fa-solid fa-plus"></i>
+    </button>`;
   }
 
   // re-scan và render lại **tất cả** containers + patch modal
@@ -383,18 +383,18 @@
           }
 
           return `
-			<div class="review-item">
-			  <div class="review-head">
-				<span class="review-user">${rv.username}</span>
-				<span class="review-star">${"★".repeat(rv.star)}${"☆".repeat(
+      <div class="review-item">
+        <div class="review-head">
+        <span class="review-user">${rv.username}</span>
+        <span class="review-star">${"★".repeat(rv.star)}${"☆".repeat(
             5 - rv.star
           )}</span>
-				<span class="review-date">${rv.date}</span>
-			  </div>
-			  <div class="review-detail">${rv.detail}</div>
-			  ${photosHtml}
-			</div>
-		  `;
+        <span class="review-date">${rv.date}</span>
+        </div>
+        <div class="review-detail">${rv.detail}</div>
+        ${photosHtml}
+      </div>
+      `;
         });
 
         console.log("Generated HTML:", reviewsHtml);

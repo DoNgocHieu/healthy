@@ -14,24 +14,33 @@ class UserAdmin {
         return $stmt->execute([$banned, $userId]);
     }
 
-    public function getUsers($page = 1, $perPage = 10) {
+    public function getUsers($page = 1, $perPage = 10, $keyword = '', $status = '') {
         try {
             $offset = ($page - 1) * $perPage;
-
-            // Đếm tổng số người dùng (bỏ admin)
-            $stmt = $this->db->query("SELECT COUNT(*) as total FROM users WHERE role != 'admin'");
+            $where = "role != 'admin'";
+            $params = [];
+            if ($keyword) {
+                $where .= " AND (username LIKE ? OR email LIKE ? OR fullname LIKE ? OR phone LIKE ? OR address LIKE ?)";
+                $kw = "%$keyword%";
+                $params = array_merge($params, [$kw, $kw, $kw, $kw, $kw]);
+            }
+            if ($status !== '' && in_array($status, ['active', 'banned'])) {
+                $where .= " AND banned = ?";
+                $params[] = $status === 'banned' ? 1 : 0;
+            }
+            // Đếm tổng số user
+            $countSql = "SELECT COUNT(*) as total FROM users WHERE $where";
+            $stmt = $this->db->prepare($countSql);
+            $stmt->execute($params);
             $total = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-            // Lấy danh sách người dùng (bỏ admin, lấy cả banned)
-            $query = "
-                SELECT id, username, email, fullname, phone, address, role, banned, created_at
-                FROM users
-                WHERE role != 'admin'
-                ORDER BY created_at DESC
-                LIMIT ? OFFSET ?
-            ";
+            // Lấy danh sách user
+            $query = "SELECT id, username, email, fullname, phone, address, role, banned, created_at FROM users WHERE $where ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            $params2 = $params;
+            $params2[] = $perPage;
+            $params2[] = $offset;
             $stmt = $this->db->prepare($query);
-            $stmt->execute([$perPage, $offset]);
+            $stmt->execute($params2);
             $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             return [
@@ -61,6 +70,8 @@ $userAdmin = new UserAdmin();
 // Xử lý phân trang - sử dụng p làm tham số phân trang để tránh xung đột với page routing
 $currentPage = isset($_GET['p']) ? (int)$_GET['p'] : 1;
 $perPage = 10;
+$keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+$status = isset($_GET['status']) ? $_GET['status'] : '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['user_id'])) {
     $uid = (int)$_POST['user_id'];
@@ -71,15 +82,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['use
     }
 }
 
-// Thêm dòng này để lấy danh sách user và tổng số trang
-$result = $userAdmin->getUsers($currentPage, $perPage);
+$result = $userAdmin->getUsers($currentPage, $perPage, $keyword, $status);
 $users = $result['users'];
 $totalPages = $result['totalPages'];
 ?>
 
-<!-- Tiêu đề -->
+<!-- Tiêu đề + Form lọc -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="h4 mb-0">Quản lý người dùng</h2>
+    <form class="d-flex gap-2" method="get" action="">
+        <input type="hidden" name="page" value="admin">
+        <input type="hidden" name="section" value="users">
+        <input type="text" class="form-control" name="keyword" placeholder="Tìm kiếm..." value="<?php echo htmlspecialchars($keyword); ?>" style="max-width:180px;">
+        <select name="status" class="form-select" style="max-width:120px;">
+            <option value="">Tất cả</option>
+            <option value="active" <?php if($status==='active') echo 'selected'; ?>>Active</option>
+            <option value="banned" <?php if($status==='banned') echo 'selected'; ?>>Banned</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Lọc</button>
+    </form>
 </div>
 
 <!-- Hiển thị thông báo lỗi nếu có -->
@@ -156,7 +177,7 @@ $totalPages = $result['totalPages'];
     <ul class="pagination justify-content-center">
         <?php for ($i = 1; $i <= $totalPages; $i++): ?>
             <li class="page-item <?php echo $i === $currentPage ? 'active' : ''; ?>">
-                <a class="page-link" href="?page=admin&section=users&p=<?php echo $i; ?>">
+                <a class="page-link" href="?page=admin&section=users&p=<?php echo $i; ?>&keyword=<?php echo urlencode($keyword); ?>&status=<?php echo urlencode($status); ?>">
                     <?php echo $i; ?>
                 </a>
             </li>

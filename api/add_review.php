@@ -129,7 +129,7 @@ try {
     // Kiểm tra đã mua hàng chưa
     $sql = "SELECT COUNT(*) FROM order_items oi
             JOIN orders o ON oi.order_id = o.id
-            WHERE oi.item_id = ? AND o.user_id = ? AND o.status IN ('completed', 'shipping')";
+            WHERE oi.item_id = ? AND o.user_id = ? AND o.order_status IN ('completed')";
     $stmt = $mysqli->prepare($sql);
     $stmt->bind_param('ii', $id_food, $user_id);
     $stmt->execute();
@@ -143,8 +143,8 @@ try {
     }
 
     // Thêm đánh giá mới với ảnh
-    $stmt = $mysqli->prepare("INSERT INTO comments (id_food, id_account, username, star, date, detail, images, photos) VALUES (?, 0, ?, ?, NOW(), ?, ?, '')");
-    $stmt->bind_param('isiss', $id_food, $username, $star, $detail, $imagesJson);
+    $stmt = $mysqli->prepare("INSERT INTO comments (id_food, id_account, username, star, date, detail, images) VALUES (?, ?, ?, ?, NOW(), ?, ?)");
+    $stmt->bind_param('iisiss', $id_food, $user_id, $username, $star, $detail, $imagesJson);
 
     if ($stmt->execute()) {
         echo json_encode(['success' => true, 'message' => 'Đánh giá đã được thêm thành công']);

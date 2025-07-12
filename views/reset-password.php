@@ -60,19 +60,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
     <?php if (!$success): ?>
     <form method="POST" autocomplete="off">
-      <div class="form-group">
+      <div class="form-group" style="position:relative;">
         <label for="password">Mật khẩu mới</label>
         <input type="password" id="password" name="password" required minlength="6" placeholder="Nhập mật khẩu mới" />
+        <button type="button" id="togglePassword1" aria-label="Hiện mật khẩu" class="btn-toggle-pw">
+          <span class="icon-open" style="position: absolute; right: -4px; top: 50%; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0;">🙈</span>
+          <span class="icon-closed" style="position: absolute; right: -4px; top: 50%; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0; display:none;">🙉</span>
+        </button>
       </div>
-      <div class="form-group">
+      <div class="form-group" style="position:relative;">
         <label for="confirm">Nhập lại mật khẩu</label>
         <input type="password" id="confirm" name="confirm" required minlength="6" placeholder="Nhập lại mật khẩu" />
+        <button type="button" id="togglePassword2" aria-label="Hiện mật khẩu" class="btn-toggle-pw">
+          <span class="icon-open" style="position: absolute; right: -4px; top: 50%; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0;">🙈</span>
+          <span class="icon-closed" style="position: absolute; right: -4px; top: 50%; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0; display:none;">🙉</span>
+        </button>
       </div>
       <button type="submit" class="btn-reset" style="background: #248a5a; color: #fff; font-weight: 600; border: none; border-radius: 8px; padding: .75rem; font-size: 1rem; transition: background .2s, transform .1s; cursor: pointer; margin-top: 1rem;">Đặt lại mật khẩu</button>
-    </form>
+<script>
+(() => {
+  function setupToggle(pwId, btnId) {
+    const pwInput = document.getElementById(pwId);
+    const btn     = document.getElementById(btnId);
+    if (!pwInput || !btn) return;
+    const iconOpen   = btn.querySelector('.icon-open');
+    const iconClosed = btn.querySelector('.icon-closed');
+    btn.addEventListener('click', () => {
+      const isHidden = pwInput.type === 'password';
+      pwInput.type = isHidden ? 'text' : 'password';
+      iconOpen.style.display   = isHidden ? 'none' : '';
+      iconClosed.style.display = isHidden ? '' : 'none';
+      btn.setAttribute('aria-label', isHidden ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
+    });
+  }
+  setupToggle('password', 'togglePassword1');
+  setupToggle('confirm', 'togglePassword2');
+})();
+</script>
+      </form>
     <?php endif; ?>
-    <div class="back-link">
-      <a href="layout.php?page=login">&larr; Quay lại đăng nhập</a>
-    </div>
   </div>
-</div>

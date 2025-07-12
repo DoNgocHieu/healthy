@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .then(() => {
       modal.classList.remove('show');
-      window.location.href = 'layout.php?page=order_confirm';
+      window.location.href = 'layout.php?page=cart';
     })
     .catch(err => {
       console.error('Error selecting address:', err);
@@ -198,9 +198,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Ẩn/hiện form thêm mới
   btnAdd?.addEventListener('click', () => {
-    addForm.style.display = 'block';
-    btnAdd.style.display = 'none';
-    btnConfirmAll.style.display = 'none';
+    // addForm.style.display = 'block';
+    // btnAdd.style.display = 'none';
+    // btnConfirmAll.style.display = 'none';
+    window.location.href = '/healthy/views/layout.php?page=address';
   });
 
   cancelAdd?.addEventListener('click', () => {

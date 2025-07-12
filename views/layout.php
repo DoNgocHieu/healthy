@@ -390,6 +390,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
             <li><a href="/healthy/views/layout.php?page=admin&section=dashboard">Quản lý</a></li>
           <?php endif; ?>
           <li><a href="/healthy/views/layout.php?page=info">Thông tin</a></li>
+          <li><a href="/healthy/views/layout.php?page=change_password">Thay đổi mật khẩu</a></li>
           <li><a href="/healthy/views/layout.php?page=logout">Đăng xuất</a></li>
         <?php else: ?>
           <li><a href="/healthy/views/layout.php?page=login">Đăng nhập</a></li>
@@ -407,7 +408,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['ajax'])) {
   <?php
   $allowPages = [
     'login','signin','monmoi','khaivi','trongoi','dauhu','nam',
-    'raucuqua','monchinh','canh','lau','trabanh',
+    'raucuqua','monchinh','canh','lau','trabanh','payment_failed',
+    'change_password',
     'item','vct','lh','home','hd1','cart','dl','info','logout','forgot_password','points','address','checkout','footer',
     'order_confirm','order_success','orders','admin','favorites','post_detail'
   ];

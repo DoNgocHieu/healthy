@@ -123,13 +123,9 @@ ob_start();
                                 <?php echo htmlspecialchars($_SESSION['fullname'] ?? 'Admin'); ?>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                              
                                 <li>
-                                    <a class="dropdown-item" href="/healthy/views/profile/index.php">
-                                        <i class="bi bi-person"></i> Tài khoản
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="/healthy/views/profile/change_password.php">
+                                    <a class="dropdown-item" href="/healthy/views/layout.php?page=change_password">
                                         <i class="bi bi-key"></i> Đổi mật khẩu
                                     </a>
                                 </li>

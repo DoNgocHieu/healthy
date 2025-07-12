@@ -4,9 +4,17 @@ require_once '../config/Database.php';
 
 try {
     // Lấy dữ liệu từ request
-    $data = json_decode(file_get_contents('php://input'), true);
+    $id = null;
+    if (isset($_POST['id'])) {
+        $id = $_POST['id'];
+    } else {
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (isset($data['id'])) {
+            $id = $data['id'];
+        }
+    }
 
-    if (!isset($data['id'])) {
+    if (!$id) {
         throw new Exception('ID đánh giá không được cung cấp');
     }
 
@@ -14,7 +22,7 @@ try {
 
     // Xóa đánh giá
     $stmt = $db->prepare('DELETE FROM comments WHERE id = ?');
-    $stmt->execute([$data['id']]);
+    $stmt->execute([$id]);
 
     if ($stmt->rowCount() === 0) {
         throw new Exception('Không tìm thấy đánh giá để xóa');

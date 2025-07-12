@@ -300,3 +300,749 @@ id_food: '2' (empty: NO)
 username: 'sdfgdfg' (empty: NO)
 star: '3' (empty: NO)
 detail: 'dfgfdg' (empty: NO)
+
+2025-07-12 18:37:25 - New request
+POST: Array
+(
+    [id_food] => 2
+    [username] => DNH
+    [star] => 3
+    [detail] => Hell0
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryI0B3ulhAlB9UdnHL
+Validation check:
+id_food: '2' (empty: NO)
+username: 'DNH' (empty: NO)
+star: '3' (empty: NO)
+detail: 'Hell0' (empty: NO)
+
+2025-07-12 18:37:53 - New request
+POST: Array
+(
+    [id_food] => 2
+    [username] => DNH
+    [star] => 3
+    [detail] => Hell0
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryJp9LZ6KME5HUaELg
+Validation check:
+id_food: '2' (empty: NO)
+username: 'DNH' (empty: NO)
+star: '3' (empty: NO)
+detail: 'Hell0' (empty: NO)
+
+2025-07-12 18:37:56 - New request
+POST: Array
+(
+    [id_food] => 2
+    [username] => DNH
+    [star] => 3
+    [detail] => Hell0
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryEqG9upHJdKIua3BE
+Validation check:
+id_food: '2' (empty: NO)
+username: 'DNH' (empty: NO)
+star: '3' (empty: NO)
+detail: 'Hell0' (empty: NO)
+
+2025-07-12 19:29:16 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => fds
+    [star] => 2
+    [detail] => d
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary3LEHiVQyD1a5i6Bf
+Validation check:
+id_food: '1' (empty: NO)
+username: 'fds' (empty: NO)
+star: '2' (empty: NO)
+detail: 'd' (empty: NO)
+
+2025-07-12 19:29:22 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => fds
+    [star] => 2
+    [detail] => d
+)
+
+FILES: Array
+(
+    [images] => Array
+        (
+            [name] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\wamp64\tmp\php25B7.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 130396
+                )
+
+        )
+
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryzRPhEKz0HCdqaGsE
+Validation check:
+id_food: '1' (empty: NO)
+username: 'fds' (empty: NO)
+star: '2' (empty: NO)
+detail: 'd' (empty: NO)
+
+2025-07-12 19:29:29 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => fds
+    [star] => 2
+    [detail] => d
+)
+
+FILES: Array
+(
+    [images] => Array
+        (
+            [name] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\wamp64\tmp\php42B6.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 130396
+                )
+
+        )
+
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryr4OqQelcdU40QztE
+Validation check:
+id_food: '1' (empty: NO)
+username: 'fds' (empty: NO)
+star: '2' (empty: NO)
+detail: 'd' (empty: NO)
+
+2025-07-12 19:38:23 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => fds
+    [star] => 2
+    [detail] => d
+)
+
+FILES: Array
+(
+    [images] => Array
+        (
+            [name] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\wamp64\tmp\php66A3.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 130396
+                )
+
+        )
+
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryyIJwA5WSQmh1l79g
+Validation check:
+id_food: '1' (empty: NO)
+username: 'fds' (empty: NO)
+star: '2' (empty: NO)
+detail: 'd' (empty: NO)
+
+2025-07-12 19:41:54 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => fds
+    [star] => 2
+    [detail] => d
+)
+
+FILES: Array
+(
+    [images] => Array
+        (
+            [name] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\wamp64\tmp\phpA218.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 130396
+                )
+
+        )
+
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryMISFea0E29JUNLjN
+Validation check:
+id_food: '1' (empty: NO)
+username: 'fds' (empty: NO)
+star: '2' (empty: NO)
+detail: 'd' (empty: NO)
+
+2025-07-12 19:41:58 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => fds
+    [star] => 2
+    [detail] => d
+)
+
+FILES: Array
+(
+    [images] => Array
+        (
+            [name] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\wamp64\tmp\phpAF1A.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 130396
+                )
+
+        )
+
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundarygyaHb7tNn1RXdDPQ
+Validation check:
+id_food: '1' (empty: NO)
+username: 'fds' (empty: NO)
+star: '2' (empty: NO)
+detail: 'd' (empty: NO)
+
+2025-07-12 19:42:00 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => fds
+    [star] => 2
+    [detail] => d
+)
+
+FILES: Array
+(
+    [images] => Array
+        (
+            [name] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\wamp64\tmp\phpB7A6.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 130396
+                )
+
+        )
+
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryAXiEB3jinJrJWkkB
+Validation check:
+id_food: '1' (empty: NO)
+username: 'fds' (empty: NO)
+star: '2' (empty: NO)
+detail: 'd' (empty: NO)
+
+2025-07-12 19:47:10 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => sd
+    [star] => 3
+    [detail] => sad
+)
+
+FILES: Array
+(
+    [images] => Array
+        (
+            [name] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\wamp64\tmp\php72E5.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 130396
+                )
+
+        )
+
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryBPB48IR3nbaZKw4Z
+Validation check:
+id_food: '1' (empty: NO)
+username: 'sd' (empty: NO)
+star: '3' (empty: NO)
+detail: 'sad' (empty: NO)
+
+2025-07-12 19:47:46 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => sd
+    [star] => 3
+    [detail] => sad
+)
+
+FILES: Array
+(
+    [images] => Array
+        (
+            [name] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\wamp64\tmp\phpFEDA.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 130396
+                )
+
+        )
+
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundarypiORR8f3csWfywAY
+Validation check:
+id_food: '1' (empty: NO)
+username: 'sd' (empty: NO)
+star: '3' (empty: NO)
+detail: 'sad' (empty: NO)
+
+2025-07-12 19:50:08 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => sd
+    [star] => 3
+    [detail] => sd
+)
+
+FILES: Array
+(
+    [images] => Array
+        (
+            [name] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\wamp64\tmp\php2B22.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 130396
+                )
+
+        )
+
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryOqgjeBN6wcruVBR9
+Validation check:
+id_food: '1' (empty: NO)
+username: 'sd' (empty: NO)
+star: '3' (empty: NO)
+detail: 'sd' (empty: NO)
+
+2025-07-12 19:53:41 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => ew
+    [star] => 3
+    [detail] => s
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryMdPDySei8Iqng4lm
+Validation check:
+id_food: '1' (empty: NO)
+username: 'ew' (empty: NO)
+star: '3' (empty: NO)
+detail: 's' (empty: NO)
+
+2025-07-12 19:57:44 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => ew
+    [star] => 3
+    [detail] => s
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryhdH1y9iV7Wjtft5b
+Validation check:
+id_food: '1' (empty: NO)
+username: 'ew' (empty: NO)
+star: '3' (empty: NO)
+detail: 's' (empty: NO)
+
+2025-07-12 20:04:37 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => d
+    [star] => 3
+    [detail] => d
+)
+
+FILES: Array
+(
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryhLhMBfZq5uhSgrq0
+Validation check:
+id_food: '1' (empty: NO)
+username: 'd' (empty: NO)
+star: '3' (empty: NO)
+detail: 'd' (empty: NO)
+
+2025-07-12 20:45:26 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => Thanh Xuân
+    [star] => 3
+    [detail] => Good
+)
+
+FILES: Array
+(
+    [images] => Array
+        (
+            [name] => Array
+                (
+                    [0] => Isushi.jpeg
+                    [1] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => Isushi.jpeg
+                    [1] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                    [1] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\wamp64\tmp\phpCCFD.tmp
+                    [1] => C:\wamp64\tmp\phpCD0E.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                    [1] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 731342
+                    [1] => 130396
+                )
+
+        )
+
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryBXzBiB3DmhSTFRTU
+Validation check:
+id_food: '1' (empty: NO)
+username: 'Thanh Xuân' (empty: NO)
+star: '3' (empty: NO)
+detail: 'Good' (empty: NO)
+
+2025-07-12 21:01:36 - New request
+POST: Array
+(
+    [id_food] => 1
+    [username] => Thanh Xuân
+    [star] => 3
+    [detail] => ds
+)
+
+FILES: Array
+(
+    [images] => Array
+        (
+            [name] => Array
+                (
+                    [0] => Isushi.jpeg
+                    [1] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [full_path] => Array
+                (
+                    [0] => Isushi.jpeg
+                    [1] => mat-bang-nha-hang-buffet-05.jpg
+                )
+
+            [type] => Array
+                (
+                    [0] => image/jpeg
+                    [1] => image/jpeg
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => C:\wamp64\tmp\php96E2.tmp
+                    [1] => C:\wamp64\tmp\php96E3.tmp
+                )
+
+            [error] => Array
+                (
+                    [0] => 0
+                    [1] => 0
+                )
+
+            [size] => Array
+                (
+                    [0] => 731342
+                    [1] => 130396
+                )
+
+        )
+
+)
+
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary5PF2IN8kAdMKmdnL
+Validation check:
+id_food: '1' (empty: NO)
+username: 'Thanh Xuân' (empty: NO)
+star: '3' (empty: NO)
+detail: 'ds' (empty: NO)

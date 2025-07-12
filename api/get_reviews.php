@@ -7,10 +7,10 @@ if (!$id_food) {
     exit;
 }
 $mysqli = getDbConnection();
-$stmt = $mysqli->prepare("SELECT username, star, date, detail, images, photos FROM comments WHERE id_food = ? ORDER BY id DESC");
+$stmt = $mysqli->prepare("SELECT username, star, date, detail, images FROM comments WHERE id_food = ? ORDER BY id DESC");
 $stmt->bind_param('i', $id_food);
 $stmt->execute();
-$stmt->bind_result($username, $star, $date, $detail, $images, $photos);
+$stmt->bind_result($username, $star, $date, $detail, $images);
 
 $reviews = [];
 while ($stmt->fetch()) {
@@ -29,7 +29,6 @@ while ($stmt->fetch()) {
         'date'     => $date,
         'detail'   => $detail,
         'images'   => $imageArray,
-        'photos'   => $photos
     ];
 }
 
