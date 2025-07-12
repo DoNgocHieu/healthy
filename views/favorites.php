@@ -32,219 +32,243 @@ $userId = $_SESSION['user_id'];
     </div>
 </div>
 
+<div id="itemModalOverlay" class="item-modal-bg" style="display:none;">
+  <div class="item-modal-box">
+    <button class="modal-close" onclick="closeItemModal()"></button>
+    <div id="itemModalContent"></div>
+  </div>
+</div>
+    </div>
+</div>
+
 <style>
+/* Favorites header giữ nguyên */
 .favorites-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem 1rem;
 }
-
 .favorites-header {
     text-align: center;
     margin-bottom: 3rem;
 }
-
 .favorites-header h1 {
     font-size: 2.5rem;
     color: #2c5530;
     margin-bottom: 0.5rem;
 }
-
 .favorites-header h1 i {
     color: #e74c3c;
     margin-right: 1rem;
 }
-
 .favorites-header p {
     font-size: 1.1rem;
     color: #6c757d;
     margin: 0;
 }
-
 .loading {
     text-align: center;
     padding: 4rem 0;
     color: #6c757d;
 }
-
 .loading i {
     font-size: 2rem;
     margin-bottom: 1rem;
     display: block;
 }
-
-.favorites-grid {
+/* Monmoi grid/card style cho favorites */
+.monmoi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 2rem;
     margin-top: 2rem;
 }
-
-.favorite-card {
+/* Card đẹp hơn, spacing, shadow, hover */
+.monmoi-card {
     background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(44,85,48,0.10);
     overflow: hidden;
-    transition: all 0.3s ease;
-    cursor: pointer;
+    transition: box-shadow 0.3s, transform 0.3s;
     position: relative;
+    padding-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0.5rem;
 }
-
-.favorite-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+.monmoi-card:hover {
+    box-shadow: 0 12px 40px rgba(44,85,48,0.18);
+    transform: translateY(-6px) scale(1.01);
 }
-
-.favorite-card-image {
-    position: relative;
-    height: 200px;
-    overflow: hidden;
-}
-
-.favorite-card-image img {
+.monmoi-card img {
     width: 100%;
-    height: 100%;
+    height: 320px;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 2px 8px rgba(44,85,48,0.08);
 }
-
-.favorite-card:hover .favorite-card-image img {
-    transform: scale(1.05);
+.monmoi-card .name {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #2c5530;
+    margin: 1rem 0 0.5rem 0;
+    text-align: center;
+    letter-spacing: 0.5px;
 }
-
-.remove-favorite {
+.monmoi-card .price {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #e67e22;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+.monmoi-card .qty-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    justify-content: center;
+}
+.monmoi-card .qty-control button {
+    background: #f5f5f5;
+    color: #222;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(44,85,48,0.08);
+    transition: background 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.monmoi-card .qty-control button i.fa-shopping-cart {
+    color: #222 !important;
+    font-size: 1.2rem;
+    margin-right: 2px;
+}
+.monmoi-card .qty-control button:hover:not(.disabled) {
+    background: #eaeaea;
+    transform: translateY(-1px) scale(1.05);
+}
+.monmoi-card .qty-control .disabled {
+    background: #e0e0e0;
+    color: #aaa;
+    cursor: not-allowed;
+    transform: none;
+}
+.monmoi-card .view-detail-btn {
+    background: #222;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background 0.2s, transform 0.2s;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(44,85,48,0.08);
+}
+.monmoi-card .view-detail-btn:hover {
+    background: #444;
+    transform: translateY(-1px) scale(1.05);
+}
+.monmoi-card .card-header {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(255, 255, 255, 0.9);
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+}
+.monmoi-card .favorite-btn {
+    background: rgba(255,255,255,0.95);
     border: none;
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
-    opacity: 0;
-    transform: scale(0.8);
+    box-shadow: 0 2px 8px rgba(44,85,48,0.08);
+    transition: box-shadow 0.2s, background 0.2s;
 }
-
-.favorite-card:hover .remove-favorite {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.remove-favorite:hover {
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.remove-favorite i {
+.monmoi-card .favorite-btn i {
     color: #e74c3c;
-    font-size: 16px;
+    font-size: 18px;
 }
-
-.favorite-card-content {
-    padding: 1.5rem;
+.monmoi-card .favorite-btn:hover {
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(44,85,48,0.15);
 }
-
-.favorite-card-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #2c5530;
-    margin-bottom: 0.5rem;
-    line-height: 1.4;
-}
-
-.favorite-card-price {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #e67e22;
-    margin-bottom: 1rem;
-}
-
-.favorite-card-description {
-    font-size: 0.9rem;
-    color: #6c757d;
-    line-height: 1.5;
-    margin-bottom: 1rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.favorite-card-actions {
+/* Modal overlay */
+.item-modal-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(44,85,48,0.15);
+    z-index: 9999;
     display: flex;
-    gap: 0.5rem;
     align-items: center;
+    justify-content: center;
 }
-
-.add-to-cart-btn {
-    flex: 1;
-    background: #28a745;
-    color: white;
+.item-modal-box {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    max-width: 480px;
+    width: 100%;
+    padding: 2rem 1.5rem 1.5rem 1.5rem;
+    position: relative;
+}
+.modal-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 32px;
+    height: 32px;
+    background: #fff;
     border: none;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     cursor: pointer;
-    transition: all 0.3s ease;
+    z-index: 2;
 }
-
-.add-to-cart-btn:hover {
-    background: #218838;
-    transform: translateY(-1px);
+.modal-close:after {
+    content: '\00d7';
+    font-size: 22px;
+    color: #e74c3c;
+    display: block;
+    text-align: center;
+    line-height: 32px;
 }
-
-.add-to-cart-btn:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.view-detail-btn {
-    background: #17a2b8;
-    color: white;
-    border: none;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
-
-.view-detail-btn:hover {
-    background: #138496;
-    transform: translateY(-1px);
-}
-
 .empty-favorites {
     text-align: center;
     padding: 4rem 2rem;
     color: #6c757d;
 }
-
 .empty-favorites i {
     font-size: 4rem;
     color: #dee2e6;
     margin-bottom: 1rem;
     display: block;
 }
-
 .empty-favorites h3 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
     color: #495057;
 }
-
 .empty-favorites p {
     font-size: 1.1rem;
     margin-bottom: 2rem;
 }
-
 .browse-menu-btn {
     background: #28a745;
     color: white;
@@ -258,42 +282,42 @@ $userId = $_SESSION['user_id'];
     text-decoration: none;
     display: inline-block;
 }
-
 .browse-menu-btn:hover {
     background: #218838;
     transform: translateY(-2px);
     color: white;
     text-decoration: none;
 }
-
-@media (max-width: 768px) {
-    .favorites-grid {
+@media (max-width: 900px) {
+    .monmoi-grid {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1.5rem;
+        gap: 1.2rem;
     }
-
-    .favorites-header h1 {
-        font-size: 2rem;
+    .monmoi-card img {
+        height: 200px;
     }
-
-    .favorite-card-content {
-        padding: 1rem;
+}
+@media (max-width: 600px) {
+    .monmoi-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .monmoi-card img {
+        height: 160px;
+    }
+    .item-modal-box {
+        max-width: 98vw;
+        padding: 1rem 0.5rem 1rem 0.5rem;
     }
 }
 </style>
 
 <script>
-// Load favorites khi trang được tải
 document.addEventListener('DOMContentLoaded', function() {
-    loadUserFavorites();
-});
-
-function loadUserFavorites() {
     fetch('../api/get_favorites.php')
         .then(response => response.json())
         .then(data => {
             const container = document.getElementById('favorites-content');
-
             if (data.status === 'success') {
                 if (data.favorites.length === 0) {
                     container.innerHTML = `
@@ -307,45 +331,38 @@ function loadUserFavorites() {
                         </div>
                     `;
                 } else {
-                    let html = '<div class="favorites-grid">';
-
+                    let html = '<div class="monmoi-grid">';
                     data.favorites.forEach(item => {
                         const isOutOfStock = item.quantity <= 0;
                         html += `
-                            <div class="favorite-card" data-item-id="${item.id}">
-                                <div class="favorite-card-image">
-                                    <img src="../img/${item.image_url}" alt="${item.name}">
-                                    <button class="remove-favorite favorite-btn" data-item-id="${item.id}" title="Xóa khỏi yêu thích">
-                                        <i class="fa-solid fa-heart"></i>
-                                    </button>
-                                </div>
-                                <div class="favorite-card-content">
-                                    <h3 class="favorite-card-title">${item.name}</h3>
-                                    <div class="favorite-card-price">${new Intl.NumberFormat('vi-VN').format(item.price)} đ</div>
-                                    <p class="favorite-card-description">${item.description}</p>
-                                    <div class="favorite-card-actions">
-                                        <button class="add-to-cart-btn ${isOutOfStock ? 'disabled' : ''}"
-                                                ${isOutOfStock ? 'disabled' : ''}
-                                                onclick="addToCartFromFavorites(${item.id})"
-                                                data-item-id="${item.id}">
-                                            ${isOutOfStock ? '<i class="fa-solid fa-lock"></i> Hết hàng' : '<i class="fa-solid fa-shopping-cart"></i> Thêm vào giỏ'}
-                                        </button>
-                                        <button class="view-detail-btn" onclick="showItemModalById(${item.id})">
-                                            <i class="fa-solid fa-eye"></i> Xem
-                                        </button>
-                                    </div>
-                                </div>
+                            <div class="monmoi-card" data-item-id="${item.id}">
+                              <div class="card-header">
+                                <button class="favorite-btn" data-item-id="${item.id}" title="Xóa khỏi yêu thích" onclick="event.stopPropagation(); window.favoritesManager && window.favoritesManager.removeFavorite(${item.id});">
+                                  <i class="fa-solid fa-heart"></i>
+                                </button>
+                              </div>
+                              <img src="../img/${item.image_url}" alt="${item.name}">
+                              <div class="name">${item.name}</div>
+                              <div class="price">${new Intl.NumberFormat('vi-VN').format(item.price)} đ</div>
+                              <div class="qty-control" id="cart-controls-${item.id}" onclick="event.stopPropagation()">
+                                ${isOutOfStock ? `
+                                  <button class="add-to-cart-btn disabled" onclick="event.stopPropagation()">
+                                    <i class="fa-solid fa-lock"></i>
+                                  </button>
+                                ` : `
+                                  <button onclick="window.addToCart && window.addToCart(${item.id})">
+                                    <i class="fa-solid fa-shopping-cart"></i> Thêm vào giỏ
+                                  </button>
+                                `}
+                              </div>
+                              <button class="view-detail-btn" onclick="showItemModalById(${item.id}); event.stopPropagation();">
+                                <i class="fa-solid fa-eye"></i> Xem
+                              </button>
                             </div>
                         `;
                     });
-
                     html += '</div>';
                     container.innerHTML = html;
-
-                    // Khởi tạo favorites manager cho các nút heart
-                    if (window.favoritesManager) {
-                        window.favoritesManager.initializeFavorites();
-                    }
                 }
             } else if (data.status === 'not_logged_in') {
                 container.innerHTML = `
@@ -364,7 +381,7 @@ function loadUserFavorites() {
                         <i class="fa-solid fa-exclamation-triangle"></i>
                         <h3>Có lỗi xảy ra</h3>
                         <p>${data.message || 'Không thể tải danh sách yêu thích'}</p>
-                        <button onclick="loadUserFavorites()" class="browse-menu-btn">
+                        <button onclick="location.reload()" class="browse-menu-btn">
                             <i class="fa-solid fa-refresh"></i> Thử lại
                         </button>
                     </div>
@@ -378,41 +395,27 @@ function loadUserFavorites() {
                     <i class="fa-solid fa-wifi"></i>
                     <h3>Lỗi kết nối</h3>
                     <p>Không thể kết nối đến máy chủ</p>
-                    <button onclick="loadUserFavorites()" class="browse-menu-btn">
+                    <button onclick="location.reload()" class="browse-menu-btn">
                         <i class="fa-solid fa-refresh"></i> Thử lại
                     </button>
                 </div>
             `;
         });
-}
-
-function addToCartFromFavorites(itemId) {
-    if (typeof addToCart === 'function') {
-        addToCart(itemId);
-    } else if (typeof window.addToCart === 'function') {
-        window.addToCart(itemId);
-    } else {
-        console.error('Hàm addToCart không tồn tại');
-        alert('Có lỗi xảy ra khi thêm vào giỏ hàng');
-    }
-}
-
-// Listen cho sự kiện remove favorite để reload trang
-document.addEventListener('favoriteRemoved', function(e) {
-    // Xóa card khỏi giao diện
-    const card = document.querySelector(`[data-item-id="${e.detail.itemId}"]`);
-    if (card) {
-        card.style.opacity = '0';
-        card.style.transform = 'scale(0.8)';
-        setTimeout(() => {
-            card.remove();
-
-            // Kiểm tra nếu không còn item nào
-            const remainingCards = document.querySelectorAll('.favorite-card');
-            if (remainingCards.length === 0) {
-                loadUserFavorites();
-            }
-        }, 300);
-    }
 });
+
+function showItemModalById(id) {
+  fetch('../views/item.php?id=' + id, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: 'ajax=1'
+  })
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('itemModalContent').innerHTML = html;
+      document.getElementById('itemModalOverlay').style.display = 'block';
+    });
+}
+function closeItemModal() {
+  document.getElementById('itemModalOverlay').style.display = 'none';
+}
 </script>

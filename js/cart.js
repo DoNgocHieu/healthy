@@ -62,7 +62,6 @@ if (window.cartJsInitialized) {
 			const fmt = (x) => x.toLocaleString('vi-VN') + ' đ';
 			document.getElementById('subtotal').textContent = fmt(subtotal);
 			document.getElementById('discount').textContent = '0 đ';
-			document.getElementById('shipping').textContent = '0 đ';
 			document.getElementById('total').textContent = fmt(subtotal);
 		}
 		function handleIncrease(itemId, qtyChange, maxQty) {
@@ -274,7 +273,6 @@ if (window.cartJsInitialized) {
 		const fmt = (x) => x.toLocaleString('vi-VN') + ' đ';
 		document.getElementById('subtotal').textContent = fmt(subtotal);
 		document.getElementById('discount').textContent = '0 đ';
-		document.getElementById('shipping').textContent = '0 đ';
 		document.getElementById('total').textContent = fmt(subtotal);
 
 		// Cập nhật checkbox “Chọn tất cả”

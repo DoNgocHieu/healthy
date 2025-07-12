@@ -11,9 +11,9 @@ if (!$auth->isLoggedIn()) {
 
 $userId = $auth->getCurrentUser()['id'];
 $cart = new Cart($userId);
-$profile = new UserProfile();
-
 $items = $cart->getItems();
+if (empty($items)) {
+}
 $invalidItems = $cart->validateStock();
 $addresses = $profile->getUserAddresses($userId);
 ?>

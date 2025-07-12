@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once dirname(__DIR__) . '/config/config.php';
 
 // Debug - Log all received data
@@ -117,6 +118,29 @@ try {
     }
 
     $checkStmt->close();
+
+    $user_id = $_SESSION['user_id'] ?? 0;
+
+    if (!$user_id) {
+        echo json_encode(['success' => false, 'message' => 'Bạn cần đăng nhập để bình luận!']);
+        exit;
+    }
+
+    // Kiểm tra đã mua hàng chưa
+    $sql = "SELECT COUNT(*) FROM order_items oi
+            JOIN orders o ON oi.order_id = o.id
+            WHERE oi.item_id = ? AND o.user_id = ? AND o.status IN ('completed', 'shipping')";
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param('ii', $id_food, $user_id);
+    $stmt->execute();
+    $stmt->bind_result($count);
+    $stmt->fetch();
+    $stmt->close();
+
+    if ($count < 1) {
+        echo json_encode(['success' => false, 'message' => 'Bạn cần mua món này trước khi đánh giá!']);
+        exit;
+    }
 
     // Thêm đánh giá mới với ảnh
     $stmt = $mysqli->prepare("INSERT INTO comments (id_food, id_account, username, star, date, detail, images, photos) VALUES (?, 0, ?, ?, NOW(), ?, ?, '')");

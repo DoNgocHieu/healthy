@@ -1,5 +1,23 @@
 <?php
+session_start();
 require_once __DIR__ . '/../config/config.php';
+$mysqli = getDbConnection();
+
+if (isset($_SESSION['user_id'])) {
+    $stmt = $mysqli->prepare("SELECT banned FROM users WHERE id=? LIMIT 1");
+    $stmt->bind_param('i', $_SESSION['user_id']);
+    $stmt->execute();
+    $stmt->bind_result($banned);
+    $stmt->fetch();
+    $stmt->close();
+
+    if (!empty($banned)) {
+        session_destroy();
+        header('Location: /healthy/views/layout.php?page=login');
+        exit;
+    }
+}
+
 require_once __DIR__ . '/../config/SiteSettingsManager.php';
 
 $page = $_GET['page'] ?? 'home';

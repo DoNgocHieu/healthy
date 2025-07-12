@@ -92,6 +92,10 @@
     background: #cce5ff;
     color: #004085;
 }
+.order-status.processing {
+    background: #d1ecf1;
+    color: #0c5460;
+}
 
 .order-status.shipping {
     background: #d4edda;

@@ -299,7 +299,7 @@ $unusedVouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="cart-box">
       <p>Tạm tính: <span id="subtotal">0 đ</span></p>
       <p>Giảm giá: <span id="discount">0 đ</span></p>
-      <p>Phí vận chuyển: <span id="shipping">0 đ</span></p>
+      <p>Phí vận chuyển: <span id="shipping">15.000 đ</span></p>
       <p style="font-weight:bold;">
         Tổng tiền: <span id="total">0 đ</span>
       </p>
@@ -333,7 +333,8 @@ function updateSubtotal() {
 }
 
 // Phí ship cố định
-shippingEl.textContent = '15.000 đ';
+const SHIPPING_FEE = 15000;
+shippingEl.textContent = SHIPPING_FEE.toLocaleString('vi-VN') + ' đ';
 
 voucherInput.addEventListener('input', function() {
   selectedVoucher = null;
@@ -367,7 +368,7 @@ applyBtn.addEventListener('click', function() {
   discountEl.textContent = discount.toLocaleString('vi-VN') + ' đ';
 
   // Tổng tiền = tạm tính - giảm giá + ship
-  let total = subtotal - discount + 15000;
+  let total = subtotal - discount + SHIPPING_FEE;
   totalEl.textContent = total.toLocaleString('vi-VN') + ' đ';
 });
 
@@ -389,11 +390,10 @@ function updateTotal() {
   discountEl.textContent = discount.toLocaleString('vi-VN') + ' đ';
 
   // Phí ship cố định
-  const shipping = 15000;
-  shippingEl.textContent = shipping.toLocaleString('vi-VN') + ' đ';
+  shippingEl.textContent = SHIPPING_FEE.toLocaleString('vi-VN') + ' đ';
 
   // Tổng tiền = tạm tính - giảm giá + ship
-  let total = subtotal - discount + shipping;
+  let total = subtotal - discount + SHIPPING_FEE;
   totalEl.textContent = total.toLocaleString('vi-VN') + ' đ';
 
   // Cập nhật số lượng món
@@ -409,9 +409,6 @@ applyBtn.addEventListener('click', function() {
   if (!selectedVoucher) return;
   updateTotal();
 });
-
-// Nếu có thay đổi số lượng món, gọi lại updateTotal()
-// Ví dụ:
 document.querySelectorAll('.qty-increase, .qty-decrease, .cart-qty-input').forEach(el => {
   el.addEventListener('change', updateTotal);
   el.addEventListener('click', updateTotal);
@@ -419,6 +416,18 @@ document.querySelectorAll('.qty-increase, .qty-decrease, .cart-qty-input').forEa
 
 document.addEventListener('DOMContentLoaded', function() {
   updateTotal();
+});
+</script>
+<script>
+// Xử lý đặt hàng khi nhấn nút Mua Hàng
+document.querySelector('.cart-checkout-btn').addEventListener('click', function() {
+  const count = document.querySelectorAll('.cart-item').length;
+  if (count < 1) {
+    alert('Vui lòng chọn ít nhất một món để mua hàng');
+    return;
+  }
+  // Chuyển sang trang xác nhận hoặc gửi dữ liệu lên server
+  window.location.href = 'layout.php?page=checkout';
 });
 </script>
 <script>

@@ -47,42 +47,14 @@
     <aside class="sidebar" aria-label="Bài viết mới">
       <h2>BÀI VIẾT MỚI</h2>
       <ul class="recent-posts">
-        <li>
-          <a href="#">
-            <img src="../img/ava1.jpg" alt="Ảnh bài viết Chiều nay ăn gì?">
-            <span>Chiều nay ăn gì? Bữa healthy đóng gói sẵn chuẩn Gu “Sống Khỏe”</span>
-          </a>
-        </li>
-        <li>
-          <a href="#">
-            <img src="../img/ava2.jpg" alt="Ảnh bài viết Salad – Dư vị của sự an yên">
-            <span>Salad – Dư vị của sự an yên</span>
-          </a>
-        </li>
-        <li>
-          <a href="#">
-            <img src="../img/ava3.jpg" alt="Ảnh bài viết Salad & Tình Yêu">
-            <span>Salad & Tình Yêu: Buông lòng để thưởng thức</span>
-          </a>
-        </li>
-        <li>
-          <a href="#">
-            <img src="../img/ava4.jpg" alt="Ảnh bài viết Salad & những lần được bỏ qua">
-            <span>Salad & những “lần” được bỏ qua...</span>
-          </a>
-        </li>
-        <li>
-          <a href="#">
-            <img src="../img/ava5.jpg" alt="Ảnh bài viết Sự thật phũ phàng về bữa trưa công sở">
-            <span>Sự thật phũ phàng về bữa trưa công sở...</span>
-          </a>
-        </li>
-        <li>
-          <a href="#">
-            <img src="../img/ava6.jpg" alt="Ảnh bài viết Say bye bye đồ ăn dầu mỡ">
-            <span>"Say bye bye" đồ ăn dầu mỡ...</span>
-          </a>
-        </li>
+        <?php foreach ($posts as $post): ?>
+          <li>
+            <a href="<?php echo 'layout.php?page=' . urlencode($post['page']); ?>">
+              <img src="<?php echo '../ct/' . htmlspecialchars($post['img']); ?>" alt="Ảnh bài viết <?php echo htmlspecialchars($post['title']); ?>">
+              <span><?php echo htmlspecialchars($post['title']); ?></span>
+            </a>
+          </li>
+        <?php endforeach; ?>
       </ul>
     </aside>
   </main>

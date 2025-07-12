@@ -53,6 +53,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 'pending' => 'Chờ xác nhận',
                                 'confirmed' => 'Đã xác nhận',
                                 'shipping' => 'Đang giao hàng',
+                                'processing' => 'Đang xử lý',
                                 'completed' => 'Đã giao hàng',
                                 'cancelled' => 'Đã hủy'
                             ];
