@@ -3,6 +3,7 @@ header('Content-Type: application/json');
 require_once __DIR__ . '/../../config/Auth.php';
 require_once __DIR__ . '/../../config/Cart.php';
 require_once __DIR__ . '/../../config/Order.php';
+require_once __DIR__ . '/../../config/config.php'; // Thêm dòng này
 
 $auth = new Auth();
 if (!$auth->isLoggedIn()) {
@@ -14,6 +15,7 @@ if (!$auth->isLoggedIn()) {
 $userId = $auth->getCurrentUser()['id'];
 $cart = new Cart($userId);
 $order = new Order($userId);
+$pdo = getDb(); 
 
 // Validate cart
 $items = $cart->getItems();
@@ -22,16 +24,6 @@ if (empty($items)) {
     echo json_encode([
         'success' => false,
         'message' => 'Giỏ hàng trống'
-    ]);
-    exit;
-}
-
-$invalidItems = $cart->validateStock();
-if (!empty($invalidItems)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Một số món không đủ số lượng trong kho'
     ]);
     exit;
 }
@@ -64,6 +56,7 @@ if (!isset($data['payment_method']) || !in_array($data['payment_method'], ['COD'
 $result = $order->create($cart, $data);
 
 if ($result['success']) {
+ 
     echo json_encode([
         'success' => true,
         'order_id' => $result['order_id'],

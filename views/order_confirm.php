@@ -40,8 +40,15 @@ $subtotal = array_reduce(
 );
 
 // Phí ship và giảm giá (có thể thay đổi logic tính toán)
-$shipping = 0; // Miễn phí ship
+$shipping = ($subtotal < 200000) ? 15000 : 0; // Miễn phí ship với đơn hàng trên 200.000đ
 $discount = 0; // Chưa có mã giảm giá
+if (!empty($_SESSION['discount_value'])) {
+    $discount = (int)$_SESSION['discount_value'];
+}
+// hoặc nếu dùng $_POST
+if (!empty($_POST['discount_value'])) {
+    $discount = (int)$_POST['discount_value'];
+}
 
 $total = $subtotal + $shipping - $discount;
 
@@ -149,6 +156,40 @@ if ($selectedAddressId) {
             </div>
         </div>
 
+        <input type="hidden" name="subtotal" id="input-subtotal" value="<?= $subtotal ?>">
+        <input type="hidden" name="discount" id="input-discount" value="<?= $discount ?>">
+        <input type="hidden" name="shipping" id="input-shipping" value="<?= $shipping ?>">
+        <input type="hidden" name="total" id="input-total" value="<?= $total ?>">
+        <input type="hidden" name="voucher_code" id="input-voucher" value="">
+        <input type="hidden" name="voucher_id" id="input-voucher-id" value="">
         <button type="submit" class="checkout-button">Đặt hàng</button>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const subtotal = sessionStorage.getItem('cart_subtotal') || '0';
+  const discount = sessionStorage.getItem('cart_discount') || '0';
+  const shipping = sessionStorage.getItem('cart_shipping') || '0';
+  const total = sessionStorage.getItem('cart_total') || '0';
+  const voucher = sessionStorage.getItem('cart_voucher') || '';
+
+  // Cập nhật giao diện
+  const spans = document.querySelectorAll('.order-summary span');
+  spans[0].textContent = Number(subtotal).toLocaleString('vi-VN') + ' đ';
+  spans[1].textContent = Number(shipping).toLocaleString('vi-VN') + ' đ';
+  spans[2].textContent = Number(discount).toLocaleString('vi-VN') + ' đ';
+  spans[3].textContent = Number(total).toLocaleString('vi-VN') + ' đ';
+
+  // Cập nhật input hidden
+  document.getElementById('input-subtotal').value = subtotal;
+  document.getElementById('input-discount').value = discount;
+  document.getElementById('input-shipping').value = shipping;
+  document.getElementById('input-total').value = total;
+  document.getElementById('input-voucher').value = voucher;
+  document.getElementById('input-voucher-id').value = sessionStorage.getItem('cart_voucher_id') || '';
+});
+
+
+</script>
+?>

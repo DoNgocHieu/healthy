@@ -16,15 +16,30 @@ if (!$orderId) {
     exit;
 }
 
+// Debug voucher id, user id, order id
+// error_log('voucherId: ' . print_r($_GET['cart_voucher_id'] ?? ($_SESSION['cart_voucher_id'] ?? null), true));
+// error_log('userId: ' . print_r($userId, true));
+// error_log('orderId: ' . print_r($orderId, true));
+
+
 // Lấy thông tin đơn hàng
-$stmt = $pdo->prepare("
-    SELECT o.*, u.email
-    FROM orders o
-    JOIN users u ON o.user_id = u.id
-    WHERE o.id = ? AND o.user_id = ?
-");
+$stmt = $pdo->prepare("SELECT o.*, u.email FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ? AND o.user_id = ?");
 $stmt->execute([$orderId, $userId]);
 $order = $stmt->fetch(PDO::FETCH_ASSOC);
+
+//lấy $orderId, $userId từ bản trên
+$orderId = $order['id'] ?? null;
+$userId = $order['user_id'] ?? null;
+$voucherId = $order['voucher_id'] ?? null;
+
+// Update voucher_usage nếu có voucher_id
+if ($voucherId) {
+    $upd = $pdo->prepare("UPDATE voucher_usage SET order_id = ?, used_at = NOW() WHERE voucher_id = ? AND user_id = ? AND order_id IS NULL LIMIT 1");
+    $upd->execute([$orderId, $voucherId, $userId]);
+    // error_log('voucher_usage updated: ' . print_r($upd->rowCount(), true));
+    // unset($_SESSION['cart_voucher_id']); 
+}
+
 
 if (!$order) {
     header('Location: layout.php?page=cart');
@@ -32,12 +47,7 @@ if (!$order) {
 }
 
 // Lấy chi tiết đơn hàng
-$itemsStmt = $pdo->prepare("
-    SELECT oi.*, i.name, i.image_url
-    FROM order_items oi
-    JOIN items i ON oi.item_id = i.id
-    WHERE oi.order_id = ?
-");
+$itemsStmt = $pdo->prepare("SELECT oi.*, i.name, i.image_url FROM order_items oi JOIN items i ON oi.item_id = i.id WHERE oi.order_id = ?");
 $itemsStmt->execute([$orderId]);
 $items = $itemsStmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -52,22 +62,12 @@ $bankInfo = [
 ?>
 
 <style>
-.order-success {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
 .success-header {
     text-align: center;
     margin-bottom: 2rem;
 }
 
 .success-header h1 {
-    color: #00b894;
     font-size: 2rem;
     margin-bottom: 1rem;
 }

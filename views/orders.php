@@ -5,6 +5,43 @@ require_once __DIR__ . '/../config/config.php';
 $pdo = getDb();
 $userId = $_SESSION['user_id'] ?? null;
 
+// Xử lý AJAX cho hủy/hoàn thành đơn
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && in_array($_POST['action'], ['cancel_order', 'complete_order'])) {
+    header('Content-Type: application/json');
+    $success = false;
+    if (!$userId) {
+        echo json_encode(['success' => false, 'msg' => 'Chưa đăng nhập']);
+        exit;
+    }
+    $orderId = (int)($_POST['order_id'] ?? 0);
+    $checkStmt = $pdo->prepare("SELECT order_status FROM orders WHERE id = ? AND user_id = ?");
+    $checkStmt->execute([$orderId, $userId]);
+    $status = $checkStmt->fetchColumn();
+
+    if ($_POST['action'] === 'cancel_order' && $status === 'pending') {
+        $upd = $pdo->prepare("UPDATE orders SET order_status = 'cancelled' WHERE id = ? AND user_id = ?");
+        $upd->execute([$orderId, $userId]);
+        $success = true;
+    }
+    if ($_POST['action'] === 'complete_order' && in_array($status, ['shipping','confirmed'])) {
+        $upd = $pdo->prepare("UPDATE orders SET order_status = 'completed', payment_status = 'paid' WHERE id = ? AND user_id = ?");
+        $upd->execute([$orderId, $userId]);
+        $success = true;
+
+        // Tính điểm: ví dụ 1 điểm mỗi 10.000đ
+        $orderStmt = $pdo->prepare("SELECT total_amount FROM orders WHERE id = ?");
+        $orderStmt->execute([$orderId]);
+        $total = $orderStmt->fetchColumn();
+        $addPoint = floor($total / 10000);
+
+        // Ghi lịch sử điểm vào bảng points_history
+        $insHistory = $pdo->prepare("INSERT INTO points_history (user_id, change_amount, created_at) VALUES (?, ?, NOW())");
+        $insHistory->execute([$userId, $addPoint]);
+    }
+    echo json_encode(['success' => $success]);
+    exit;
+}
+
 if (!$userId) {
     header('Location: layout.php?page=login');
     exit;
@@ -114,56 +151,160 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </div>
                         </div>
                     </div>
+
+                    <div class="order-status-actions" data-order-id="<?= $order['id'] ?>" data-status="<?= $order['order_status'] ?>">
+                        <?php if ($order['order_status'] === 'pending'): ?>
+                            <button type="button" class="btn-cancel-order" title="Hủy đơn" onclick="cancelOrder(<?= $order['id'] ?>, this)">
+                                <i class="fa fa-times-circle"></i> Hủy đơn
+                            </button>
+                        <?php else: ?>
+                            <span class="order-status-label <?= strtolower($order['order_status']) ?>">
+                                <?php
+                                $statusText = [
+                                    'pending' => 'Chờ xác nhận',
+                                    'confirmed' => 'Đã xác nhận',
+                                    'shipping' => 'Đang giao hàng',
+                                    'processing' => 'Đang xử lý',
+                                    'completed' => 'Đã giao hàng',
+                                    'cancelled' => 'Đã hủy'
+                                ];
+                                echo $statusText[$order['order_status']] ?? $order['order_status'];
+                                ?>
+                            </span>
+                            <?php if (in_array($order['order_status'], ['shipping','confirmed'])): ?>
+                                <button type="button" class="btn-complete-order" title="Đã nhận hàng" onclick="completeOrder(<?= $order['id'] ?>, this)">
+                                    <i class="fa fa-check-circle"></i> Đã nhận hàng
+                                </button>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
                 </div>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
 </div>
 
-<?php
-// Xử lý lưu đơn hàng mới
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_order') {
-    $selectedAddress = $_POST['address'] ?? null;
-    $paymentMethod = $_POST['payment_method'] ?? 'cod'; // Mặc định là thanh toán khi nhận hàng
 
-    if ($selectedAddress) {
-        // Lưu đơn hàng vào cơ sở dữ liệu
-        $orderStmt = $pdo->prepare("
-            INSERT INTO orders (user_id, shipping_address, payment_method, total_amount, created_at, order_status)
-            VALUES (?, ?, ?, ?, NOW(), 'pending')
-        ");
-        $orderStmt->execute([
-            $userId,
-            $selectedAddress['address'], // chỉ lưu địa chỉ!
-            $_POST['payment_method'],
-            array_sum(array_column($_SESSION['cart'] ?? [], 'subtotal')) // Tổng tiền
-        ]);
 
-        $orderId = $pdo->lastInsertId();
-
-        // Lưu chi tiết đơn hàng
-        $detailStmt = $pdo->prepare("
-            INSERT INTO order_items (order_id, item_id, quantity, price)
-            VALUES (?, ?, ?, ?)
-        ");
-
-        foreach ($_SESSION['cart'] as $item) {
-            $detailStmt->execute([
-                $orderId,
-                $item['id'],
-                $item['quantity'],
-                $item['price']
-            ]);
-        }
-
-        // Xóa giỏ hàng sau khi đặt hàng thành công
-        unset($_SESSION['cart']);
-
-        // Chuyển hướng đến trang cảm ơn
-        header('Location: layout.php?page=thank_you');
-        exit;
-    } else {
-        $error = "Vui lòng chọn địa chỉ giao hàng.";
-    }
+<style>
+.order-status-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+  min-height: 40px;
+  margin: 20px;
 }
-?>
+.order-status-label {
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 6px 18px;
+  border-radius: 18px;
+  background: #f5f5f5;
+  color: #2d4c2a;
+  margin-right: 0;
+}
+.order-status-label.completed { background: #eafbe7; color: #27ae60; }
+.order-status-label.cancelled { background: #fbeaea; color: #e74c3c; }
+.order-status-label.shipping { background: #eaf3fb; color: #2980b9; }
+.order-status-label.confirmed { background: #f7fbe9; color: #f39c12; }
+.order-status-label.processing { background: #f7fbe9; color: #8e44ad; }
+.order-status-label.pending { background: #fffbe9; color: #f39c12; }
+
+.btn-cancel-order, .btn-complete-order {
+  border: none;
+  outline: none;
+  background: #e74c3c;
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.98rem;
+  border-radius: 18px;
+  padding: 7px 18px 7px 14px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 20px;
+}
+.btn-cancel-order i { color: #fff; font-size: 1.1em; }
+.btn-cancel-order:hover {
+  background: #c0392b;
+}
+.btn-complete-order {
+  background: #27ae60;
+}
+.btn-complete-order i { color: #fff; font-size: 1.1em; }
+.btn-complete-order:hover {
+  background: #219150;
+}
+</style>
+
+<script>
+function cancelOrder(orderId, btn) {
+  if (!confirm('Bạn chắc chắn muốn hủy đơn hàng này?')) return;
+  btn.disabled = true;
+  fetch('orders.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'action=cancel_order&order_id=' + orderId
+  })
+  .then(response => response.json())
+  .then(data => {
+    btn.disabled = false;
+    if (data.success) {
+      // Cập nhật giao diện người dùng
+      const orderCard = btn.closest('.order-card');
+      orderCard.querySelector('.order-status').textContent = 'Đã hủy';
+      orderCard.querySelector('.order-status').className = 'order-status cancelled';
+      btn.remove();
+    } else {
+      alert('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
+    }
+  })
+  .catch(error => {
+    btn.disabled = false;
+    console.error('Error:', error);
+    alert('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
+  });
+}
+
+function completeOrder(orderId, btn) {
+  if (!confirm('Xác nhận đã nhận hàng?')) return;
+  btn.disabled = true;
+  fetch('orders.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'action=complete_order&order_id=' + orderId
+  })
+  .then(response => response.json())
+  .then(data => {
+    btn.disabled = false;
+    if (data.success) {
+      const orderCard = btn.closest('.order-card');
+      // Cập nhật trạng thái chính
+      const statusDiv = orderCard.querySelector('.order-status');
+      if (statusDiv) {
+        statusDiv.textContent = 'Đã giao hàng';
+        statusDiv.className = 'order-status completed';
+      }
+      // Cập nhật label trạng thái nếu có
+      const statusLabel = orderCard.querySelector('.order-status-label');
+      if (statusLabel) {
+        statusLabel.textContent = 'Đã giao hàng';
+        statusLabel.className = 'order-status-label completed';
+      }
+      // Ẩn nút
+      btn.remove();
+    } else {
+      alert('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
+    }
+  })
+  .catch(error => {
+    btn.disabled = false;
+    console.error('Error:', error);
+    alert('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
+  });
+}
+</script>

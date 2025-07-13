@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     voucherForm.querySelector('[name="points_required"]').value = voucher.points_required || 0;
                     voucherForm.querySelector('[name="discount_type"]').value = voucher.discount_type || 'amount';
                     voucherForm.querySelector('[name="discount_value"]').value = voucher.discount_value || 0;
-                    voucherForm.querySelector('[name="expires_at"]').value = voucher.expires_at || '';
+                    voucherForm.querySelector('[name="expires_at"]').value = voucher.expires_at ? voucher.expires_at.substring(0, 10) : '';
                     voucherForm.querySelector('[name="active"]').checked = voucher.active == 1;
 
                     voucherModal.show();

@@ -1,37 +1,63 @@
 <?php
 require_once __DIR__ . '/Database.php';
 
-class Order {
+class Order
+{
     private $db;
     private $userId;
 
-    public function __construct($userId = null) {
+    public function __construct($userId = null)
+    {
         $this->db = Database::getInstance()->getConnection();
         $this->userId = $userId;
     }
 
-    public function create($cart, $data) {
+    public function create($cart, $data)
+    {
+        error_log('Order create data: ' . print_r($data, true));
         try {
             $this->db->beginTransaction();
 
             // Create order
+
             $stmt = $this->db->prepare('
                 INSERT INTO orders (
-                    user_id, total_amount, shipping_address, payment_method,
-                    voucher_id, points_used, points_earned
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    user_id, order_status, payment_status, payment_method,
+                    total_amount, subtotal, shipping_fee, discount, points_used, points_value, points_earned,
+                    shipping_address, notes, voucher_id, created_at, updated_at, payment_transaction_no, payment_bank_code, payment_date
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), ?, ?, ?)
             ');
 
             $pointsEarned = floor($cart->getCartTotal() / 10000); // 1 point per 10,000 VND
 
+            $orderStatus = 'pending';
+            $paymentStatus = 'pending';
+
+            $subtotal = $data['subtotal'] ?? $cart->getCartTotal();
+            $shippingFee = $data['shipping_fee'] ?? 15000;
+            $discount = $data['discount'] ?? 0;
+            $totalAmount = $data['total_amount'] ?? ($subtotal + $shippingFee - $discount);
+            $pointsValue = $data['points_value'] ?? 0;
+            $payment_method = $data['payment_method'] ?? 'COD';
+
             $stmt->execute([
                 $this->userId,
-                $cart->getCartTotal(),
-                $data['shipping_address'],
-                $data['payment_method'],
-                $data['voucher_id'] ?? null,
+                $orderStatus,
+                $paymentStatus,
+                $payment_method,
+                $totalAmount,
+                $subtotal,
+                $shippingFee,
+                $discount,
                 $data['points_used'] ?? 0,
-                $pointsEarned
+                $pointsValue ?? 0,
+                $pointsEarned ?? 0,
+                $data['shipping_address'],
+                $data['notes'] ?? null,
+                $data['voucher_id'] ?? null,
+                $data['payment_transaction_no'] ?? null,
+                $data['payment_bank_code'] ?? null,
+                $data['payment_date'] ?? null
             ]);
 
             $orderId = $this->db->lastInsertId();
@@ -83,7 +109,6 @@ class Order {
                 'order_id' => $orderId,
                 'points_earned' => $pointsEarned
             ];
-
         } catch (Exception $e) {
             $this->db->rollBack();
             return [
@@ -93,7 +118,8 @@ class Order {
         }
     }
 
-    private function updateStock($itemId, $quantity) {
+    private function updateStock($itemId, $quantity)
+    {
         $stmt = $this->db->prepare('
             UPDATE items
             SET stock_quantity = stock_quantity - ?
@@ -102,7 +128,8 @@ class Order {
         $stmt->execute([$quantity, $itemId]);
     }
 
-    public function getOrder($orderId) {
+    public function getOrder($orderId)
+    {
         $stmt = $this->db->prepare('
             SELECT o.*,
                    u.fullname, u.email, u.phone,
@@ -124,7 +151,8 @@ class Order {
         return $order;
     }
 
-    public function getOrderItems($orderId) {
+    public function getOrderItems($orderId)
+    {
         $stmt = $this->db->prepare('
             SELECT oi.*, i.name, i.image_url
             FROM order_items oi
@@ -135,7 +163,8 @@ class Order {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getUserOrders($page = 1, $perPage = 10) {
+    public function getUserOrders($page = 1, $perPage = 10)
+    {
         $offset = ($page - 1) * $perPage;
 
         $stmt = $this->db->prepare('
@@ -155,7 +184,8 @@ class Order {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function cancelOrder($orderId) {
+    public function cancelOrder($orderId)
+    {
         $order = $this->getOrder($orderId);
         if (!$order) {
             return [
@@ -218,7 +248,6 @@ class Order {
                 'success' => true,
                 'message' => 'Đã hủy đơn hàng thành công'
             ];
-
         } catch (Exception $e) {
             $this->db->rollBack();
             return [
