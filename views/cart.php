@@ -129,7 +129,7 @@ $cart = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Tính tổng
 $total = array_reduce(
   $cart,
-  fn($s, $r) => $s + $r['price'] * $r['qty'],
+  fn($s, $r) => $s + $r['price'] * $r['qty'] ,
   0
 );
 
@@ -171,7 +171,7 @@ $unusedVouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </video>
 <form id="selectAddressForm" method="POST" style="display:none">
   <input type="hidden" name="select_address" value="1">
-  <input type="hidden" name="address_id" id="select_address_id" value="">
+  <input type="hidden" name="address_id" id="select_address_id" value="<?= $selected ? $selected['id'] : '' ?>">
 </form>
 <h2 class="cart-title">Giỏ hàng</h2>
 <link rel="stylesheet" href="../css/cart.css">
@@ -340,9 +340,11 @@ $unusedVouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     subtotalEl.textContent = subtotal.toLocaleString('vi-VN') + ' đ';
     return subtotal;
   }
+  // Gọi ngay khi khai báo hàm để cập nhật tổng tiền khi vào trang
+  updateTotal();
 
   // Phí ship cố định
-  const SHIPPING_FEE = 15000;
+  const SHIPPING_FEE = 15000 ;
   shippingEl.textContent = SHIPPING_FEE.toLocaleString('vi-VN') + ' đ';
 
   voucherInput.addEventListener('input', function() {
@@ -396,23 +398,12 @@ $unusedVouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
       messageBox.textContent = 'Mã khuyến mãi không tồn tại.';
       messageBox.style.color = 'red';
     }
+    // Luôn cập nhật lại tổng tiền khi thay đổi input
+    updateTotal();
   });
 
   applyBtn.addEventListener('click', function() {
-    if (!selectedVoucher) return;
-
-    let subtotal = updateSubtotal();
-    let discount = 0;
-    if (selectedVoucher.dataset.type === 'percent') {
-      discount = Math.round(subtotal * parseFloat(selectedVoucher.dataset.value) / 100);
-    } else {
-      discount = parseInt(selectedVoucher.dataset.value);
-    }
-    discountEl.textContent = discount.toLocaleString('vi-VN') + ' đ';
-
-    // Tổng tiền = tạm tính - giảm giá + ship
-    let total = subtotal - discount + SHIPPING_FEE;
-    totalEl.textContent = total.toLocaleString('vi-VN') + ' đ';
+    updateTotal();
   });
 
   function updateTotal() {
@@ -435,7 +426,7 @@ $unusedVouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     // Phí ship cố định
     shippingEl.textContent = SHIPPING_FEE.toLocaleString('vi-VN') + ' đ';
 
-    // Tổng tiền = tạm tính - giảm giá + ship
+    // Tổng tiền luôn cộng ship
     let total = subtotal - discount + SHIPPING_FEE;
     totalEl.textContent = total.toLocaleString('vi-VN') + ' đ';
 
@@ -445,30 +436,31 @@ $unusedVouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
   // Gọi khi trang load
-  updateTotal();
-
-  // Gọi lại khi nhấn áp dụng voucher
-  applyBtn.addEventListener('click', function() {
-    if (!selectedVoucher) return;
-    updateTotal();
-  });
-  document.querySelectorAll('.qty-increase, .qty-decrease, .cart-qty-input').forEach(el => {
-    el.addEventListener('change', updateTotal);
-    el.addEventListener('click', updateTotal);
-  });
-
   document.addEventListener('DOMContentLoaded', function() {
     updateTotal();
+    document.querySelectorAll('.qty-increase, .qty-decrease, .cart-qty-input').forEach(el => {
+      el.addEventListener('change', updateTotal);
+      el.addEventListener('click', updateTotal);
+    });
+    applyBtn.addEventListener('click', function() {
+      updateTotal();
+    });
   });
 </script>
 <script>
   // Xử lý đặt hàng khi nhấn nút Mua Hàng
   document.querySelector('.cart-checkout-btn').addEventListener('click', function() {
     const cartItems = document.querySelectorAll('.cart-item');
-  if (cartItems.length === 0) {
-    alert('Giỏ hàng đang trống!');
-    return;
-  }
+    if (cartItems.length === 0) {
+      alert('Giỏ hàng đang trống!');
+      return;
+    }
+    // Kiểm tra địa chỉ đã chọn
+    var selectedAddressId = document.getElementById('select_address_id')?.value;
+    if (!selectedAddressId) {
+      alert('Vui lòng chọn địa chỉ giao hàng.');
+      return;
+    }
     const subtotal = document.getElementById('subtotal').textContent.replace(/\D/g, '') || 0;
     const discount = document.getElementById('discount').textContent.replace(/\D/g, '') || 0;
     const shipping = document.getElementById('shipping').textContent.replace(/\D/g, '') || 0;

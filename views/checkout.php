@@ -181,10 +181,10 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch(window.location.href, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: `action=select_address&address_id=${checked.value}`
-    })
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `action=select_address&address_id=${checked.value}`
+  })
     .then(() => {
       modal.classList.remove('show');
       window.location.href = 'layout.php?page=cart';
