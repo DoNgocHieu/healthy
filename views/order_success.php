@@ -21,7 +21,6 @@ if (!$orderId) {
 // error_log('userId: ' . print_r($userId, true));
 // error_log('orderId: ' . print_r($orderId, true));
 
-
 // Lấy thông tin đơn hàng
 $stmt = $pdo->prepare("SELECT o.*, u.email FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ? AND o.user_id = ?");
 $stmt->execute([$orderId, $userId]);
@@ -39,7 +38,6 @@ if ($voucherId) {
     // error_log('voucher_usage updated: ' . print_r($upd->rowCount(), true));
     // unset($_SESSION['cart_voucher_id']); 
 }
-
 
 if (!$order) {
     header('Location: layout.php?page=cart');
@@ -61,13 +59,24 @@ $bankInfo = [
 ];
 ?>
 
+
 <style>
+.order-success {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 .success-header {
     text-align: center;
     margin-bottom: 2rem;
 }
 
 .success-header h1 {
+    color: #00b894;
     font-size: 2rem;
     margin-bottom: 1rem;
 }

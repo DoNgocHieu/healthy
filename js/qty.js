@@ -138,6 +138,7 @@
     id="qty-input-${id}"
     class="qty-display"
     type="number"
+    disabled
     min="1"
     max="${stock}"
     value="${qty}"

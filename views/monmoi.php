@@ -94,11 +94,11 @@ if ($itemIds) {
 
           <div class="qty-control" id="cart-controls-<?= $id ?>" onclick="event.stopPropagation()">
             <?php if ($stockQty <= 0): ?>
-              <button class="add-to-cart-btn disabled" onclick="event.stopPropagation()">
+              <button disabled class="add-to-cart-btn disabled" onclick="event.stopPropagation()">
                 <i class="fa-solid fa-lock"></i>
               </button>
             <?php elseif ($inCartQty > 0): ?>
-              <button onclick="handleIncrease(<?= $id ?>, -1, <?= $stockQty ?>)">
+              <button  onclick="handleIncrease(<?= $id ?>, -1, <?= $stockQty ?>)">
                 <i class="fa-solid fa-minus" style="font-size: 1.2rem"></i>
               </button>
               <input
@@ -106,6 +106,7 @@ if ($itemIds) {
                 class="qty-display"
                 type="number"
                 min="1"
+                disabled
                 max="<?= $stockQty ?>"
                 value="<?= $inCartQty ?>"
                 oninput="handleQtyChange(<?= $id ?>, <?= $stockQty ?>)"

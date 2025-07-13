@@ -1,14 +1,17 @@
 <?php
 require_once __DIR__ . '/../../config/OrderAdmin.php';
 
+
 $orderAdmin = new OrderAdmin();
 
-// Lấy thống kê cho 30 ngày gần nhất
-$dateFrom = date('Y-m-d', strtotime('-30 days'));
-$dateTo = date('Y-m-d');
+// Xử lý chọn tháng/năm
+$selectedMonth = isset($_GET['month']) ? intval($_GET['month']) : intval(date('m'));
+$selectedYear = isset($_GET['year']) ? intval($_GET['year']) : intval(date('Y'));
+
+// Tính ngày đầu/tháng và cuối/tháng
+$dateFrom = sprintf('%04d-%02d-01', $selectedYear, $selectedMonth);
+$dateTo = date('Y-m-t', strtotime($dateFrom));
 $stats = $orderAdmin->getOrderStats($dateFrom, $dateTo);
-
-
 
 // Helper function để format số an toàn
 function formatNumber($value) {
@@ -18,6 +21,69 @@ function formatNumber($value) {
 
 <div class="container-fluid py-4">
     <h2 class="mb-4">Tổng quan</h2>
+
+    <!-- Form chọn tháng/năm -->
+    <form id="filterForm" class="mb-4 d-flex align-items-center gap-2" style="gap:1rem;" onsubmit="return false;">
+        <label for="month" class="form-label mb-0">Tháng:</label>
+        <select name="month" id="month" class="form-select" style="width:100px;">
+            <?php for ($m = 1; $m <= 12; $m++): ?>
+                <option value="<?= $m ?>" <?= $m == $selectedMonth ? 'selected' : '' ?>><?= $m ?></option>
+            <?php endfor; ?>
+        </select>
+        <label for="year" class="form-label mb-0">Năm:</label>
+        <select name="year" id="year" class="form-select" style="width:100px;">
+            <?php $currentYear = intval(date('Y')); for ($y = $currentYear; $y >= $currentYear - 5; $y--): ?>
+                <option value="<?= $y ?>" <?= $y == $selectedYear ? 'selected' : '' ?>><?= $y ?></option>
+            <?php endfor; ?>
+        </select>
+    </form>
+
+    <script>
+    function loadStats() {
+        const month = document.getElementById('month').value;
+        const year = document.getElementById('year').value;
+        fetch(`/healthy/api/get_order_stats.php?month=${month}&year=${year}`)
+            .then(res => res.json())
+            .then(stats => {
+                document.querySelector('.h5.mb-0.font-weight-bold.text-gray-800').textContent = stats.total_orders;
+                document.querySelectorAll('.h5.mb-0.font-weight-bold.text-gray-800')[1].textContent = Number(stats.total_revenue).toLocaleString() + 'đ';
+                document.querySelectorAll('.h5.mb-0.font-weight-bold.text-gray-800')[2].textContent = Number(stats.paid_amount).toLocaleString() + 'đ';
+                document.querySelectorAll('.h5.mb-0.font-weight-bold.text-gray-800')[3].textContent = stats.unique_customers;
+
+                // Trạng thái đơn hàng
+                document.querySelector('p.card-text.display-4').textContent = stats.pending_orders;
+                document.querySelectorAll('p.card-text.display-4')[1].textContent = stats.processing_orders;
+                document.querySelectorAll('p.card-text.display-4')[2].textContent = stats.shipping_orders;
+                document.querySelectorAll('p.card-text.display-4')[3].textContent = stats.completed_orders;
+                document.querySelectorAll('p.card-text.display-4')[4].textContent = stats.cancelled_orders;
+            });
+    }
+    document.getElementById('month').addEventListener('change', loadStats);
+    document.getElementById('year').addEventListener('change', loadStats);
+    </script>
+
+    <script>
+    document.getElementById('filterForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const month = document.getElementById('month').value;
+        const year = document.getElementById('year').value;
+        fetch(`/healthy/api/get_order_stats.php?month=${month}&year=${year}`)
+            .then(res => res.json())
+            .then(stats => {
+                document.querySelector('.h5.mb-0.font-weight-bold.text-gray-800').textContent = stats.total_orders;
+                document.querySelectorAll('.h5.mb-0.font-weight-bold.text-gray-800')[1].textContent = Number(stats.total_revenue).toLocaleString() + 'đ';
+                document.querySelectorAll('.h5.mb-0.font-weight-bold.text-gray-800')[2].textContent = Number(stats.paid_amount).toLocaleString() + 'đ';
+                document.querySelectorAll('.h5.mb-0.font-weight-bold.text-gray-800')[3].textContent = stats.unique_customers;
+
+                // Trạng thái đơn hàng
+                document.querySelector('p.card-text.display-4').textContent = stats.pending_orders;
+                document.querySelectorAll('p.card-text.display-4')[1].textContent = stats.processing_orders;
+                document.querySelectorAll('p.card-text.display-4')[2].textContent = stats.shipping_orders;
+                document.querySelectorAll('p.card-text.display-4')[3].textContent = stats.completed_orders;
+                document.querySelectorAll('p.card-text.display-4')[4].textContent = stats.cancelled_orders;
+            });
+    });
+    </script>
 
     <div class="row">
         <!-- Tổng đơn hàng -->

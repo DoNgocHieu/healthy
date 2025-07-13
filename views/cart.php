@@ -129,7 +129,7 @@ $cart = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Tính tổng
 $total = array_reduce(
   $cart,
-  fn($s, $r) => $s + $r['price'] * $r['qty'] ,
+  fn($s, $r) => $s + $r['price'] * $r['qty'],
   0
 );
 
@@ -306,12 +306,13 @@ $unusedVouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <input type="text" placeholder="Nhập mã khuyến mãi" style="width:100%; padding:0.5rem; margin-top:0.5rem;">
     </div>
     <div class="cart-box">
-      <p>Tạm tính: <span id="subtotal">0 đ</span></p>
-      <p>Giảm giá: <span id="discount">0 đ</span></p>
-      <p>Phí vận chuyển: <span id="shipping">15.000 đ</span></p>
-      <p style="font-weight:bold;">
-        Tổng tiền: <span id="total">0 đ</span>
-      </p>
+      <p>Tạm tính: <span id="subtotal" style="margin-bottom: 10px;">0 đ</span></p>
+      <p>Giảm giá: <span id="discount" style="margin-bottom: 10px;">0 đ</span></p>
+      <!-- <p>Phí vận chuyển: <span id="shipping">15.000 đ</span></p> -->
+      <span style="font-weight:bold;">
+        Tổng tiền:                     <span id="total">0 đ</span>
+      </span>
+      <i style="color: red;">(Chưa tính phí vận chuyển)</i>
     </div>
     <button class="cart-checkout-btn">Mua Hàng (<span id="checkout-count">0</span>)</button>
   </div>
@@ -327,7 +328,7 @@ $unusedVouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
   const subtotalEl = document.getElementById('subtotal');
   const discountEl = document.getElementById('discount');
   const totalEl = document.getElementById('total');
-  const shippingEl = document.getElementById('shipping');
+  // const shippingEl = document.getElementById('shipping');
 
   let selectedVoucher = null;
 
@@ -340,12 +341,10 @@ $unusedVouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     subtotalEl.textContent = subtotal.toLocaleString('vi-VN') + ' đ';
     return subtotal;
   }
-  // Gọi ngay khi khai báo hàm để cập nhật tổng tiền khi vào trang
-  updateTotal();
 
   // Phí ship cố định
-  const SHIPPING_FEE = 15000 ;
-  shippingEl.textContent = SHIPPING_FEE.toLocaleString('vi-VN') + ' đ';
+  const SHIPPING_FEE = 0;
+  // shippingEl.textContent = SHIPPING_FEE.toLocaleString('vi-VN') + ' đ';
 
   voucherInput.addEventListener('input', function() {
     selectedVoucher = null;
@@ -398,12 +397,23 @@ $unusedVouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
       messageBox.textContent = 'Mã khuyến mãi không tồn tại.';
       messageBox.style.color = 'red';
     }
-    // Luôn cập nhật lại tổng tiền khi thay đổi input
-    updateTotal();
   });
 
   applyBtn.addEventListener('click', function() {
-    updateTotal();
+    if (!selectedVoucher) return;
+
+    let subtotal = updateSubtotal();
+    let discount = 0;
+    if (selectedVoucher.dataset.type === 'percent') {
+      discount = Math.round(subtotal * parseFloat(selectedVoucher.dataset.value) / 100);
+    } else {
+      discount = parseInt(selectedVoucher.dataset.value);
+    }
+    discountEl.textContent = discount.toLocaleString('vi-VN') + ' đ';
+
+    // Tổng tiền = tạm tính - giảm giá + ship
+    let total = subtotal - discount + SHIPPING_FEE;
+    totalEl.textContent = total.toLocaleString('vi-VN') + ' đ';
   });
 
   function updateTotal() {
@@ -424,9 +434,9 @@ $unusedVouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     discountEl.textContent = discount.toLocaleString('vi-VN') + ' đ';
 
     // Phí ship cố định
-    shippingEl.textContent = SHIPPING_FEE.toLocaleString('vi-VN') + ' đ';
+    // shippingEl.textContent = SHIPPING_FEE.toLocaleString('vi-VN') + ' đ';
 
-    // Tổng tiền luôn cộng ship
+    // Tổng tiền = tạm tính - giảm giá + ship
     let total = subtotal - discount + SHIPPING_FEE;
     totalEl.textContent = total.toLocaleString('vi-VN') + ' đ';
 
@@ -436,15 +446,20 @@ $unusedVouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
   // Gọi khi trang load
+  updateTotal();
+
+  // Gọi lại khi nhấn áp dụng voucher
+  applyBtn.addEventListener('click', function() {
+    if (!selectedVoucher) return;
+    updateTotal();
+  });
+  document.querySelectorAll('.qty-increase, .qty-decrease, .cart-qty-input').forEach(el => {
+    el.addEventListener('change', updateTotal);
+    el.addEventListener('click', updateTotal);
+  });
+
   document.addEventListener('DOMContentLoaded', function() {
     updateTotal();
-    document.querySelectorAll('.qty-increase, .qty-decrease, .cart-qty-input').forEach(el => {
-      el.addEventListener('change', updateTotal);
-      el.addEventListener('click', updateTotal);
-    });
-    applyBtn.addEventListener('click', function() {
-      updateTotal();
-    });
   });
 </script>
 <script>
@@ -463,14 +478,14 @@ $unusedVouchers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     const subtotal = document.getElementById('subtotal').textContent.replace(/\D/g, '') || 0;
     const discount = document.getElementById('discount').textContent.replace(/\D/g, '') || 0;
-    const shipping = document.getElementById('shipping').textContent.replace(/\D/g, '') || 0;
+    // const shipping = document.getElementById('shipping').textContent.replace(/\D/g, '') || 0;
     const total = document.getElementById('total').textContent.replace(/\D/g, '') || 0;
     const voucherCode = voucherInput.value.trim();
     const voucherId = selectedVoucher ? selectedVoucher.dataset.id : '';
 
     sessionStorage.setItem('cart_subtotal', subtotal);
     sessionStorage.setItem('cart_discount', discount);
-    sessionStorage.setItem('cart_shipping', shipping);
+    // sessionStorage.setItem('cart_shipping', shipping);
     sessionStorage.setItem('cart_total', total);
     sessionStorage.setItem('cart_voucher', voucherCode);
     sessionStorage.setItem('cart_voucher_id', voucherId);

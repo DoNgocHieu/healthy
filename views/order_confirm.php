@@ -170,8 +170,8 @@ if ($selectedAddressId) {
 document.addEventListener('DOMContentLoaded', function() {
   const subtotal = sessionStorage.getItem('cart_subtotal') || '0';
   const discount = sessionStorage.getItem('cart_discount') || '0';
-  const shipping = sessionStorage.getItem('cart_shipping') || '0';
-  const total = sessionStorage.getItem('cart_total') || '0';
+  const shipping = 15000; 
+  const total = Number(subtotal) + Number(shipping) - Number(discount);
   const voucher = sessionStorage.getItem('cart_voucher') || '';
 
   // Cập nhật giao diện
