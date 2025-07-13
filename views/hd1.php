@@ -18,4 +18,45 @@
             tin tưởng và luôn ủng hộ bếp chay Broccoli.
         </p>
     </div>
+    <img id="hd1Bg" class="hd1-bg-img" src="../img/hd1.jpg" alt="Banner" />
 </section>
+<script>
+const images = [
+  '../img/hd1.jpg',
+  '../img/hd2.png',
+  '../img/hd3.png',
+  '../img/hd4.png',
+];
+let idx = 0;
+const img = document.getElementById('hd1Bg');
+function nextImg() {
+  img.classList.add('blur');
+  setTimeout(() => {
+    idx = (idx + 1) % images.length;
+    img.src = images[idx];
+    img.classList.remove('blur');
+  }, 300);
+}
+setInterval(nextImg, 5000);
+</script>
+
+<style>
+.hd1-bg-img {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100%;
+  min-height: 90vh;
+  object-fit: cover;
+  z-index: 0;
+  transition: opacity 0.7s, filter 0.8s;
+  opacity: 1;
+}
+.hd1-bg-img.blur {
+  filter: blur(8px);
+}
+.hd1-overlay {
+  position: relative;
+  z-index: 1;
+}
+</style>

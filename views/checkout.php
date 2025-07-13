@@ -32,7 +32,7 @@ $selectedId = $_SESSION['selected_address_id']
 </form>
 
 <!-- Nút chuyển đến trang xác nhận đơn hàng -->
-<a href="layout.php?page=order_confirm" class="btn-confirm-order">Xác nhận đơn hàng</a>
+<!-- <a href="layout.php?page=order_confirm" class="btn-confirm-order">Xác nhận đơn hàng</a> -->
 
 <!-- Modal chọn/add/edit địa chỉ -->
 <div id="addressModal" class="modal">

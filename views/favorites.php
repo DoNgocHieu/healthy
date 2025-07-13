@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -288,6 +289,18 @@ $userId = $_SESSION['user_id'];
     color: white;
     text-decoration: none;
 }
+.qty-display{
+  width: 3.2rem;
+  height: 2.4rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+  background: transparent;
+  border: none;
+  color: #1D2E28;
+  padding: 0;
+  box-sizing: border-box;
+}
 @media (max-width: 900px) {
     .monmoi-grid {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -355,9 +368,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                   </button>
                                 `}
                               </div>
-                              <button class="view-detail-btn" onclick="showItemModalById(${item.id}); event.stopPropagation();">
-                                <i class="fa-solid fa-eye"></i> Xem
-                              </button>
+                           
                             </div>
                         `;
                     });

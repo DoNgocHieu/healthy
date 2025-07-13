@@ -33,6 +33,9 @@ $perPage = 10;
 
 // Lấy danh sách đơn hàng
 $result = $orderAdmin->getOrders($filters, $page, $perPage);
+
+
+
 ?>
 
 <div class="container-fluid py-4">
@@ -57,7 +60,6 @@ $result = $orderAdmin->getOrders($filters, $page, $perPage);
                         <option value="pending" <?php echo (isset($_GET['status']) && $_GET['status'] === 'pending') ? 'selected' : ''; ?>>Chờ xử lý</option>
                         <option value="processing" <?php echo (isset($_GET['status']) && $_GET['status'] === 'processing') ? 'selected' : ''; ?>>Đang xử lý</option>
                         <option value="shipping" <?php echo (isset($_GET['status']) && $_GET['status'] === 'shipping') ? 'selected' : ''; ?>>Đang giao</option>
-                        <option value="completed" <?php echo (isset($_GET['status']) && $_GET['status'] === 'completed') ? 'selected' : ''; ?>>Hoàn thành</option>
                         <option value="cancelled" <?php echo (isset($_GET['status']) && $_GET['status'] === 'cancelled') ? 'selected' : ''; ?>>Đã hủy</option>
                     </select>
                 </div>
@@ -122,23 +124,32 @@ $result = $orderAdmin->getOrders($filters, $page, $perPage);
                             <td><?php echo number_format($order['total_amount']); ?>đ</td>
                             <td><?php echo htmlspecialchars($order['payment_method'] ?? 'N/A'); ?></td>
                             <td>
-                                <select class="form-select form-select-sm order-status"
-                                        data-order-id="<?php echo $order['id']; ?>"
-                                        <?php echo $order['order_status'] === 'cancelled' ? 'disabled' : ''; ?>>
-                                    <option value="pending" <?php echo $order['order_status'] === 'pending' ? 'selected' : ''; ?>>Chờ xử lý</option>
-                                    <option value="processing" <?php echo $order['order_status'] === 'processing' ? 'selected' : ''; ?>>Đang xử lý</option>
-                                    <option value="shipping" <?php echo $order['order_status'] === 'shipping' ? 'selected' : ''; ?>>Đang giao</option>
-                                    <option value="completed" <?php echo $order['order_status'] === 'completed' ? 'selected' : ''; ?>>Hoàn thành</option>
-                                    <option value="cancelled" <?php echo $order['order_status'] === 'cancelled' ? 'selected' : ''; ?>>Đã hủy</option>
-                                </select>
+                                <?php
+                                $status = $order['order_status'];
+                                if ($status === 'completed') {
+                                    echo '<span class="text-success fw-bold">Hoàn thành</span>';
+                                } elseif ($status === 'cancelled') {
+                                    echo '<span class="text-danger fw-bold">Đã hủy</span>';
+                                } else {
+                                    // Chỉ hiện nút, không hiện chữ trạng thái bên cạnh
+                                    if ($status === 'pending') {
+                                        echo '<button type="button" class="btn btn-sm btn-primary order-step-btn" data-order-id="' . $order['id'] . '" data-next-status="processing">Đang xử lý</button>';
+                                        echo '<button type="button" class="btn btn-sm btn-danger ms-2 order-step-btn" data-order-id="' . $order['id'] . '" data-next-status="cancelled">Hủy</button>';
+                                    } elseif ($status === 'processing') {
+                                        echo '<button type="button" class="btn btn-sm btn-warning order-step-btn" data-order-id="' . $order['id'] . '" data-next-status="shipping">Đang giao</button>';
+                                        echo '<button type="button" class="btn btn-sm btn-danger ms-2 order-step-btn" data-order-id="' . $order['id'] . '" data-next-status="cancelled">Hủy</button>';
+                                    } elseif ($status === 'shipping') {
+                                        echo '<span class="text-info fw-bold">Chờ người mua nhận hàng</span>';
+                                    }
+                                }
+                                ?>
                             </td>
                             <td>
-                                <select class="form-select form-select-sm payment-status"
-                                        data-order-id="<?php echo $order['id']; ?>"
-                                        <?php echo $order['order_status'] === 'cancelled' ? 'disabled' : ''; ?>>
-                                    <option value="pending" <?php echo $order['payment_status'] === 'pending' ? 'selected' : ''; ?>>Chưa thanh toán</option>
-                                    <option value="paid" <?php echo $order['payment_status'] === 'paid' ? 'selected' : ''; ?>>Đã thanh toán</option>
-                                </select>
+                              <?php if ($order['payment_status'] === 'paid'): ?>
+                                <span class="text-success fw-bold">Đã thanh toán</span>
+                              <?php else: ?>
+                                <span class="text-danger fw-bold">Chưa thanh toán</span>
+                              <?php endif; ?>
                             </td>
                             <td><?php echo date('d/m/Y H:i', strtotime($order['created_at'])); ?></td>
                             <td>
@@ -188,12 +199,11 @@ $result = $orderAdmin->getOrders($filters, $page, $perPage);
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Xử lý cập nhật trạng thái đơn hàng
-    document.querySelectorAll('.order-status').forEach(select => {
-        select.addEventListener('change', function() {
+    document.querySelectorAll('.order-step-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
             const orderId = this.dataset.orderId;
-            const status = this.value;
-
-            if (confirm('Bạn có chắc muốn cập nhật trạng thái đơn hàng?')) {
+            const nextStatus = this.dataset.nextStatus;
+            if (confirm('Bạn có chắc muốn chuyển trạng thái đơn hàng?')) {
                 fetch('/healthy/admin/api/update_order_status.php', {
                     method: 'POST',
                     headers: {
@@ -201,20 +211,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     body: JSON.stringify({
                         order_id: orderId,
-                        order_status: status
+                        order_status: nextStatus
                     })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         alert('Cập nhật trạng thái thành công');
-                        if (status === 'cancelled') {
-                            this.disabled = true;
-                            const paymentSelect = document.querySelector(`.payment-status[data-order-id="${orderId}"]`);
-                            if (paymentSelect) {
-                                paymentSelect.disabled = true;
-                            }
-                        }
+                        location.reload();
                     } else {
                         alert('Có lỗi xảy ra: ' + data.message);
                         location.reload();
@@ -224,14 +228,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error('Error:', error);
                     alert('Có lỗi xảy ra khi cập nhật trạng thái');
                 });
-            } else {
-                // Restore previous value if cancelled
-                this.value = this.getAttribute('data-previous-value');
             }
         });
-
-        // Store the initial value
-        select.setAttribute('data-previous-value', select.value);
     });
 
     // Xử lý cập nhật trạng thái thanh toán
@@ -396,7 +394,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'pending': 'Chờ xử lý',
             'processing': 'Đang xử lý',
             'shipping': 'Đang giao',
-            'completed': 'Hoàn thành',
+          
             'cancelled': 'Đã hủy'
         };
         return statusMap[status] || status;
@@ -407,3 +405,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<style>
+.text-success { color: #27ae60; }
+.text-danger { color: #e74c3c; }
+.fw-bold { font-weight: bold; }
+</style>

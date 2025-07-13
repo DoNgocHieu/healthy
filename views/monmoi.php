@@ -74,7 +74,7 @@ if ($itemIds) {
           </div>
           <img src="../img/<?=htmlspecialchars($it['image_url'],ENT_QUOTES)?>"
                alt="<?=htmlspecialchars($it['name'],ENT_QUOTES)?>">
-          <div class="name"><?=htmlspecialchars($it['name'],ENT_QUOTES)?></div>
+          <div class="name ellipsis-1line"><?=htmlspecialchars($it['name'],ENT_QUOTES)?></div>
           <?php
             $avg = $avgStars[$id]['avg_star'] ?? 0;
             $count = $avgStars[$id]['review_count'] ?? 0;
@@ -206,12 +206,19 @@ if ($itemIds) {
   margin-bottom: .75rem;
   background: #eee;
 }
-.monmoi-card .name {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #063b2b;
-  margin-bottom: .5rem;
-}
+  .monmoi-card .name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #063b2b;
+    margin-bottom: .5rem;
+  }
+  .ellipsis-1line {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
+  }
 .monmoi-card .price {
   font-weight: bold;
   color: rgb(221,168,21);
@@ -364,6 +371,7 @@ body {
   align-items: center;
   justify-content: center;
 }
+
 
 .modal-close {
   position: absolute;

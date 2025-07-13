@@ -91,10 +91,11 @@ try {
         }
     }
 
+    $order['items'] = $orderItems;
+
     echo json_encode([
         'success' => true,
         'order' => $order,
-        'items' => $orderItems,
         'voucher' => $voucher,
         'points_history' => $pointsHistory
     ]);
